@@ -37,10 +37,10 @@ Panel/
 ## Version
 
 ### 0.1.0 <-Currently
-- [ ] Clock + date
-- [ ] Weather
+- [x] Clock + date
+- [x] Weather
+- [x] Greeting bar (static lines first, AI API in 0.2.0)
 - [x] Add git
-- [ ] Greeting bar (
 
 ### 0.1.1 
 - [ ] Change the fonts to `Hangyaboly`
