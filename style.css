@@ -152,34 +152,35 @@ main {
 .clock-hand {
   position: absolute;
   left: 50%;
-  transform-origin: bottom center;
+  bottom: calc(50% - var(--hand-tail));
+  transform-origin: 50% calc(100% - var(--hand-tail));
   border-radius: 999px;
   filter: drop-shadow(0 2px 3px rgba(120, 80, 20, 0.25));
 }
 
 .clock-hour {
+  --hand-tail: 1.6vmin;
   width: 1.5vmin;
   height: 12vmin;
   margin-left: -0.75vmin;
-  bottom: calc(50% - 1.6vmin);
   background: #443e35;
   transition: transform 0.4s ease;
 }
 
 .clock-minute {
+  --hand-tail: 1.6vmin;
   width: 1vmin;
   height: 16.5vmin;
   margin-left: -0.5vmin;
-  bottom: calc(50% - 1.6vmin);
   background: #443e35;
   transition: transform 0.4s ease;
 }
 
 .clock-second {
+  --hand-tail: 3vmin;
   width: 0.45vmin;
   height: 20vmin;
   margin-left: -0.225vmin;
-  bottom: calc(50% - 3vmin);
   background: #e8603c;
   box-shadow: 0 0 6px rgba(232, 96, 60, 0.35);
   transition: transform 0.25s cubic-bezier(0.34, 1.8, 0.5, 1);
