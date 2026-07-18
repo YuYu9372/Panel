@@ -12,7 +12,10 @@ const greetingWidget = {
 
   init() {
     this.el = document.getElementById('greeting');
-    this.el.innerHTML = `<div class="greeting-text"></div>`;
+    this.el.innerHTML = `
+      <span class="greeting-title"></span>
+      <span class="greeting-line"></span>
+    `;
     this.update();
   },
 
@@ -27,6 +30,7 @@ const greetingWidget = {
 
     const line = this.lines[Math.floor(Math.random() * this.lines.length)];
 
-    this.el.querySelector('.greeting-text').textContent = `${title} ${line}`;
+    this.el.querySelector('.greeting-title').textContent = title;
+    this.el.querySelector('.greeting-line').textContent = line;
   },
 };

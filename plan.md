@@ -60,4 +60,4 @@ Panel/
 ## Notes
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
 - Layout (from UI pdf): white greeting bar on top, below split left/right.
-- Layout colors and style: TBD.
+- Style: soft floating cards on a cream canvas, orange/cyan identity, system fonts, inline SVG weather icons.
