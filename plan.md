@@ -42,9 +42,6 @@ Panel/
 - [x] Greeting bar (static lines first, AI API in 0.2.0)
 - [x] Add git
 
-### 0.1.1 
-- [ ] Change the fonts to `Hangyaboly`
-
 ### 0.2.0 
 - [ ] To-do list
 - [ ] Calendar
