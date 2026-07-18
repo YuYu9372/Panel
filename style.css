@@ -4,57 +4,75 @@
   box-sizing: border-box;
 }
 
-body {
-  height: 100vh;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(16px, 2.2vmin, 24px);
-  padding: clamp(16px, 2.6vmin, 28px);
-  overflow: hidden;
+:root {
+  color-scheme: light;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', 'Noto Sans', 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
   color: #3d3a33;
+  background: #f3eee4;
+}
+
+body {
+  min-width: 320px;
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(10px, 1.6vmin, 18px);
+  padding: clamp(12px, 2.2vmin, 24px);
+  overflow: hidden;
   background:
-    radial-gradient(90rem 60rem at 12% 110%, rgba(255, 205, 140, 0.18), transparent 60%),
-    radial-gradient(90rem 60rem at 95% -10%, rgba(150, 225, 230, 0.2), transparent 60%),
+    radial-gradient(80rem 56rem at 0% 110%, rgba(255, 198, 121, 0.22), transparent 62%),
+    radial-gradient(80rem 56rem at 100% -10%, rgba(129, 218, 224, 0.2), transparent 62%),
     #f3eee4;
 }
 
-main {
-  display: contents;
+.dashboard {
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    'clock weather'
+    'github device';
+  gap: clamp(12px, 2vmin, 22px);
 }
 
-#greeting,
-#clock,
-#weather {
-  border-radius: clamp(20px, 3.2vmin, 30px);
+.widget {
+  border-radius: clamp(18px, 2.8vmin, 28px);
   box-shadow:
     0 1px 2px rgba(93, 77, 55, 0.06),
-    0 6px 16px rgba(93, 77, 55, 0.09),
-    0 24px 48px -16px rgba(93, 77, 55, 0.16);
-  outline: 1px solid rgba(255, 255, 255, 0.6);
+    0 7px 18px rgba(93, 77, 55, 0.09),
+    0 24px 48px -18px rgba(93, 77, 55, 0.2);
+  outline: 1px solid rgba(255, 255, 255, 0.65);
   outline-offset: -1px;
   overflow: hidden;
 }
 
-/* ---------- greeting ---------- */
-
-#greeting {
-  grid-column: 1 / -1;
-  background: linear-gradient(180deg, #fffdf7 0%, #faf5ea 100%);
-  display: flex;
-  align-items: baseline;
-  padding: clamp(18px, 2.6vmin, 26px) clamp(28px, 4vw, 44px);
+.widget {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
 }
 
-#greeting::before {
+/* ---------- greeting ---------- */
+
+.greeting-bar {
+  min-width: 0;
+  min-height: clamp(46px, 6.8vmin, 58px);
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(8px, 1.8vw, 20px);
+}
+
+.greeting-bar::before {
   content: '';
-  align-self: center;
-  width: 14px;
-  height: 14px;
+  flex: 0 0 auto;
+  width: clamp(10px, 1.6vmin, 14px);
+  height: clamp(10px, 1.6vmin, 14px);
+  margin-right: clamp(14px, 2.2vmin, 20px);
   border-radius: 50%;
-  margin-right: 20px;
   background: radial-gradient(circle at 35% 30%, #ffd9a0, #f7a94a);
   box-shadow: 0 0 0 6px rgba(247, 169, 74, 0.15);
   animation: breathe 4.5s ease-in-out infinite alternate;
@@ -65,88 +83,116 @@ main {
 }
 
 .greeting-title {
-  font-size: clamp(1.5rem, 3.2vw, 2.3rem);
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  flex: 0 0 auto;
+  font-size: clamp(1.35rem, 3vmin, 2rem);
+  font-weight: 680;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
 .greeting-line {
-  font-size: clamp(1rem, 1.9vw, 1.35rem);
-  font-weight: 450;
+  min-width: 0;
+  overflow: hidden;
+  margin-left: 0.85em;
   color: #8c8578;
-  margin-left: 0.9em;
+  font-size: clamp(0.92rem, 1.9vmin, 1.2rem);
+  font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* ---------- panels ---------- */
-
-#clock,
-#weather {
+.widget-heading {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
 }
+
+.widget-heading h2 {
+  margin-top: 0.15rem;
+  font-size: clamp(1.2rem, 2.35vmin, 1.55rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.widget-kicker {
+  font-size: clamp(0.65rem, 1.3vmin, 0.76rem);
+  font-weight: 750;
+  letter-spacing: 0.2em;
+  opacity: 0.58;
+}
+
+.widget-updated {
+  font-size: clamp(0.68rem, 1.35vmin, 0.78rem);
+  font-weight: 600;
+  opacity: 0.58;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- clock: top left ---------- */
 
 #clock {
-  background: linear-gradient(165deg, #ffe4b8 0%, #ffd89e 55%, #ffcd8a 100%);
-  gap: clamp(10px, 1.8vmin, 18px);
-  padding: 3vmin;
+  grid-area: clock;
+  display: grid;
+  grid-template-columns: minmax(180px, 0.9fr) minmax(170px, 1.1fr);
+  grid-template-rows: 1fr auto auto 1fr;
+  column-gap: clamp(16px, 3vmin, 34px);
+  row-gap: clamp(4px, 0.8vmin, 8px);
+  align-items: center;
+  padding: clamp(16px, 2.6vmin, 28px);
+  background: linear-gradient(150deg, #ffe9c3 0%, #ffd99f 58%, #ffcb82 100%);
 }
-
-#weather {
-  background: linear-gradient(165deg, #cdf3ef 0%, #a9eff2 55%, #96e2e9 100%);
-  gap: clamp(4px, 1vmin, 10px);
-  padding: 3vmin;
-}
-
-/* ---------- clock ---------- */
 
 .clock-face {
+  --clock-size: min(27vmin, 27vh);
   position: relative;
-  width: min(38vmin, 44vh);
-  height: min(38vmin, 44vh);
+  grid-column: 1;
+  grid-row: 1 / -1;
+  place-self: center;
+  width: var(--clock-size);
+  height: var(--clock-size);
   border-radius: 50%;
   background: radial-gradient(circle at 38% 32%, #fffefb 0%, #fdf8ee 70%, #f7efdd 100%);
   box-shadow:
-    0 14px 34px -10px rgba(163, 96, 22, 0.35),
+    0 12px 30px -10px rgba(163, 96, 22, 0.38),
     0 3px 8px rgba(163, 96, 22, 0.15),
     inset 0 2px 6px rgba(255, 255, 255, 0.9),
-    inset 0 -8px 18px rgba(214, 150, 60, 0.18);
+    inset 0 -7px 16px rgba(214, 150, 60, 0.18);
 }
 
 .clock-tick {
   position: absolute;
   left: 50%;
   top: 0;
-  width: 0.55vmin;
+  width: 0.42vmin;
   height: 100%;
-  margin-left: -0.275vmin;
+  margin-left: -0.21vmin;
   background: linear-gradient(
     to bottom,
     #4a443a 0,
-    #4a443a 2vmin,
-    transparent 2vmin,
-    transparent calc(100% - 2vmin),
-    #4a443a calc(100% - 2vmin),
+    #4a443a 1.4vmin,
+    transparent 1.4vmin,
+    transparent calc(100% - 1.4vmin),
+    #4a443a calc(100% - 1.4vmin),
     #4a443a 100%
   );
-  opacity: 0.35;
+  opacity: 0.34;
 }
 
 .clock-tick-major {
-  width: 0.9vmin;
-  margin-left: -0.45vmin;
+  width: 0.68vmin;
+  margin-left: -0.34vmin;
   background: linear-gradient(
     to bottom,
     #4a443a 0,
-    #4a443a 2.6vmin,
-    transparent 2.6vmin,
-    transparent calc(100% - 2.6vmin),
-    #4a443a calc(100% - 2.6vmin),
+    #4a443a 1.9vmin,
+    transparent 1.9vmin,
+    transparent calc(100% - 1.9vmin),
+    #4a443a calc(100% - 1.9vmin),
     #4a443a 100%
   );
-  opacity: 0.8;
+  opacity: 0.82;
 }
 
 .clock-hand {
@@ -159,28 +205,28 @@ main {
 }
 
 .clock-hour {
-  --hand-tail: 1.6vmin;
-  width: 1.5vmin;
-  height: 12vmin;
-  margin-left: -0.75vmin;
+  --hand-tail: 1.3vmin;
+  width: 1.25vmin;
+  height: 10vmin;
+  margin-left: -0.625vmin;
   background: #443e35;
   transition: transform 0.4s ease;
 }
 
 .clock-minute {
-  --hand-tail: 1.6vmin;
-  width: 1vmin;
-  height: 16.5vmin;
-  margin-left: -0.5vmin;
+  --hand-tail: 1.3vmin;
+  width: 0.82vmin;
+  height: 14.8vmin;
+  margin-left: -0.41vmin;
   background: #443e35;
   transition: transform 0.4s ease;
 }
 
 .clock-second {
-  --hand-tail: 3vmin;
-  width: 0.45vmin;
-  height: 20vmin;
-  margin-left: -0.225vmin;
+  --hand-tail: 2.5vmin;
+  width: 0.36vmin;
+  height: 16vmin;
+  margin-left: -0.18vmin;
   background: #e8603c;
   box-shadow: 0 0 6px rgba(232, 96, 60, 0.35);
   transition: transform 0.25s cubic-bezier(0.34, 1.8, 0.5, 1);
@@ -190,9 +236,9 @@ main {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 2.6vmin;
-  height: 2.6vmin;
-  margin: -1.3vmin 0 0 -1.3vmin;
+  width: 2.1vmin;
+  height: 2.1vmin;
+  margin: -1.05vmin 0 0 -1.05vmin;
   background: #443e35;
   border-radius: 50%;
 }
@@ -201,43 +247,65 @@ main {
   content: '';
   position: absolute;
   inset: 0;
+  width: 0.8vmin;
+  height: 0.8vmin;
   margin: auto;
-  width: 1vmin;
-  height: 1vmin;
-  background: #e8603c;
   border-radius: 50%;
+  background: #e8603c;
 }
 
 .clock-time {
-  font-size: clamp(2rem, 4.6vmin, 2.9rem);
-  font-weight: 620;
-  letter-spacing: 0.03em;
+  grid-column: 2;
+  grid-row: 2;
+  font-size: clamp(2.15rem, 5.4vmin, 3.9rem);
+  font-weight: 680;
+  line-height: 1;
+  letter-spacing: 0.015em;
   color: #4a4238;
   font-variant-numeric: tabular-nums;
 }
 
 .clock-date {
-  font-size: clamp(1rem, 2.1vmin, 1.3rem);
-  font-weight: 500;
+  grid-column: 2;
+  grid-row: 3;
+  font-size: clamp(0.9rem, 1.85vmin, 1.15rem);
+  font-weight: 600;
   color: #8a7250;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.035em;
 }
 
-/* ---------- weather ---------- */
+/* ---------- weather: top right ---------- */
+
+#weather {
+  grid-area: weather;
+  display: grid;
+  grid-template-columns: minmax(150px, 0.82fr) minmax(180px, 1.18fr);
+  grid-template-rows: auto auto auto auto;
+  column-gap: clamp(12px, 2.5vmin, 30px);
+  align-content: center;
+  align-items: center;
+  padding: clamp(16px, 2.6vmin, 28px);
+  background: linear-gradient(150deg, #d4f5f0 0%, #afeef1 58%, #91e0e8 100%);
+}
 
 .weather-city {
-  font-size: 0.85rem;
-  font-weight: 650;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  font-size: clamp(0.68rem, 1.4vmin, 0.82rem);
+  font-weight: 750;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(23, 84, 87, 0.55);
-  margin-bottom: 1vmin;
+  color: rgba(23, 84, 87, 0.56);
 }
 
 .weather-icon {
-  width: clamp(96px, 17vmin, 150px);
-  height: clamp(96px, 17vmin, 150px);
-  filter: drop-shadow(0 6px 10px rgba(23, 84, 87, 0.18));
+  grid-column: 1;
+  grid-row: 1 / -1;
+  place-self: center;
+  width: min(19vmin, 19vh);
+  height: min(19vmin, 19vh);
+  filter: drop-shadow(0 7px 12px rgba(23, 84, 87, 0.18));
 }
 
 .weather-icon svg {
@@ -246,41 +314,359 @@ main {
 }
 
 .weather-temp {
-  font-size: clamp(4rem, 11vmin, 6.5rem);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  grid-column: 2;
+  grid-row: 2;
+  font-size: clamp(3.6rem, 8.5vmin, 5.8rem);
+  font-weight: 720;
+  line-height: 1;
+  letter-spacing: -0.04em;
   color: #175e66;
   font-variant-numeric: tabular-nums;
 }
 
 .weather-unit {
-  font-size: 0.4em;
-  font-weight: 600;
-  color: #2b7e86;
-  vertical-align: 0.55em;
   margin-left: 0.1em;
+  font-size: 0.38em;
+  font-weight: 650;
+  color: #2b7e86;
+  vertical-align: 0.62em;
 }
 
 .weather-desc {
-  font-size: clamp(1.3rem, 2.8vmin, 1.75rem);
-  font-weight: 600;
+  grid-column: 2;
+  grid-row: 3;
+  font-size: clamp(1.05rem, 2.25vmin, 1.4rem);
+  font-weight: 650;
   color: #2b7e86;
 }
 
 .weather-range {
-  background: rgba(255, 255, 255, 0.55);
+  grid-column: 2;
+  grid-row: 4;
+  justify-self: start;
+  margin-top: clamp(7px, 1.2vmin, 12px);
+  padding: 0.45em 1.15em;
   border-radius: 999px;
-  padding: 0.5em 1.4em;
-  font-size: clamp(0.95rem, 2vmin, 1.25rem);
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.58);
+  font-size: clamp(0.83rem, 1.65vmin, 1rem);
+  font-weight: 700;
   color: #175e66;
-  margin-top: 1.2vmin;
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- GitHub: bottom left ---------- */
+
+#github-contributions {
+  grid-area: github;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(18px, 2.8vmin, 30px);
+  color: #2f3545;
+  background:
+    radial-gradient(34rem 24rem at 110% 120%, rgba(143, 152, 207, 0.28), transparent 62%),
+    linear-gradient(150deg, #f7f3ff 0%, #e8e7f8 100%);
+}
+
+.github-mark {
+  width: clamp(30px, 4.4vmin, 44px);
+  height: clamp(30px, 4.4vmin, 44px);
+  fill: #343847;
+  opacity: 0.9;
+}
+
+.github-profile-link {
+  display: grid;
+  border-radius: 50%;
+  color: inherit;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.github-profile-link:hover {
+  transform: translateY(-1px);
+  opacity: 0.75;
+}
+
+.contribution-summary {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(10px, 1.6vmin, 17px);
+  padding: clamp(8px, 1.25vmin, 13px) 0;
+}
+
+.contribution-total {
+  color: #323748;
+  font-size: clamp(2.8rem, 6.5vmin, 4.5rem);
+  font-weight: 750;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.contribution-label {
+  color: #6f7486;
+  font-size: clamp(0.72rem, 1.45vmin, 0.88rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+}
+
+.contribution-graph {
+  width: 100%;
+  padding: clamp(9px, 1.35vmin, 13px);
+  border: 1px solid rgba(82, 83, 119, 0.08);
+  border-radius: clamp(12px, 1.8vmin, 17px);
+  background: rgba(255, 255, 255, 0.53);
+}
+
+.contribution-grid {
+  width: 100%;
+  height: clamp(62px, 10.2vmin, 76px);
+  display: grid;
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: clamp(1px, 0.25vmin, 3px);
+}
+
+.contribution-day,
+.contribution-legend i {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 2px;
+  background: #e3e2eb;
+}
+
+.contribution-day[data-level='1'],
+.contribution-legend i[data-level='1'] {
+  background: #b8d8a9;
+}
+
+.contribution-day[data-level='2'],
+.contribution-legend i[data-level='2'] {
+  background: #7fbd7b;
+}
+
+.contribution-day[data-level='3'],
+.contribution-legend i[data-level='3'] {
+  background: #45a564;
+}
+
+.contribution-day[data-level='4'],
+.contribution-legend i[data-level='4'] {
+  background: #237747;
+}
+
+.contribution-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin: clamp(6px, 0.9vmin, 9px) 1px clamp(5px, 0.8vmin, 8px);
+  color: #74798a;
+  font-size: clamp(0.6rem, 1.05vmin, 0.68rem);
+  font-weight: 650;
+}
+
+.contribution-legend i {
+  width: clamp(7px, 1.1vmin, 10px);
+  height: clamp(7px, 1.1vmin, 10px);
+}
+
+/* ---------- device: bottom right ---------- */
+
+#device-status {
+  --status-accent: #707a7b;
+  grid-area: device;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(18px, 2.8vmin, 30px);
+  color: #27342e;
+  transition: background 500ms ease, color 500ms ease;
+}
+
+.device-status--unknown {
+  --status-accent: #6f7777;
+  background: linear-gradient(150deg, #eef0ed 0%, #dce1de 100%);
+}
+
+.device-status--healthy {
+  --status-accent: #2f8b58;
+  background:
+    radial-gradient(32rem 22rem at 105% 110%, rgba(75, 161, 91, 0.24), transparent 60%),
+    linear-gradient(150deg, #ddf2d8 0%, #bfe6bd 100%);
+}
+
+.device-status--warning {
+  --status-accent: #b47711;
+  background:
+    radial-gradient(32rem 22rem at 105% 110%, rgba(213, 151, 35, 0.26), transparent 60%),
+    linear-gradient(150deg, #fff0bd 0%, #f4d786 100%);
+}
+
+.device-status--danger {
+  --status-accent: #b93d35;
+  color: #4e2825;
+  background:
+    radial-gradient(32rem 22rem at 105% 110%, rgba(180, 44, 36, 0.22), transparent 60%),
+    linear-gradient(150deg, #ffd6cd 0%, #ee9d93 100%);
+}
+
+.device-heading {
+  align-items: center;
+}
+
+.device-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.45em 0.8em;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.56);
+  font-size: clamp(0.7rem, 1.45vmin, 0.84rem);
+  font-weight: 750;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--status-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--status-accent) 17%, transparent);
+}
+
+.device-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(8px, 1.3vmin, 13px);
+  margin: auto 0;
+  padding: clamp(12px, 1.8vmin, 18px) 0;
+}
+
+.device-metric {
+  min-width: 0;
+  padding: clamp(10px, 1.55vmin, 15px);
+  border: 1px solid rgba(43, 63, 49, 0.08);
+  border-radius: clamp(12px, 1.8vmin, 17px);
+  background: rgba(255, 255, 255, 0.49);
+}
+
+.metric-topline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.metric-name {
+  font-size: clamp(0.7rem, 1.4vmin, 0.82rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  opacity: 0.62;
+}
+
+.metric-value {
+  font-size: clamp(1.2rem, 2.85vmin, 1.8rem);
+  font-weight: 760;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-track {
+  height: 6px;
+  margin: 9px 0 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(44, 61, 49, 0.12);
+}
+
+.metric-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--status-accent);
+  transition: width 450ms ease, background 450ms ease;
+}
+
+.metric-detail {
+  overflow: hidden;
+  font-size: clamp(0.66rem, 1.2vmin, 0.75rem);
+  font-weight: 600;
+  opacity: 0.62;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.device-metric.is-unavailable {
+  opacity: 0.55;
+}
+
+@media (max-width: 850px) {
+  body {
+    height: auto;
+    min-height: 100dvh;
+    overflow: auto;
+  }
+
+  .dashboard {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: minmax(300px, auto);
+    grid-template-areas:
+      'clock'
+      'weather'
+      'github'
+      'device';
+  }
+
+  body {
+    grid-template-rows: auto auto;
+  }
+}
+
+@media (max-width: 540px) {
+  #clock,
+  #weather {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    text-align: center;
+  }
+
+  .clock-face,
+  .weather-icon {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .clock-time,
+  .clock-date,
+  .weather-city,
+  .weather-temp,
+  .weather-desc,
+  .weather-range {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: center;
+  }
+
+  .clock-face {
+    --clock-size: min(64vw, 240px);
+  }
+
+  .weather-icon {
+    width: min(38vw, 150px);
+    height: min(38vw, 150px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
     animation: none !important;
     transition: none !important;
   }

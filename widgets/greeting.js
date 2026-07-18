@@ -4,20 +4,28 @@ const greetingWidget = {
 
   periods: [
     {
-      from: 5, to: 12, title: 'Good Morning !',
-      lines: ['Have a nice day.', 'Fresh start.', 'Time for breakfast?', 'Remember to drink water.'],
+      from: 5,
+      to: 12,
+      title: 'Good Morning !',
+      lines: ['Fresh start.', 'Time for breakfast?'],
     },
     {
-      from: 12, to: 18, title: 'Good Afternoon !',
-      lines: ['Keep it up.', 'One thing at a time.', 'Stretch a little.', 'Remember to drink water.'],
+      from: 12,
+      to: 18,
+      title: 'Good Afternoon !',
+      lines: ['Keep it up.', 'Stretch a little.'],
     },
     {
-      from: 18, to: 22, title: 'Good Evening !',
-      lines: ['Time to slow down.', 'How was your day?', "You're doing fine.", 'Dinner time?'],
+      from: 18,
+      to: 22,
+      title: 'Good Evening !',
+      lines: ['How was your day?', 'Dinner time?'],
     },
     {
-      from: 22, to: 5, title: 'Good Night !',
-      lines: ['Time to sleep.', 'Rest your eyes.', 'Tomorrow can wait.', 'Sweet dreams.'],
+      from: 22,
+      to: 5,
+      title: 'Good Night !',
+      lines: ['Time to sleep.', 'Sweet dreams.'],
     },
   ],
 
@@ -32,14 +40,15 @@ const greetingWidget = {
 
   update() {
     const hour = new Date().getHours();
-
-    const period = this.periods.find((p) =>
-      p.from < p.to ? hour >= p.from && hour < p.to : hour >= p.from || hour < p.to
-    );
-
-    const line = period.lines[Math.floor(Math.random() * period.lines.length)];
+    const period = this.periods.find((item) => (
+      item.from < item.to
+        ? hour >= item.from && hour < item.to
+        : hour >= item.from || hour < item.to
+    ));
+    const minute = new Date().getMinutes();
 
     this.el.querySelector('.greeting-title').textContent = period.title;
-    this.el.querySelector('.greeting-line').textContent = line;
+    this.el.querySelector('.greeting-line').textContent =
+      period.lines[minute % period.lines.length];
   },
 };
