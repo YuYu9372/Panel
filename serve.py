@@ -292,6 +292,9 @@ def determine_status(cpu, gpu, memory, temperature):
     if not percentages and temperature is None:
         return {'level': 'unknown', 'label': 'Unavailable'}
 
+    if any(value >= 98 for value in percentages) or (temperature is not None and temperature >= 100):
+        return {'level': 'critical', 'label': 'Critical'}
+
     if any(value >= 90 for value in percentages) or (temperature is not None and temperature >= 90):
         return {'level': 'danger', 'label': 'Overload'}
 

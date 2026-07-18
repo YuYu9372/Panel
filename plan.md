@@ -52,12 +52,12 @@ Panel/
 - [x] Weather (top right)
 - [x] GitHub contribution count + yearly heatmap (bottom left)
 - [x] Device status: CPU, GPU, RAM, temperature (bottom right)
-- [x] Green / yellow / red device alert states
+- [x] Green / yellow / red / purple device alert states
 
 ---
 
 ## Notes
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
 - Layout: time-based greeting bar above a fixed 2 × 2 grid.
-- Device thresholds: warning at 70% load or 75°C; danger at 90% load or 90°C.
+- Device thresholds: warning at 70% load or 75°C; danger at 90% load or 90°C; critical at 98% load or 100°C.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG weather icons.

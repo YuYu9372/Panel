@@ -512,6 +512,14 @@ body {
     linear-gradient(150deg, #ffd6cd 0%, #ee9d93 100%);
 }
 
+.device-status--critical {
+  --status-accent: #7839b6;
+  color: #38214d;
+  background:
+    radial-gradient(32rem 22rem at 105% 110%, rgba(120, 57, 182, 0.28), transparent 60%),
+    linear-gradient(150deg, #eadbfa 0%, #c9a8ea 100%);
+}
+
 .device-heading {
   align-items: center;
 }

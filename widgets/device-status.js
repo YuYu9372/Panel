@@ -62,7 +62,7 @@ const deviceStatusWidget = {
   },
 
   setStatus(level, label) {
-    ['healthy', 'warning', 'danger', 'unknown'].forEach((state) => {
+    ['healthy', 'warning', 'danger', 'critical', 'unknown'].forEach((state) => {
       this.el.classList.toggle(`device-status--${state}`, state === level);
     });
     this.el.querySelector('.status-label').textContent = label;
