@@ -58,6 +58,6 @@ Panel/
 ---
 
 ## Notes
-- Weather API source: TBD.
+- Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
 - Layout (from UI pdf): white greeting bar on top, below split left/right.
 - Layout colors and style: TBD.
