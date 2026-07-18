@@ -23,13 +23,13 @@
 ```
 Panel/
 ├── plan.md
-├── index.html          # layout: greeting bar + two panels
+├── index.html         
 ├── style.css
-├── app.js              # loads widgets, lays out, timer updates
+├── app.js              
 └── widgets/
-    ├── greeting.js     # top bar: time-based greeting + a line (AI later)
-    ├── clock.js        # left: time + date
-    └── weather.js      # right: current weather
+    ├── greeting.js    
+    ├── clock.js       
+    └── weather.js     
 ```
 
 ---
