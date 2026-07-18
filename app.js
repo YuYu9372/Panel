@@ -1,4 +1,4 @@
-const widgets = [clockWidget];
+const widgets = [greetingWidget, clockWidget];
 
 widgets.forEach((w) => {
   w.init();
