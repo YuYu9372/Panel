@@ -23,9 +23,13 @@
 ```
 Panel/
 ├── plan.md
-├── index.html
+├── index.html         
 ├── style.css
-└── app.js
+├── app.js              
+└── widgets/
+    ├── greeting.js    
+    ├── clock.js       
+    └── weather.js     
 ```
 
 ---
@@ -33,9 +37,13 @@ Panel/
 ## Version
 
 ### 0.1.0 <-Currently
-- [ ] Clock + date
-- [ ] Weather
-- [ ] Add git
+- [x] Clock + date
+- [x] Weather
+- [x] Greeting bar (static lines first, AI API in 0.2.0)
+- [x] Add git
+
+### 0.1.1 
+- [ ] Change the fonts to `Hangyaboly`
 
 ### 0.2.0 
 - [ ] To-do list
@@ -50,5 +58,6 @@ Panel/
 ---
 
 ## Notes
-- Weather API source: TBD.
-- Layout colors and style: TBD.
+- Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
+- Layout (from UI pdf): white greeting bar on top, below split left/right.
+- Style: soft floating cards on a cream canvas, orange/cyan identity, system fonts, inline SVG weather icons.

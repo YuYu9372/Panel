@@ -1,0 +1,287 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(16px, 2.2vmin, 24px);
+  padding: clamp(16px, 2.6vmin, 28px);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', 'Noto Sans', 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
+  color: #3d3a33;
+  background:
+    radial-gradient(90rem 60rem at 12% 110%, rgba(255, 205, 140, 0.18), transparent 60%),
+    radial-gradient(90rem 60rem at 95% -10%, rgba(150, 225, 230, 0.2), transparent 60%),
+    #f3eee4;
+}
+
+main {
+  display: contents;
+}
+
+#greeting,
+#clock,
+#weather {
+  border-radius: clamp(20px, 3.2vmin, 30px);
+  box-shadow:
+    0 1px 2px rgba(93, 77, 55, 0.06),
+    0 6px 16px rgba(93, 77, 55, 0.09),
+    0 24px 48px -16px rgba(93, 77, 55, 0.16);
+  outline: 1px solid rgba(255, 255, 255, 0.6);
+  outline-offset: -1px;
+  overflow: hidden;
+}
+
+/* ---------- greeting ---------- */
+
+#greeting {
+  grid-column: 1 / -1;
+  background: linear-gradient(180deg, #fffdf7 0%, #faf5ea 100%);
+  display: flex;
+  align-items: baseline;
+  padding: clamp(18px, 2.6vmin, 26px) clamp(28px, 4vw, 44px);
+}
+
+#greeting::before {
+  content: '';
+  align-self: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 20px;
+  background: radial-gradient(circle at 35% 30%, #ffd9a0, #f7a94a);
+  box-shadow: 0 0 0 6px rgba(247, 169, 74, 0.15);
+  animation: breathe 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes breathe {
+  to { transform: scale(1.15); }
+}
+
+.greeting-title {
+  font-size: clamp(1.5rem, 3.2vw, 2.3rem);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.greeting-line {
+  font-size: clamp(1rem, 1.9vw, 1.35rem);
+  font-weight: 450;
+  color: #8c8578;
+  margin-left: 0.9em;
+}
+
+/* ---------- panels ---------- */
+
+#clock,
+#weather {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+#clock {
+  background: linear-gradient(165deg, #ffe4b8 0%, #ffd89e 55%, #ffcd8a 100%);
+  gap: clamp(10px, 1.8vmin, 18px);
+  padding: 3vmin;
+}
+
+#weather {
+  background: linear-gradient(165deg, #cdf3ef 0%, #a9eff2 55%, #96e2e9 100%);
+  gap: clamp(4px, 1vmin, 10px);
+  padding: 3vmin;
+}
+
+/* ---------- clock ---------- */
+
+.clock-face {
+  position: relative;
+  width: min(38vmin, 44vh);
+  height: min(38vmin, 44vh);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #fffefb 0%, #fdf8ee 70%, #f7efdd 100%);
+  box-shadow:
+    0 14px 34px -10px rgba(163, 96, 22, 0.35),
+    0 3px 8px rgba(163, 96, 22, 0.15),
+    inset 0 2px 6px rgba(255, 255, 255, 0.9),
+    inset 0 -8px 18px rgba(214, 150, 60, 0.18);
+}
+
+.clock-tick {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 0.55vmin;
+  height: 100%;
+  margin-left: -0.275vmin;
+  background: linear-gradient(
+    to bottom,
+    #4a443a 0,
+    #4a443a 2vmin,
+    transparent 2vmin,
+    transparent calc(100% - 2vmin),
+    #4a443a calc(100% - 2vmin),
+    #4a443a 100%
+  );
+  opacity: 0.35;
+}
+
+.clock-tick-major {
+  width: 0.9vmin;
+  margin-left: -0.45vmin;
+  background: linear-gradient(
+    to bottom,
+    #4a443a 0,
+    #4a443a 2.6vmin,
+    transparent 2.6vmin,
+    transparent calc(100% - 2.6vmin),
+    #4a443a calc(100% - 2.6vmin),
+    #4a443a 100%
+  );
+  opacity: 0.8;
+}
+
+.clock-hand {
+  position: absolute;
+  left: 50%;
+  bottom: calc(50% - var(--hand-tail));
+  transform-origin: 50% calc(100% - var(--hand-tail));
+  border-radius: 999px;
+  filter: drop-shadow(0 2px 3px rgba(120, 80, 20, 0.25));
+}
+
+.clock-hour {
+  --hand-tail: 1.6vmin;
+  width: 1.5vmin;
+  height: 12vmin;
+  margin-left: -0.75vmin;
+  background: #443e35;
+  transition: transform 0.4s ease;
+}
+
+.clock-minute {
+  --hand-tail: 1.6vmin;
+  width: 1vmin;
+  height: 16.5vmin;
+  margin-left: -0.5vmin;
+  background: #443e35;
+  transition: transform 0.4s ease;
+}
+
+.clock-second {
+  --hand-tail: 3vmin;
+  width: 0.45vmin;
+  height: 20vmin;
+  margin-left: -0.225vmin;
+  background: #e8603c;
+  box-shadow: 0 0 6px rgba(232, 96, 60, 0.35);
+  transition: transform 0.25s cubic-bezier(0.34, 1.8, 0.5, 1);
+}
+
+.clock-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.6vmin;
+  height: 2.6vmin;
+  margin: -1.3vmin 0 0 -1.3vmin;
+  background: #443e35;
+  border-radius: 50%;
+}
+
+.clock-center::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1vmin;
+  height: 1vmin;
+  background: #e8603c;
+  border-radius: 50%;
+}
+
+.clock-time {
+  font-size: clamp(2rem, 4.6vmin, 2.9rem);
+  font-weight: 620;
+  letter-spacing: 0.03em;
+  color: #4a4238;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-date {
+  font-size: clamp(1rem, 2.1vmin, 1.3rem);
+  font-weight: 500;
+  color: #8a7250;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- weather ---------- */
+
+.weather-city {
+  font-size: 0.85rem;
+  font-weight: 650;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(23, 84, 87, 0.55);
+  margin-bottom: 1vmin;
+}
+
+.weather-icon {
+  width: clamp(96px, 17vmin, 150px);
+  height: clamp(96px, 17vmin, 150px);
+  filter: drop-shadow(0 6px 10px rgba(23, 84, 87, 0.18));
+}
+
+.weather-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.weather-temp {
+  font-size: clamp(4rem, 11vmin, 6.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #175e66;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-unit {
+  font-size: 0.4em;
+  font-weight: 600;
+  color: #2b7e86;
+  vertical-align: 0.55em;
+  margin-left: 0.1em;
+}
+
+.weather-desc {
+  font-size: clamp(1.3rem, 2.8vmin, 1.75rem);
+  font-weight: 600;
+  color: #2b7e86;
+}
+
+.weather-range {
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  padding: 0.5em 1.4em;
+  font-size: clamp(0.95rem, 2vmin, 1.25rem);
+  font-weight: 600;
+  color: #175e66;
+  margin-top: 1.2vmin;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
