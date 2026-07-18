@@ -40,7 +40,10 @@ Panel/
 - [ ] Clock + date
 - [ ] Weather
 - [x] Add git
-- [ ] Greeting bar (static lines first, AI API in 0.2.0)
+- [ ] Greeting bar (
+
+### 0.1.1 
+- [ ] Change the fonts to `Hangyaboly`
 
 ### 0.2.0 
 - [ ] To-do list
