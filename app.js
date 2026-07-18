@@ -1,4 +1,10 @@
-const widgets = [greetingWidget, clockWidget, weatherWidget];
+const widgets = [
+  greetingWidget,
+  clockWidget,
+  githubContributionsWidget,
+  weatherWidget,
+  deviceStatusWidget,
+];
 
 widgets.forEach((w) => {
   w.init();

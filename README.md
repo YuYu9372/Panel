@@ -1,6 +1,16 @@
 # Panel
 
-## Still making the first version
+## Run
+
+```bash
+python3 serve.py
+```
+
+Then open [http://localhost:8642](http://localhost:8642).
+
+The Python server exposes local CPU, GPU, RAM, and temperature data to the device-status widget, and caches the public GitHub contribution calendar. Unsupported sensors are shown as unavailable.
+
+## About
 
 A personal info dashboard, always on, shown fullscreen on a small screen.
 

@@ -25,39 +25,39 @@ Panel/
 ├── plan.md
 ├── index.html         
 ├── style.css
+├── serve.py            # Static server + local device API
 ├── app.js              
 └── widgets/
-    ├── greeting.js    
-    ├── clock.js       
-    └── weather.js     
+    ├── greeting.js
+    ├── clock.js
+    ├── weather.js
+    ├── github-contributions.js
+    └── device-status.js
 ```
 
 ---
 
 ## Version
 
-### 0.1.0 <-Currently
+### 0.1.0
 - [x] Clock + date
 - [x] Weather
-- [x] Greeting bar (static lines first, AI API in 0.2.0)
+- [x] Greeting bar
 - [x] Add git
 
-### 0.1.1 
-- [ ] Change the fonts to `Hangyaboly`
-
-### 0.2.0 
-- [ ] To-do list
-- [ ] Calendar
-- [ ] Expenses / monthly total
-- [ ] Exchange rates
-- [ ] Stocks
-- [ ] Habit tracker (GitHub-style grid)
-- [ ] Tracked GitHub repo stars
-- [ ] Server / device status
+### 0.2.0 <- Currently
+- [x] Time-based greeting bar
+- [x] 2 × 2 fullscreen layout
+- [x] Clock (top left)
+- [x] Weather (top right)
+- [x] GitHub contribution count + yearly heatmap (bottom left)
+- [x] Device status: CPU, GPU, RAM, temperature (bottom right)
+- [x] Green / yellow / red device alert states
 
 ---
 
 ## Notes
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
-- Layout (from UI pdf): white greeting bar on top, below split left/right.
-- Style: soft floating cards on a cream canvas, orange/cyan identity, system fonts, inline SVG weather icons.
+- Layout: time-based greeting bar above a fixed 2 × 2 grid.
+- Device thresholds: warning at 70% load or 75°C; danger at 90% load or 90°C.
+- Style: soft floating cards on a cream canvas, system fonts, inline SVG weather icons.
