@@ -23,9 +23,13 @@
 ```
 Panel/
 ├── plan.md
-├── index.html
+├── index.html          # layout: greeting bar + two panels
 ├── style.css
-└── app.js
+├── app.js              # loads widgets, lays out, timer updates
+└── widgets/
+    ├── greeting.js     # top bar: time-based greeting + a line (AI later)
+    ├── clock.js        # left: time + date
+    └── weather.js      # right: current weather
 ```
 
 ---
@@ -35,7 +39,8 @@ Panel/
 ### 0.1.0 <-Currently
 - [ ] Clock + date
 - [ ] Weather
-- [ ] Add git
+- [x] Add git
+- [ ] Greeting bar (static lines first, AI API in 0.2.0)
 
 ### 0.2.0 
 - [ ] To-do list
@@ -51,4 +56,5 @@ Panel/
 
 ## Notes
 - Weather API source: TBD.
+- Layout (from UI pdf): white greeting bar on top, below split left/right.
 - Layout colors and style: TBD.
