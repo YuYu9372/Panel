@@ -59,7 +59,7 @@ Panel/
 - [x] Remove GitHub contributions widget
 - [x] AI chat widget (bottom left), same API key
 - [x] Chat model switcher: Haiku 4.5 / Sonnet 4.6 low / Opus 4.8 low, tier backgrounds
-- [ ] Composio MCP: Google Tasks + Calendar (code ready, set COMPOSIO_MCP_URL in .env)
+- [x] Composio MCP: Google Tasks + Calendar (code ready, set COMPOSIO_MCP_URL in .env)
 
 ---
 
