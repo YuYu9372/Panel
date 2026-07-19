@@ -357,14 +357,41 @@ body {
 /* ---------- chat: bottom left ---------- */
 
 #chat {
+  --chat-accent: #5d68b8;
   grid-area: chat;
   display: flex;
   flex-direction: column;
   padding: clamp(18px, 2.8vmin, 30px);
   color: #2f3545;
+  transition: background 500ms ease;
   background:
     radial-gradient(34rem 24rem at 110% 120%, rgba(143, 152, 207, 0.28), transparent 62%),
     linear-gradient(150deg, #f7f3ff 0%, #e8e7f8 100%);
+}
+
+#chat.chat--better {
+  --chat-accent: #4353c9;
+  background:
+    radial-gradient(34rem 24rem at 110% 120%, rgba(96, 110, 220, 0.34), transparent 62%),
+    linear-gradient(150deg, #ece9ff 0%, #d3d2f7 100%);
+}
+
+#chat.chat--best {
+  --chat-accent: #a8770f;
+  color: #3d3320;
+  background:
+    radial-gradient(34rem 24rem at 110% 120%, rgba(222, 168, 47, 0.3), transparent 62%),
+    linear-gradient(150deg, #fff5d8 0%, #f3ddA4 100%);
+}
+
+.chat-title {
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 160ms ease;
+}
+
+.chat-title:hover {
+  opacity: 0.7;
 }
 
 .chat-log {
@@ -402,7 +429,7 @@ body {
 .chat-bubble--user {
   align-self: flex-end;
   border-bottom-right-radius: 4px;
-  background: #5d68b8;
+  background: var(--chat-accent);
   color: #fdfcff;
 }
 
@@ -441,7 +468,7 @@ body {
 }
 
 .chat-input:focus {
-  outline: 2px solid rgba(93, 104, 184, 0.45);
+  outline: 2px solid color-mix(in srgb, var(--chat-accent) 45%, transparent);
   outline-offset: -1px;
   background: #fff;
 }
@@ -452,7 +479,7 @@ body {
   height: clamp(30px, 4.4vmin, 40px);
   border: none;
   border-radius: 50%;
-  background: #5d68b8;
+  background: var(--chat-accent);
   color: #fdfcff;
   font-size: clamp(0.9rem, 1.8vmin, 1.15rem);
   font-weight: 750;

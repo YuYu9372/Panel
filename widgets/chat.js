@@ -2,13 +2,15 @@ const chatWidget = {
   el: null,
   messages: [],
   pending: false,
+  models: [{ id: 'claude-haiku-4-5', label: 'Claude Haiku 4.5', tier: 'normal' }],
+  modelIndex: 0,
 
   init() {
     this.el = document.getElementById('chat');
     this.el.innerHTML = `
       <div class="widget-heading">
         <div>
-          <h2 class="chat-title">Claude</h2>
+          <h2 class="chat-title" title="Switch model">Claude</h2>
         </div>
       </div>
       <div class="chat-log">
@@ -23,19 +25,30 @@ const chatWidget = {
       event.preventDefault();
       this.send();
     });
-    this.loadTitle();
+    this.el.querySelector('.chat-title').addEventListener('click', () => {
+      this.setModel((this.modelIndex + 1) % this.models.length);
+    });
+    this.setModel(0);
+    this.loadModels();
   },
 
-  async loadTitle() {
+  async loadModels() {
     try {
       const response = await fetch('/api/chat');
-      const { model } = await response.json();
-      const parts = model.replace(/^claude-/, '').split('-');
-      const words = parts.filter((p) => isNaN(p)).map((p) => p[0].toUpperCase() + p.slice(1));
-      const version = parts.filter((p) => !isNaN(p)).join('.');
-      this.el.querySelector('.chat-title').textContent =
-        ['Claude', ...words, version].filter(Boolean).join(' ');
+      const data = await response.json();
+      if (!Array.isArray(data.models) || !data.models.length) return;
+      this.models = data.models;
+      const start = this.models.findIndex((m) => m.id === data.default);
+      this.setModel(start >= 0 ? start : 0);
     } catch {}
+  },
+
+  setModel(index) {
+    this.modelIndex = index;
+    const model = this.models[index];
+    this.el.querySelector('.chat-title').textContent = model.label;
+    this.el.classList.remove('chat--normal', 'chat--better', 'chat--best');
+    this.el.classList.add(`chat--${model.tier}`);
   },
 
   append(role, text) {
@@ -65,7 +78,10 @@ const chatWidget = {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: this.messages }),
+        body: JSON.stringify({
+          messages: this.messages,
+          model: this.models[this.modelIndex].id,
+        }),
       });
       const data = await response.json();
       if (!response.ok || !data.reply) throw new Error(data.error || 'Chat failed');
