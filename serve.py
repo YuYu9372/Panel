@@ -144,7 +144,7 @@ def get_github_contributions():
             raise
 
 
-OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
+ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 GREETING_CACHE_SECONDS = 3600
 greeting_cache = {'payload': None, 'expires_at': 0.0, 'period': None}
 greeting_lock = threading.Lock()
@@ -195,21 +195,22 @@ def fetch_ai_greeting(period):
     )
 
     request = Request(
-        OPENROUTER_URL,
+        ANTHROPIC_URL,
         data=json.dumps({
-            'model': os.environ.get('PANEL_AI_MODEL', 'anthropic/claude-haiku-4.5'),
+            'model': os.environ.get('PANEL_AI_MODEL', 'claude-haiku-4-5'),
             'messages': [{'role': 'user', 'content': prompt}],
             'max_tokens': 60,
         }).encode('utf-8'),
         headers={
-            'Authorization': f"Bearer {os.environ['OPENROUTER_API_KEY']}",
+            'x-api-key': os.environ['ANTHROPIC_API_KEY'],
+            'anthropic-version': '2023-06-01',
             'Content-Type': 'application/json',
         },
     )
     with urlopen(request, timeout=15) as response:
         data = json.loads(response.read())
 
-    line = data['choices'][0]['message']['content'].strip().strip('"').strip()
+    line = data['content'][0]['text'].strip().strip('"').strip()
     if not line or len(line) > 100:
         raise ValueError('Unusable greeting line')
     return line
@@ -223,7 +224,7 @@ def get_greeting():
         if cached and greeting_cache['period'] == period and now < greeting_cache['expires_at']:
             return cached
 
-        if not os.environ.get('OPENROUTER_API_KEY'):
+        if not os.environ.get('ANTHROPIC_API_KEY'):
             return {'line': None, 'source': 'fallback'}
 
         try:
