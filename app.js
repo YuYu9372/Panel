@@ -1,4 +1,5 @@
 const widgets = [
+  themeWidget,
   greetingWidget,
   clockWidget,
   weatherWidget,

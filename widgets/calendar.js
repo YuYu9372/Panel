@@ -21,6 +21,10 @@ const calendarWidget = {
     this.update();
   },
 
+  hhmm(date) {
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  },
+
   describe(event) {
     if (event.all_day) {
       const [y, m, d] = (event.start || '').split('-').map(Number);
@@ -31,11 +35,15 @@ const calendarWidget = {
         timeLabel: 'All day',
       };
     }
-    const date = new Date(event.start);
+    const start = new Date(event.start);
+    const end = event.end ? new Date(event.end) : null;
+    const timeLabel = (end && end.getTime() !== start.getTime())
+      ? `${this.hhmm(start)} ~\u00A0${this.hhmm(end)}`
+      : this.hhmm(start);
     return {
-      dayKey: date.toDateString(),
-      dayLabel: date.toLocaleDateString([], { month: 'short', day: 'numeric' }),
-      timeLabel: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      dayKey: start.toDateString(),
+      dayLabel: start.toLocaleDateString([], { month: 'short', day: 'numeric' }),
+      timeLabel,
     };
   },
 

@@ -20,8 +20,10 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current: **0.4.1**
+Current: **0.4.2**
 
+- Time-based dark mode (dark 18:00–05:00, light otherwise; auto-switches while running)
+- Night owl 🦉 in the "Good Night" greeting during 00:00–04:00
 - Top bar: time-based greeting (AI line, local fallback) + compact system status
 - 2 × 2 grid: clock, weather, calendar, tasks
 - Weather: UV index with a color-tier background (blue / green / yellow / red by UV band)

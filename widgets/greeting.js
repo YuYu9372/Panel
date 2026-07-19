@@ -47,7 +47,8 @@ const greetingWidget = {
         : hour >= item.from || hour < item.to
     ));
 
-    this.el.querySelector('.greeting-title').textContent = period.title;
+    const nightOwl = hour < 4 ? ' 🦉' : '';
+    this.el.querySelector('.greeting-title').textContent = period.title + nightOwl;
 
     const lineEl = this.el.querySelector('.greeting-line');
     lineEl.textContent = period.lines[now.getMinutes() % period.lines.length];

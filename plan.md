@@ -28,6 +28,7 @@ Panel/
 ├── serve.py            # Static server + local device API
 ├── app.js              
 └── widgets/
+    ├── theme.js
     ├── greeting.js
     ├── clock.js
     ├── weather.js
@@ -68,8 +69,12 @@ Panel/
 - [x] Tasks widget: Google Tasks by folder, checkbox completes + syncs back (bottom right)
 - [x] Move System status into the top bar (compact chips); calendar + tasks take the bottom row
 
-### 0.4.1 <- Currently
+### 0.4.1
 - [x] UV index in weather + color-tier background (blue / green / yellow / red by UV band). Was stranded on the unmerged 0.3.1 branch; re-applied on top of the 0.4.0 layout.
+
+### 0.4.2 <- Currently
+- [x] Time-based dark mode: dark 18:00–05:00, light otherwise. Auto-switches while running; each card keeps its hue.
+- [x] Night owl 🦉 in the "Good Night" greeting during 00:00–04:00.
 
 ---
 
@@ -80,3 +85,4 @@ Panel/
 - Layout: top bar (greeting + system status) above a fixed 2 × 2 grid (clock, weather, calendar, tasks).
 - Device thresholds: warning at 70% load or 75°C; danger at 90% load or 90°C; critical at 98% load or 100°C.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
+- Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. An inline `<head>` script sets it before first paint to avoid a flash.

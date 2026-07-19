@@ -498,7 +498,7 @@ body {
 
 .cal-item {
   display: grid;
-  grid-template-columns: clamp(50px, 8vmin, 70px) 18px 1fr;
+  grid-template-columns: clamp(60px, 9.5vmin, 88px) 18px 1fr;
   column-gap: clamp(6px, 1vmin, 12px);
   align-items: start;
 }
@@ -520,6 +520,7 @@ body {
 .cal-time {
   font-size: clamp(0.62rem, 1.2vmin, 0.72rem);
   font-weight: 600;
+  line-height: 1.25;
   color: #7b83a4;
   font-variant-numeric: tabular-nums;
 }
@@ -605,9 +606,14 @@ body {
   min-height: 0;
   margin-top: clamp(10px, 1.6vmin, 16px);
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(10px, 1.6vmin, 16px);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  align-content: start;
+  gap: clamp(10px, 1.6vmin, 16px) clamp(12px, 2vmin, 22px);
+}
+
+.task-folder--wide {
+  grid-column: 1 / -1;
 }
 
 .folder-head {
@@ -716,13 +722,178 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.task-due.is-overdue {
+.task-item.is-today {
+  border-color: rgba(198, 150, 20, 0.45);
+  background: rgba(232, 182, 30, 0.15);
+}
+
+.task-item.is-today .task-due {
+  color: #9a6f12;
+}
+
+.task-item.is-overdue {
+  border-color: rgba(190, 62, 46, 0.42);
+  background: rgba(202, 66, 48, 0.12);
+}
+
+.task-item.is-overdue .task-due {
   color: #c1443a;
 }
 
 .task-due:empty {
   display: none;
 }
+
+/* ---------- dark mode (18:00–05:00) ---------- */
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  color: #e6e4de;
+  background: #14151a;
+}
+
+:root[data-theme='dark'] body {
+  background:
+    radial-gradient(80rem 56rem at 0% 110%, rgba(255, 186, 92, 0.09), transparent 62%),
+    radial-gradient(80rem 56rem at 100% -10%, rgba(120, 190, 220, 0.09), transparent 62%),
+    #14151a;
+}
+
+:root[data-theme='dark'] .widget {
+  outline-color: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 8px 22px rgba(0, 0, 0, 0.32),
+    0 26px 50px -18px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme='dark'] .greeting-line { color: #9a968c; }
+:root[data-theme='dark'] .system-status { color: #b7b4ab; }
+
+:root[data-theme='dark'] #clock {
+  background: linear-gradient(150deg, #362a17 0%, #29200f 58%, #221a0d 100%);
+}
+
+:root[data-theme='dark'] .clock-face {
+  background: radial-gradient(circle at 38% 32%, #2b2416 0%, #221c11 70%, #1b160d 100%);
+  box-shadow:
+    0 12px 30px -10px rgba(0, 0, 0, 0.5),
+    inset 0 2px 6px rgba(255, 255, 255, 0.05),
+    inset 0 -7px 16px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme='dark'] .clock-hour,
+:root[data-theme='dark'] .clock-minute,
+:root[data-theme='dark'] .clock-center { background: #ece6d8; }
+
+:root[data-theme='dark'] .clock-time { color: #f0ebdf; }
+:root[data-theme='dark'] .clock-date { color: #c8ad7c; }
+
+:root[data-theme='dark'] .clock-tick {
+  background: linear-gradient(
+    to bottom,
+    #6d6656 0, #6d6656 1.4vmin,
+    transparent 1.4vmin, transparent calc(100% - 1.4vmin),
+    #6d6656 calc(100% - 1.4vmin), #6d6656 100%
+  );
+  opacity: 0.45;
+}
+
+:root[data-theme='dark'] .clock-tick-major {
+  background: linear-gradient(
+    to bottom,
+    #938b78 0, #938b78 1.9vmin,
+    transparent 1.9vmin, transparent calc(100% - 1.9vmin),
+    #938b78 calc(100% - 1.9vmin), #938b78 100%
+  );
+  opacity: 0.85;
+}
+
+:root[data-theme='dark'] #weather {
+  --wx-ink: #d0e0f5;
+  --wx-sub: #9cb7d7;
+  --wx-label: rgba(190, 210, 238, 0.6);
+  --wx-pill: rgba(255, 255, 255, 0.09);
+  background: linear-gradient(150deg, #1a2942 0%, #142032 58%, #101a2a 100%);
+}
+
+:root[data-theme='dark'] #weather.weather--moderate {
+  --wx-ink: #c6e6cc;
+  --wx-sub: #93c79f;
+  --wx-label: rgba(170, 215, 180, 0.6);
+  background: linear-gradient(150deg, #173021 0%, #12271a 58%, #0e1f13 100%);
+}
+
+:root[data-theme='dark'] #weather.weather--high {
+  --wx-ink: #f2d79c;
+  --wx-sub: #d3ac60;
+  --wx-label: rgba(224, 184, 112, 0.6);
+  background: linear-gradient(150deg, #332813 0%, #281f0f 58%, #21190b 100%);
+}
+
+:root[data-theme='dark'] #weather.weather--extreme {
+  --wx-ink: #f3b4a7;
+  --wx-sub: #db8b7d;
+  --wx-label: rgba(232, 162, 148, 0.6);
+  background: linear-gradient(150deg, #3a1f1b 0%, #2c1714 58%, #241210 100%);
+}
+
+:root[data-theme='dark'] #calendar {
+  color: #ccd5ea;
+  background:
+    radial-gradient(34rem 24rem at 110% 120%, rgba(96, 116, 190, 0.2), transparent 62%),
+    linear-gradient(150deg, #1c2238 0%, #151a2b 100%);
+}
+
+:root[data-theme='dark'] .cal-glyph { color: #97a2cc; }
+:root[data-theme='dark'] .cal-date { color: #c3cce8; }
+:root[data-theme='dark'] .cal-time,
+:root[data-theme='dark'] .cal-cal,
+:root[data-theme='dark'] .cal-empty { color: #8b93b4; }
+:root[data-theme='dark'] .cal-title { color: #dfe4f4; }
+
+:root[data-theme='dark'] .cal-node {
+  background: #7d8ad2;
+  box-shadow: 0 0 0 4px rgba(125, 138, 210, 0.18);
+}
+
+:root[data-theme='dark'] .cal-rail::before { background: rgba(140, 155, 215, 0.26); }
+
+:root[data-theme='dark'] #tasks {
+  color: #cfe0d4;
+  background:
+    radial-gradient(34rem 24rem at 110% 120%, rgba(96, 170, 120, 0.18), transparent 62%),
+    linear-gradient(150deg, #1a2c20 0%, #132017 100%);
+}
+
+:root[data-theme='dark'] .tasks-glyph { color: #6fb488; }
+:root[data-theme='dark'] .folder-head { color: #a9c9b5; }
+:root[data-theme='dark'] .tasks-empty { color: #8fb89d; }
+
+:root[data-theme='dark'] .task-item {
+  border-color: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme='dark'] .task-check {
+  border-color: #5f9a75;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme='dark'] .task-title { color: #e0eae2; }
+:root[data-theme='dark'] .task-due { color: #8fb89d; }
+
+:root[data-theme='dark'] .task-item.is-today {
+  border-color: rgba(214, 176, 70, 0.42);
+  background: rgba(220, 180, 60, 0.13);
+}
+:root[data-theme='dark'] .task-item.is-today .task-due { color: #e6c463; }
+
+:root[data-theme='dark'] .task-item.is-overdue {
+  border-color: rgba(224, 132, 119, 0.4);
+  background: rgba(210, 90, 75, 0.15);
+}
+:root[data-theme='dark'] .task-item.is-overdue .task-due { color: #e08477; }
 
 @media (max-width: 850px) {
   body {
