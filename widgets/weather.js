@@ -47,15 +47,25 @@ const weatherWidget = {
       <div class="weather-icon"></div>
       <div class="weather-temp"></div>
       <div class="weather-desc"></div>
-      <div class="weather-range"></div>
+      <div class="weather-meta">
+        <span class="weather-range"></span>
+        <span class="weather-uv"></span>
+      </div>
     `;
     this.update();
+  },
+
+  uvTier(uv) {
+    if (uv >= 8) return 'extreme';
+    if (uv >= 6) return 'high';
+    if (uv >= 3) return 'moderate';
+    return 'low';
   },
 
   async update() {
     const url =
       `https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}` +
-      `&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
+      `&current=temperature_2m,weather_code,uv_index&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
 
     try {
       const res = await fetch(url);
@@ -73,6 +83,13 @@ const weatherWidget = {
       this.el.querySelector('.weather-desc').textContent = desc;
       this.el.querySelector('.weather-range').textContent =
         `${Math.round(data.daily.temperature_2m_min[0])}° / ${Math.round(data.daily.temperature_2m_max[0])}°`;
+
+      const uv = Math.max(0, Math.round(data.current.uv_index ?? 0));
+      this.el.querySelector('.weather-uv').textContent = `UV ${uv}`;
+      this.el.classList.remove(
+        'weather--low', 'weather--moderate', 'weather--high', 'weather--extreme',
+      );
+      this.el.classList.add(`weather--${this.uvTier(uv)}`);
     } catch {
       this.el.querySelector('.weather-desc').textContent = 'Weather unavailable';
     }

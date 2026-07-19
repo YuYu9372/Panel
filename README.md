@@ -20,10 +20,11 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current: **0.4.0**
+Current: **0.4.1**
 
 - Top bar: time-based greeting (AI line, local fallback) + compact system status
 - 2 × 2 grid: clock, weather, calendar, tasks
+- Weather: UV index with a color-tier background (blue / green / yellow / red by UV band)
 - Calendar: vertical timeline of upcoming Google Calendar events
 - Tasks: Google Tasks by folder, with checkboxes that complete and sync back
 - Calendar + tasks read the Composio MCP directly — no LLM, zero Anthropic tokens

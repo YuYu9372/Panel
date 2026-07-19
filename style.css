@@ -277,6 +277,10 @@ body {
 /* ---------- weather: top right ---------- */
 
 #weather {
+  --wx-ink: #1c4e80;
+  --wx-sub: #2f6ba5;
+  --wx-label: rgba(28, 78, 128, 0.56);
+  --wx-pill: rgba(255, 255, 255, 0.62);
   grid-area: weather;
   display: grid;
   grid-template-columns: minmax(150px, 0.82fr) minmax(180px, 1.18fr);
@@ -285,7 +289,29 @@ body {
   align-content: center;
   align-items: center;
   padding: clamp(16px, 2.6vmin, 28px);
-  background: linear-gradient(150deg, #d4f5f0 0%, #afeef1 58%, #91e0e8 100%);
+  transition: background 500ms ease;
+  background: linear-gradient(150deg, #d6ecff 0%, #b3d9fb 58%, #93c6f5 100%);
+}
+
+#weather.weather--moderate {
+  --wx-ink: #1f6b34;
+  --wx-sub: #2f8b45;
+  --wx-label: rgba(31, 107, 52, 0.56);
+  background: linear-gradient(150deg, #d9f5db 0%, #b6e6bb 58%, #93d79c 100%);
+}
+
+#weather.weather--high {
+  --wx-ink: #8a5a0f;
+  --wx-sub: #a8770f;
+  --wx-label: rgba(138, 90, 15, 0.6);
+  background: linear-gradient(150deg, #fff2c9 0%, #ffe08f 58%, #f6cd63 100%);
+}
+
+#weather.weather--extreme {
+  --wx-ink: #a03325;
+  --wx-sub: #b93d35;
+  --wx-label: rgba(160, 51, 37, 0.6);
+  background: linear-gradient(150deg, #ffdad2 0%, #f6a99b 58%, #ef8f7e 100%);
 }
 
 .weather-city {
@@ -296,7 +322,7 @@ body {
   font-weight: 750;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(23, 84, 87, 0.56);
+  color: var(--wx-label);
 }
 
 .weather-icon {
@@ -320,7 +346,7 @@ body {
   font-weight: 720;
   line-height: 1;
   letter-spacing: -0.04em;
-  color: #175e66;
+  color: var(--wx-ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -328,7 +354,7 @@ body {
   margin-left: 0.1em;
   font-size: 0.38em;
   font-weight: 650;
-  color: #2b7e86;
+  color: var(--wx-sub);
   vertical-align: 0.62em;
 }
 
@@ -337,21 +363,32 @@ body {
   grid-row: 3;
   font-size: clamp(1.05rem, 2.25vmin, 1.4rem);
   font-weight: 650;
-  color: #2b7e86;
+  color: var(--wx-sub);
 }
 
-.weather-range {
+.weather-meta {
   grid-column: 2;
   grid-row: 4;
   justify-self: start;
+  display: flex;
+  gap: clamp(6px, 1vmin, 10px);
   margin-top: clamp(7px, 1.2vmin, 12px);
+}
+
+.weather-range,
+.weather-uv {
   padding: 0.45em 1.15em;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.58);
+  background: var(--wx-pill);
   font-size: clamp(0.83rem, 1.65vmin, 1rem);
   font-weight: 700;
-  color: #175e66;
+  color: var(--wx-ink);
   font-variant-numeric: tabular-nums;
+}
+
+.weather-range:empty,
+.weather-uv:empty {
+  display: none;
 }
 
 /* ---------- top bar: greeting + system status ---------- */
@@ -744,7 +781,7 @@ body {
   .weather-city,
   .weather-temp,
   .weather-desc,
-  .weather-range {
+  .weather-meta {
     grid-column: 1;
     grid-row: auto;
     justify-self: center;
