@@ -176,17 +176,31 @@ def fetch_chat_reply(messages, model):
         body['thinking'] = {'type': 'disabled'}
         body['output_config'] = {'effort': 'low'}
 
-    request = Request(
-        ANTHROPIC_URL,
-        data=json.dumps(body).encode('utf-8'),
-        headers={
-            'x-api-key': os.environ['ANTHROPIC_API_KEY'],
-            'anthropic-version': '2023-06-01',
-            'Content-Type': 'application/json',
-        },
-    )
-    with urlopen(request, timeout=30) as response:
-        data = json.loads(response.read())
+    headers = {
+        'x-api-key': os.environ['ANTHROPIC_API_KEY'],
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+    }
+
+    mcp_url = os.environ.get('COMPOSIO_MCP_URL')
+    if mcp_url:
+        server = {'type': 'url', 'url': mcp_url, 'name': 'composio'}
+        if os.environ.get('COMPOSIO_MCP_TOKEN'):
+            server['authorization_token'] = os.environ['COMPOSIO_MCP_TOKEN']
+        body['mcp_servers'] = [server]
+        body['tools'] = [{'type': 'mcp_toolset', 'mcp_server_name': 'composio'}]
+        body['max_tokens'] = 1000
+        headers['anthropic-beta'] = 'mcp-client-2025-11-20'
+
+    conversation = messages
+    for _ in range(4):
+        body['messages'] = conversation
+        request = Request(ANTHROPIC_URL, data=json.dumps(body).encode('utf-8'), headers=headers)
+        with urlopen(request, timeout=90) as response:
+            data = json.loads(response.read())
+        if data.get('stop_reason') != 'pause_turn':
+            break
+        conversation = conversation + [{'role': 'assistant', 'content': data['content']}]
 
     reply = '\n'.join(
         block['text'] for block in data['content'] if block.get('type') == 'text'
