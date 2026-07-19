@@ -418,6 +418,10 @@ def collect_device_stats():
     }
 
 
+LOCAL_HOSTS = {'localhost', '127.0.0.1', '::1'}
+LOOPBACK_CLIENTS = {'127.0.0.1', '::1', '::ffff:127.0.0.1'}
+
+
 class PanelHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
         self.send_header('Cache-Control', 'no-store')
@@ -431,11 +435,30 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def is_local_request(self):
+        if self.client_address[0] not in LOOPBACK_CLIENTS:
+            return False
+        host = self.headers.get('Host', '')
+        if host.startswith('['):
+            hostname = host[1:host.find(']')] if ']' in host else host
+        else:
+            hostname = host.split(':', 1)[0]
+        if hostname not in LOCAL_HOSTS:
+            return False
+        origin = self.headers.get('Origin')
+        if origin is not None and urlparse(origin).hostname not in LOCAL_HOSTS:
+            return False
+        return True
+
     def do_GET(self):
         path = unquote(urlparse(self.path).path)
 
         if any(part.startswith('.') for part in path.split('/') if part):
             self.send_error(404)
+            return
+
+        if path.startswith('/api/') and not self.is_local_request():
+            self.send_error(403)
             return
 
         if path == '/api/device':
@@ -459,10 +482,18 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self):
-        path = urlparse(self.path).path
+        path = unquote(urlparse(self.path).path)
 
         if path != '/api/chat':
             self.send_error(404)
+            return
+
+        if not self.is_local_request():
+            self.send_error(403)
+            return
+
+        if not self.headers.get('Content-Type', '').startswith('application/json'):
+            self.send_json({'error': 'Invalid chat request'}, status=400)
             return
 
         if not os.environ.get('ANTHROPIC_API_KEY'):
