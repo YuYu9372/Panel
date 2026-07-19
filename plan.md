@@ -61,12 +61,15 @@ Panel/
 - [x] AI chat widget (bottom left), same API key
 - [x] Chat model switcher: Haiku 4.5 / Sonnet 4.6 low / Opus 4.8 low, tier backgrounds
 
-### 0.4.0 <- Currently
+### 0.4.0
 - [x] Remove AI chat (was burning tokens fast)
 - [x] Call Composio MCP directly from serve.py (no LLM, zero Anthropic tokens)
 - [x] Calendar widget: vertical timeline of upcoming Google Calendar events (bottom left)
 - [x] Tasks widget: Google Tasks by folder, checkbox completes + syncs back (bottom right)
 - [x] Move System status into the top bar (compact chips); calendar + tasks take the bottom row
+
+### 0.4.1 <- Currently
+- [x] UV index in weather + color-tier background (blue / green / yellow / red by UV band). Was stranded on the unmerged 0.3.1 branch; re-applied on top of the 0.4.0 layout.
 
 ---
 
