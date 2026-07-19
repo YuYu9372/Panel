@@ -372,8 +372,8 @@ body {
 #chat.chat--better {
   --chat-accent: #4353c9;
   background:
-    radial-gradient(34rem 24rem at 110% 120%, rgba(96, 110, 220, 0.34), transparent 62%),
-    linear-gradient(150deg, #ece9ff 0%, #d3d2f7 100%);
+    radial-gradient(34rem 24rem at 110% 120%, rgba(96, 110, 220, 0.4), transparent 62%),
+    linear-gradient(150deg, #e2ddff 0%, #bfbdf0 100%);
 }
 
 #chat.chat--best {

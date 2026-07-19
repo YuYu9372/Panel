@@ -4,6 +4,7 @@ const chatWidget = {
   pending: false,
   models: [{ id: 'claude-haiku-4-5', label: 'Claude Haiku 4.5', tier: 'normal' }],
   modelIndex: 0,
+  userPicked: false,
 
   init() {
     this.el = document.getElementById('chat');
@@ -26,6 +27,7 @@ const chatWidget = {
       this.send();
     });
     this.el.querySelector('.chat-title').addEventListener('click', () => {
+      this.userPicked = true;
       this.setModel((this.modelIndex + 1) % this.models.length);
     });
     this.setModel(0);
@@ -37,8 +39,10 @@ const chatWidget = {
       const response = await fetch('/api/chat');
       const data = await response.json();
       if (!Array.isArray(data.models) || !data.models.length) return;
+      const currentId = this.models[this.modelIndex].id;
       this.models = data.models;
-      const start = this.models.findIndex((m) => m.id === data.default);
+      const wanted = this.userPicked ? currentId : data.default;
+      const start = this.models.findIndex((m) => m.id === wanted);
       this.setModel(start >= 0 ? start : 0);
     } catch {}
   },
