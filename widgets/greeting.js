@@ -49,15 +49,15 @@ const greetingWidget = {
 
     this.el.querySelector('.greeting-title').textContent = period.title;
 
-    let line = null;
+    const lineEl = this.el.querySelector('.greeting-line');
+    lineEl.textContent = period.lines[now.getMinutes() % period.lines.length];
+
     try {
       const response = await fetch('/api/greeting');
-      if (response.ok) line = (await response.json()).line;
-    } catch {
-      line = null;
-    }
-
-    this.el.querySelector('.greeting-line').textContent =
-      line || period.lines[now.getMinutes() % period.lines.length];
+      if (response.ok) {
+        const { line } = await response.json();
+        if (line) lineEl.textContent = line;
+      }
+    } catch {}
   },
 };

@@ -27,7 +27,7 @@ def load_env(path='.env'):
             line = line.strip()
             if line and not line.startswith('#') and '=' in line:
                 key, value = line.split('=', 1)
-                os.environ.setdefault(key.strip(), value.strip())
+                os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
     except OSError:
         pass
 
@@ -223,16 +223,18 @@ def get_greeting():
         if cached and greeting_cache['period'] == period and now < greeting_cache['expires_at']:
             return cached
 
-        if 'OPENROUTER_API_KEY' not in os.environ:
+        if not os.environ.get('OPENROUTER_API_KEY'):
             return {'line': None, 'source': 'fallback'}
 
         try:
             payload = {'line': fetch_ai_greeting(period), 'source': 'ai'}
+            ttl = GREETING_CACHE_SECONDS
         except Exception:
-            return {'line': None, 'source': 'fallback'}
+            payload = {'line': None, 'source': 'fallback'}
+            ttl = 120
 
         greeting_cache['payload'] = payload
-        greeting_cache['expires_at'] = now + GREETING_CACHE_SECONDS
+        greeting_cache['expires_at'] = now + ttl
         greeting_cache['period'] = period
         return payload
 
@@ -460,6 +462,10 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         path = urlparse(self.path).path
+
+        if any(part.startswith('.') for part in path.split('/') if part):
+            self.send_error(404)
+            return
 
         if path == '/api/device':
             try:
