@@ -1,6 +1,6 @@
 const clockWidget = {
   el: null,
-  interval: 1000,
+  interval: null, // self-schedules on the second boundary; app.js skips its timer
   rot: null,
 
   init() {
@@ -23,7 +23,13 @@ const clockWidget = {
       <div class="clock-time"></div>
       <div class="clock-date"></div>
     `;
+    this.tick();
+  },
+
+  tick() {
     this.update();
+    // Re-align to the next whole second every tick — no drift, no lag.
+    setTimeout(() => this.tick(), 1000 - (Date.now() % 1000));
   },
 
   update() {
