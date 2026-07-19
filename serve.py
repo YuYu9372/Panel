@@ -17,7 +17,7 @@ from urllib.request import Request, urlopen
 
 try:
     import psutil
-except ImportError:  # The dashboard still runs with reduced telemetry.
+except ImportError:
     psutil = None
 
 
