@@ -129,6 +129,55 @@ def get_greeting():
         return payload
 
 
+CHAT_MAX_MESSAGES = 20
+CHAT_MAX_CHARS = 4000
+CHAT_SYSTEM_PROMPT = (
+    'You are the assistant inside Panel, a personal dashboard shown on a small '
+    'always-on screen. Be helpful and concise: a few short sentences unless more '
+    'is clearly needed. Plain text only: no markdown, no emoji.'
+)
+
+
+def build_chat_messages(payload):
+    messages = payload.get('messages')
+    if not isinstance(messages, list) or not messages:
+        raise ValueError('messages required')
+
+    cleaned = []
+    for message in messages[-CHAT_MAX_MESSAGES:]:
+        role = message.get('role')
+        content = message.get('content')
+        if role not in ('user', 'assistant') or not isinstance(content, str) or not content.strip():
+            raise ValueError('invalid message')
+        cleaned.append({'role': role, 'content': content[:CHAT_MAX_CHARS]})
+
+    while cleaned and cleaned[0]['role'] != 'user':
+        cleaned.pop(0)
+    if not cleaned:
+        raise ValueError('messages required')
+    return cleaned
+
+
+def fetch_chat_reply(messages):
+    request = Request(
+        ANTHROPIC_URL,
+        data=json.dumps({
+            'model': os.environ.get('PANEL_AI_MODEL', 'claude-haiku-4-5'),
+            'system': CHAT_SYSTEM_PROMPT,
+            'messages': messages,
+            'max_tokens': 600,
+        }).encode('utf-8'),
+        headers={
+            'x-api-key': os.environ['ANTHROPIC_API_KEY'],
+            'anthropic-version': '2023-06-01',
+            'Content-Type': 'application/json',
+        },
+    )
+    with urlopen(request, timeout=30) as response:
+        data = json.loads(response.read())
+    return data['content'][0]['text'].strip()
+
+
 def clamp_percent(value):
     if value is None:
         return None
@@ -369,6 +418,31 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         super().do_GET()
+
+    def do_POST(self):
+        path = urlparse(self.path).path
+
+        if path != '/api/chat':
+            self.send_error(404)
+            return
+
+        if not os.environ.get('ANTHROPIC_API_KEY'):
+            self.send_json({'error': 'AI is not configured'}, status=503)
+            return
+
+        try:
+            length = int(self.headers.get('Content-Length') or 0)
+            if not 0 < length <= 64 * 1024:
+                raise ValueError('bad length')
+            messages = build_chat_messages(json.loads(self.rfile.read(length)))
+        except Exception:
+            self.send_json({'error': 'Invalid chat request'}, status=400)
+            return
+
+        try:
+            self.send_json({'reply': fetch_chat_reply(messages)})
+        except Exception:
+            self.send_json({'error': 'AI request failed'}, status=502)
 
 
 def main():
