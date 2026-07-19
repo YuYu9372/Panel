@@ -16,6 +16,16 @@ A personal info dashboard, always on, shown fullscreen on a small screen.
 
 See [plan.md](plan.md) for goals, stack, and roadmap.
 
+## Version
+
+Current: **0.2.0**
+
+- 2 × 2 fullscreen layout: clock, weather, GitHub contributions, device status
+- Time-based greeting bar with AI-generated line (local fallback)
+- Device alert states: green / yellow / red / purple
+
+Full version history in [plan.md](plan.md).
+
 ## Coworkers
 - YuYu9372
 - Claude
