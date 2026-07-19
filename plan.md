@@ -74,6 +74,7 @@ Panel/
 
 ### 0.4.2 <- Currently
 - [x] Time-based dark mode: dark 18:00–05:00, light otherwise. Auto-switches while running; each card keeps its hue.
+- [x] Night owl 🦉 in the "Good Night" greeting during 00:00–04:00.
 
 ---
 
