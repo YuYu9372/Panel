@@ -31,7 +31,8 @@ Panel/
     ├── greeting.js
     ├── clock.js
     ├── weather.js
-    ├── chat.js
+    ├── calendar.js
+    ├── tasks.js
     └── device-status.js
 ```
 
@@ -54,18 +55,25 @@ Panel/
 - [x] Device status: CPU, GPU, RAM, temperature (bottom right)
 - [x] Green / yellow / red / purple device alert states
 
-### 0.3.0 <- Currently
+### 0.3.0
 - [x] AI greeting line via Anthropic API (local fallback)
 - [x] Remove GitHub contributions widget
 - [x] AI chat widget (bottom left), same API key
 - [x] Chat model switcher: Haiku 4.5 / Sonnet 4.6 low / Opus 4.8 low, tier backgrounds
-- [ ] Composio MCP: Google Tasks + Calendar (code ready, set COMPOSIO_MCP_URL in .env)
+
+### 0.4.0 <- Currently
+- [x] Remove AI chat (was burning tokens fast)
+- [x] Call Composio MCP directly from serve.py (no LLM, zero Anthropic tokens)
+- [x] Calendar widget: vertical timeline of upcoming Google Calendar events (bottom left)
+- [x] Tasks widget: Google Tasks by folder, checkbox completes + syncs back (bottom right)
+- [x] Move System status into the top bar (compact chips); calendar + tasks take the bottom row
 
 ---
 
 ## Notes
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
-- AI: Anthropic API (`claude-haiku-4-5`), key in `.env` as `ANTHROPIC_API_KEY`. Greeting and chat degrade gracefully without it.
-- Layout: time-based greeting bar above a fixed 2 × 2 grid.
+- Greeting line: Anthropic API (`claude-haiku-4-5`), key in `.env` as `ANTHROPIC_API_KEY`; falls back to a local phrase without it. Only remaining AI/token use.
+- Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) via `COMPOSIO_MCP_URL` / `COMPOSIO_MCP_TOKEN` in `.env`. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Cached 10 min / 5 min.
+- Layout: top bar (greeting + system status) above a fixed 2 × 2 grid (clock, weather, calendar, tasks).
 - Device thresholds: warning at 70% load or 75°C; danger at 90% load or 90°C; critical at 98% load or 100°C.
-- Style: soft floating cards on a cream canvas, system fonts, inline SVG weather icons.
+- Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
