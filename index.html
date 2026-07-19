@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel</title>
   <link rel="icon" href="data:," />
-  <link rel="stylesheet" href="style.css?v=12" />
+  <script>
+    (function () {
+      var h = new Date().getHours();
+      document.documentElement.dataset.theme = (h >= 18 || h < 5) ? 'dark' : 'light';
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css?v=13" />
 </head>
 <body>
   <header class="topbar" aria-label="Status bar">
@@ -19,12 +25,13 @@
     <section id="tasks" class="widget" aria-label="Tasks"></section>
   </main>
 
+  <script src="widgets/theme.js?v=1"></script>
   <script src="widgets/greeting.js?v=7"></script>
   <script src="widgets/clock.js?v=4"></script>
   <script src="widgets/weather.js?v=5"></script>
   <script src="widgets/calendar.js?v=1"></script>
   <script src="widgets/tasks.js?v=1"></script>
   <script src="widgets/device-status.js?v=4"></script>
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>
