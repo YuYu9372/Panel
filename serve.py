@@ -131,6 +131,12 @@ def get_greeting():
 
 CHAT_MAX_MESSAGES = 20
 CHAT_MAX_CHARS = 4000
+CHAT_DEFAULT_MODEL = 'claude-haiku-4-5'
+CHAT_MODELS = {
+    'claude-haiku-4-5': {'label': 'Claude Haiku 4.5', 'tier': 'normal'},
+    'claude-sonnet-4-6': {'label': 'Claude Sonnet 4.6', 'tier': 'better'},
+    'claude-opus-4-8': {'label': 'Claude Opus 4.8', 'tier': 'best'},
+}
 CHAT_SYSTEM_PROMPT = (
     'You are the chat assistant of Panel, a personal dashboard on a small screen. '
     'Answer directly in one or two short sentences; go longer only when clearly '
@@ -159,15 +165,20 @@ def build_chat_messages(payload):
     return cleaned
 
 
-def fetch_chat_reply(messages):
+def fetch_chat_reply(messages, model):
+    body = {
+        'model': model,
+        'system': CHAT_SYSTEM_PROMPT,
+        'messages': messages,
+        'max_tokens': 300,
+    }
+    if model != 'claude-haiku-4-5':
+        body['thinking'] = {'type': 'disabled'}
+        body['output_config'] = {'effort': 'low'}
+
     request = Request(
         ANTHROPIC_URL,
-        data=json.dumps({
-            'model': os.environ.get('PANEL_AI_MODEL', 'claude-haiku-4-5'),
-            'system': CHAT_SYSTEM_PROMPT,
-            'messages': messages,
-            'max_tokens': 300,
-        }).encode('utf-8'),
+        data=json.dumps(body).encode('utf-8'),
         headers={
             'x-api-key': os.environ['ANTHROPIC_API_KEY'],
             'anthropic-version': '2023-06-01',
@@ -176,7 +187,13 @@ def fetch_chat_reply(messages):
     )
     with urlopen(request, timeout=30) as response:
         data = json.loads(response.read())
-    return data['content'][0]['text'].strip()
+
+    reply = '\n'.join(
+        block['text'] for block in data['content'] if block.get('type') == 'text'
+    ).strip()
+    if not reply:
+        raise ValueError('Empty chat reply')
+    return reply
 
 
 def clamp_percent(value):
@@ -419,7 +436,10 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path == '/api/chat':
-            self.send_json({'model': os.environ.get('PANEL_AI_MODEL', 'claude-haiku-4-5')})
+            self.send_json({
+                'models': [{'id': mid, **info} for mid, info in CHAT_MODELS.items()],
+                'default': CHAT_DEFAULT_MODEL,
+            })
             return
 
         super().do_GET()
@@ -439,13 +459,17 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             length = int(self.headers.get('Content-Length') or 0)
             if not 0 < length <= 64 * 1024:
                 raise ValueError('bad length')
-            messages = build_chat_messages(json.loads(self.rfile.read(length)))
+            payload = json.loads(self.rfile.read(length))
+            messages = build_chat_messages(payload)
+            model = payload.get('model') or CHAT_DEFAULT_MODEL
+            if model not in CHAT_MODELS:
+                raise ValueError('unknown model')
         except Exception:
             self.send_json({'error': 'Invalid chat request'}, status=400)
             return
 
         try:
-            self.send_json({'reply': fetch_chat_reply(messages)})
+            self.send_json({'reply': fetch_chat_reply(messages, model)})
         except Exception:
             self.send_json({'error': 'AI request failed'}, status=502)
 
