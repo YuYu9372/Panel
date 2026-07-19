@@ -21,6 +21,19 @@ except ImportError:
     psutil = None
 
 
+def load_env(path='.env'):
+    try:
+        for line in Path(path).read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                key, value = line.split('=', 1)
+                os.environ.setdefault(key.strip(), value.strip())
+    except OSError:
+        pass
+
+
+load_env()
+
 GITHUB_USER = os.environ.get('PANEL_GITHUB_USER', 'YuYu9372')
 CONTRIBUTIONS_CACHE_SECONDS = 900
 contributions_cache = {'payload': None, 'expires_at': 0.0}
@@ -129,6 +142,99 @@ def get_github_contributions():
                 stale['stale'] = True
                 return stale
             raise
+
+
+OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
+GREETING_CACHE_SECONDS = 3600
+greeting_cache = {'payload': None, 'expires_at': 0.0, 'period': None}
+greeting_lock = threading.Lock()
+
+WEATHER_TEXT = {
+    0: 'clear', 1: 'mostly clear', 2: 'partly cloudy', 3: 'cloudy',
+    45: 'foggy', 48: 'foggy', 51: 'drizzly', 53: 'drizzly', 55: 'drizzly',
+    61: 'rainy', 63: 'rainy', 65: 'pouring', 80: 'showery', 81: 'showery',
+    82: 'pouring', 95: 'stormy', 96: 'stormy', 99: 'stormy',
+}
+
+
+def current_period(hour):
+    if 5 <= hour < 12:
+        return 'morning'
+    if 12 <= hour < 18:
+        return 'afternoon'
+    if 18 <= hour < 22:
+        return 'evening'
+    return 'night'
+
+
+def fetch_weather_brief():
+    url = ('https://api.open-meteo.com/v1/forecast?latitude=25.03&longitude=121.56'
+           '&current=temperature_2m,weather_code&timezone=auto')
+    try:
+        with urlopen(url, timeout=5) as response:
+            current = json.loads(response.read())['current']
+        text = WEATHER_TEXT.get(current['weather_code'])
+        if text is None:
+            return None
+        return f"{text}, {round(current['temperature_2m'])}C"
+    except Exception:
+        return None
+
+
+def fetch_ai_greeting(period):
+    context = f"It is {datetime.now().strftime('%A, %H:%M')} ({period})."
+    weather = fetch_weather_brief()
+    if weather:
+        context += f' The weather in Taipei is {weather}.'
+
+    prompt = (
+        f'{context} Write one short, warm line (max 8 words) for the greeting bar '
+        f'of a personal dashboard. It appears right after "Good {period.capitalize()} !" '
+        'so do not greet again. Mention the weather or time only if it feels natural. '
+        'Plain text only: no quotes, no emoji.'
+    )
+
+    request = Request(
+        OPENROUTER_URL,
+        data=json.dumps({
+            'model': os.environ.get('PANEL_AI_MODEL', 'anthropic/claude-haiku-4.5'),
+            'messages': [{'role': 'user', 'content': prompt}],
+            'max_tokens': 60,
+        }).encode('utf-8'),
+        headers={
+            'Authorization': f"Bearer {os.environ['OPENROUTER_API_KEY']}",
+            'Content-Type': 'application/json',
+        },
+    )
+    with urlopen(request, timeout=15) as response:
+        data = json.loads(response.read())
+
+    line = data['choices'][0]['message']['content'].strip().strip('"').strip()
+    if not line or len(line) > 100:
+        raise ValueError('Unusable greeting line')
+    return line
+
+
+def get_greeting():
+    now = time.monotonic()
+    period = current_period(datetime.now().hour)
+    with greeting_lock:
+        cached = greeting_cache['payload']
+        if cached and greeting_cache['period'] == period and now < greeting_cache['expires_at']:
+            return cached
+
+        if 'OPENROUTER_API_KEY' not in os.environ:
+            return {'line': None, 'source': 'fallback'}
+
+        try:
+            payload = {'line': fetch_ai_greeting(period), 'source': 'ai'}
+        except Exception:
+            return {'line': None, 'source': 'fallback'}
+
+        greeting_cache['payload'] = payload
+        greeting_cache['expires_at'] = now + GREETING_CACHE_SECONDS
+        greeting_cache['period'] = period
+        return payload
 
 
 def clamp_percent(value):
@@ -360,6 +466,10 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json(collect_device_stats())
             except Exception as error:
                 self.send_json({'error': str(error)}, status=500)
+            return
+
+        if path == '/api/greeting':
+            self.send_json(get_greeting())
             return
 
         if path == '/api/github-contributions':
