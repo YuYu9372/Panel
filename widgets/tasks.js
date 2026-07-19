@@ -22,14 +22,16 @@ const tasksWidget = {
   },
 
   describeDue(due) {
-    if (!due) return { text: '', overdue: false };
-    const date = new Date(due);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return {
-      text: `due ${date.toLocaleDateString([], { month: 'short', day: 'numeric' })}`,
-      overdue: date < today,
-    };
+    if (!due) return { text: '', state: '' };
+    const dueDate = due.slice(0, 10);
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    let state = '';
+    if (dueDate < today) state = 'overdue';
+    else if (dueDate === today) state = 'today';
+    const [y, m, d] = dueDate.split('-').map(Number);
+    const label = new Date(y, m - 1, d).toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return { text: `due ${label}`, state };
   },
 
   render(folders) {
@@ -44,18 +46,17 @@ const tasksWidget = {
     }
 
     body.replaceChildren();
-    folders.forEach((folder) => {
+    const ordered = [...folders].sort((a, b) =>
+      (a.list_title === 'Long Term Task' ? 1 : 0) - (b.list_title === 'Long Term Task' ? 1 : 0));
+
+    ordered.forEach((folder) => {
       const section = document.createElement('div');
       section.className = 'task-folder';
+      if (folder.list_title === 'Long Term Task') section.classList.add('task-folder--wide');
 
       const head = document.createElement('div');
       head.className = 'folder-head';
-      head.innerHTML = `
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">
-          <path d="M3 6.5a2 2 0 0 1 2-2h3.6l2 2H19a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
-        </svg>
-        <span class="folder-name"></span>
-      `;
+      head.innerHTML = '<span class="folder-name"></span>';
       head.querySelector('.folder-name').textContent = folder.list_title;
       section.appendChild(head);
 
@@ -65,11 +66,12 @@ const tasksWidget = {
         const due = this.describeDue(task.due);
         const item = document.createElement('li');
         item.className = 'task-item';
+        if (due.state) item.classList.add(`is-${due.state}`);
         item.innerHTML = `
           <button class="task-check" type="button" aria-label="Complete task"></button>
           <div class="task-main">
             <span class="task-title"></span>
-            <span class="task-due${due.overdue ? ' is-overdue' : ''}"></span>
+            <span class="task-due"></span>
           </div>
         `;
         item.querySelector('.task-title').textContent = task.title;
