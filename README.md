@@ -8,7 +8,7 @@ python3 serve.py
 
 Then open [http://localhost:8642](http://localhost:8642).
 
-The Python server exposes local CPU, GPU, RAM, and temperature data to the device-status widget, and caches the public GitHub contribution calendar. Unsupported sensors are shown as unavailable.
+The Python server exposes local CPU, GPU, RAM, and temperature data to the device-status widget, and proxies the Anthropic API for the greeting line and chat widget. Unsupported sensors are shown as unavailable.
 
 ## About
 
@@ -18,10 +18,11 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current: **0.2.0**
+Current: **0.3.0**
 
-- 2 × 2 fullscreen layout: clock, weather, GitHub contributions, device status
+- 2 × 2 fullscreen layout: clock, weather, AI chat, device status
 - Time-based greeting bar with AI-generated line (local fallback)
+- AI chat widget backed by the Anthropic API
 - Device alert states: green / yellow / red / purple
 
 Full version history in [plan.md](plan.md).

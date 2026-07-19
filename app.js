@@ -1,7 +1,7 @@
 const widgets = [
   greetingWidget,
   clockWidget,
-  githubContributionsWidget,
+  chatWidget,
   weatherWidget,
   deviceStatusWidget,
 ];

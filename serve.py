@@ -10,9 +10,8 @@ import subprocess
 import threading
 import time
 from datetime import datetime, timezone
-from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import quote, urlparse
+from urllib.parse import unquote, urlparse
 from urllib.request import Request, urlopen
 
 try:
@@ -33,116 +32,6 @@ def load_env(path='.env'):
 
 
 load_env()
-
-GITHUB_USER = os.environ.get('PANEL_GITHUB_USER', 'YuYu9372')
-CONTRIBUTIONS_CACHE_SECONDS = 900
-contributions_cache = {'payload': None, 'expires_at': 0.0}
-contributions_lock = threading.Lock()
-
-
-class GitHubContributionsParser(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.days = []
-        self.heading = []
-        self.tooltip = []
-        self.in_heading = False
-        self.in_tooltip = False
-        self.active_day = None
-
-    def handle_starttag(self, tag, attrs):
-        attributes = dict(attrs)
-        classes = attributes.get('class', '').split()
-
-        if tag == 'h2' and attributes.get('id') == 'js-contribution-activity-description':
-            self.in_heading = True
-
-        if tag == 'td' and 'ContributionCalendar-day' in classes:
-            date = attributes.get('data-date')
-            level = attributes.get('data-level')
-            if date and level is not None:
-                self.active_day = {
-                    'date': date,
-                    'level': int(level),
-                    'count': 0,
-                }
-                self.days.append(self.active_day)
-
-        if tag == 'tool-tip' and self.active_day is not None:
-            self.in_tooltip = True
-            self.tooltip = []
-
-    def handle_data(self, data):
-        if self.in_heading:
-            self.heading.append(data)
-        if self.in_tooltip:
-            self.tooltip.append(data)
-
-    def handle_endtag(self, tag):
-        if tag == 'h2' and self.in_heading:
-            self.in_heading = False
-
-        if tag == 'tool-tip' and self.in_tooltip:
-            text = ' '.join(self.tooltip)
-            match = re.search(r'([\d,]+) contributions?', text)
-            if match and self.active_day is not None:
-                self.active_day['count'] = int(match.group(1).replace(',', ''))
-            self.in_tooltip = False
-
-    def result(self):
-        heading = ' '.join(self.heading)
-        total_match = re.search(r'([\d,]+)\s+contributions?', heading)
-        if not total_match or not self.days:
-            raise ValueError('GitHub contribution data was incomplete')
-
-        return {
-            'total': int(total_match.group(1).replace(',', '')),
-            'days': sorted(self.days, key=lambda day: day['date']),
-        }
-
-
-def fetch_github_contributions(username=GITHUB_USER):
-    url = f'https://github.com/users/{quote(username)}/contributions'
-    request = Request(
-        url,
-        headers={
-            'Accept': 'text/html',
-            'User-Agent': 'Panel-Dashboard/0.2.0',
-        },
-    )
-    with urlopen(request, timeout=8) as response:
-        html = response.read().decode('utf-8')
-
-    parser = GitHubContributionsParser()
-    parser.feed(html)
-    payload = parser.result()
-    payload.update({
-        'username': username,
-        'profile_url': f'https://github.com/{quote(username)}',
-        'updated_at': datetime.now(timezone.utc).isoformat(),
-        'stale': False,
-    })
-    return payload
-
-
-def get_github_contributions():
-    now = time.monotonic()
-    with contributions_lock:
-        if contributions_cache['payload'] and now < contributions_cache['expires_at']:
-            return contributions_cache['payload']
-
-        try:
-            payload = fetch_github_contributions()
-            contributions_cache['payload'] = payload
-            contributions_cache['expires_at'] = now + CONTRIBUTIONS_CACHE_SECONDS
-            return payload
-        except Exception:
-            if contributions_cache['payload']:
-                stale = dict(contributions_cache['payload'])
-                stale['stale'] = True
-                return stale
-            raise
-
 
 ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 GREETING_CACHE_SECONDS = 3600
@@ -238,6 +127,87 @@ def get_greeting():
         greeting_cache['expires_at'] = now + ttl
         greeting_cache['period'] = period
         return payload
+
+
+CHAT_MAX_MESSAGES = 20
+CHAT_MAX_CHARS = 4000
+CHAT_DEFAULT_MODEL = 'claude-haiku-4-5'
+CHAT_MODELS = {
+    'claude-haiku-4-5': {'label': 'Claude Haiku 4.5', 'tier': 'normal'},
+    'claude-sonnet-4-6': {'label': 'Claude Sonnet 4.6', 'tier': 'better'},
+    'claude-opus-4-8': {'label': 'Claude Opus 4.8', 'tier': 'best'},
+}
+CHAT_SYSTEM_PROMPT = (
+    'You are the chat assistant of Panel, a personal dashboard on a small screen. '
+    'Answer directly in one or two short sentences; go longer only when clearly '
+    'needed. Never introduce yourself or explain what you are. '
+    'Plain text only: no markdown, no emoji.'
+)
+
+
+def build_chat_messages(payload):
+    messages = payload.get('messages')
+    if not isinstance(messages, list) or not messages:
+        raise ValueError('messages required')
+
+    cleaned = []
+    for message in messages[-CHAT_MAX_MESSAGES:]:
+        role = message.get('role')
+        content = message.get('content')
+        if role not in ('user', 'assistant') or not isinstance(content, str) or not content.strip():
+            raise ValueError('invalid message')
+        cleaned.append({'role': role, 'content': content[:CHAT_MAX_CHARS]})
+
+    while cleaned and cleaned[0]['role'] != 'user':
+        cleaned.pop(0)
+    if not cleaned:
+        raise ValueError('messages required')
+    return cleaned
+
+
+def fetch_chat_reply(messages, model):
+    body = {
+        'model': model,
+        'system': CHAT_SYSTEM_PROMPT,
+        'messages': messages,
+        'max_tokens': 300,
+    }
+    if model != 'claude-haiku-4-5':
+        body['thinking'] = {'type': 'disabled'}
+        body['output_config'] = {'effort': 'low'}
+
+    headers = {
+        'x-api-key': os.environ['ANTHROPIC_API_KEY'],
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+    }
+
+    mcp_url = os.environ.get('COMPOSIO_MCP_URL')
+    if mcp_url:
+        server = {'type': 'url', 'url': mcp_url, 'name': 'composio'}
+        if os.environ.get('COMPOSIO_MCP_TOKEN'):
+            server['authorization_token'] = os.environ['COMPOSIO_MCP_TOKEN']
+        body['mcp_servers'] = [server]
+        body['tools'] = [{'type': 'mcp_toolset', 'mcp_server_name': 'composio'}]
+        body['max_tokens'] = 1000
+        headers['anthropic-beta'] = 'mcp-client-2025-11-20'
+
+    conversation = messages
+    for _ in range(4):
+        body['messages'] = conversation
+        request = Request(ANTHROPIC_URL, data=json.dumps(body).encode('utf-8'), headers=headers)
+        with urlopen(request, timeout=90) as response:
+            data = json.loads(response.read())
+        if data.get('stop_reason') != 'pause_turn':
+            break
+        conversation = conversation + [{'role': 'assistant', 'content': data['content']}]
+
+    reply = '\n'.join(
+        block['text'] for block in data['content'] if block.get('type') == 'text'
+    ).strip()
+    if not reply:
+        raise ValueError('Empty chat reply')
+    return reply
 
 
 def clamp_percent(value):
@@ -448,6 +418,10 @@ def collect_device_stats():
     }
 
 
+LOCAL_HOSTS = {'localhost', '127.0.0.1', '::1'}
+LOOPBACK_CLIENTS = {'127.0.0.1', '::1', '::ffff:127.0.0.1'}
+
+
 class PanelHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
         self.send_header('Cache-Control', 'no-store')
@@ -461,11 +435,30 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def is_local_request(self):
+        if self.client_address[0] not in LOOPBACK_CLIENTS:
+            return False
+        host = self.headers.get('Host', '')
+        if host.startswith('['):
+            hostname = host[1:host.find(']')] if ']' in host else host
+        else:
+            hostname = host.split(':', 1)[0]
+        if hostname not in LOCAL_HOSTS:
+            return False
+        origin = self.headers.get('Origin')
+        if origin is not None and urlparse(origin).hostname not in LOCAL_HOSTS:
+            return False
+        return True
+
     def do_GET(self):
-        path = urlparse(self.path).path
+        path = unquote(urlparse(self.path).path)
 
         if any(part.startswith('.') for part in path.split('/') if part):
             self.send_error(404)
+            return
+
+        if path.startswith('/api/') and not self.is_local_request():
+            self.send_error(403)
             return
 
         if path == '/api/device':
@@ -479,14 +472,51 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(get_greeting())
             return
 
-        if path == '/api/github-contributions':
-            try:
-                self.send_json(get_github_contributions())
-            except Exception as error:
-                self.send_json({'error': str(error)}, status=502)
+        if path == '/api/chat':
+            self.send_json({
+                'models': [{'id': mid, **info} for mid, info in CHAT_MODELS.items()],
+                'default': CHAT_DEFAULT_MODEL,
+            })
             return
 
         super().do_GET()
+
+    def do_POST(self):
+        path = unquote(urlparse(self.path).path)
+
+        if path != '/api/chat':
+            self.send_error(404)
+            return
+
+        if not self.is_local_request():
+            self.send_error(403)
+            return
+
+        if not self.headers.get('Content-Type', '').startswith('application/json'):
+            self.send_json({'error': 'Invalid chat request'}, status=400)
+            return
+
+        if not os.environ.get('ANTHROPIC_API_KEY'):
+            self.send_json({'error': 'AI is not configured'}, status=503)
+            return
+
+        try:
+            length = int(self.headers.get('Content-Length') or 0)
+            if not 0 < length <= 64 * 1024:
+                raise ValueError('bad length')
+            payload = json.loads(self.rfile.read(length))
+            messages = build_chat_messages(payload)
+            model = payload.get('model') or CHAT_DEFAULT_MODEL
+            if model not in CHAT_MODELS:
+                raise ValueError('unknown model')
+        except Exception:
+            self.send_json({'error': 'Invalid chat request'}, status=400)
+            return
+
+        try:
+            self.send_json({'reply': fetch_chat_reply(messages, model)})
+        except Exception:
+            self.send_json({'error': 'AI request failed'}, status=502)
 
 
 def main():
