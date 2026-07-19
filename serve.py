@@ -10,9 +10,8 @@ import subprocess
 import threading
 import time
 from datetime import datetime, timezone
-from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import quote, urlparse
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 try:
@@ -33,116 +32,6 @@ def load_env(path='.env'):
 
 
 load_env()
-
-GITHUB_USER = os.environ.get('PANEL_GITHUB_USER', 'YuYu9372')
-CONTRIBUTIONS_CACHE_SECONDS = 900
-contributions_cache = {'payload': None, 'expires_at': 0.0}
-contributions_lock = threading.Lock()
-
-
-class GitHubContributionsParser(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.days = []
-        self.heading = []
-        self.tooltip = []
-        self.in_heading = False
-        self.in_tooltip = False
-        self.active_day = None
-
-    def handle_starttag(self, tag, attrs):
-        attributes = dict(attrs)
-        classes = attributes.get('class', '').split()
-
-        if tag == 'h2' and attributes.get('id') == 'js-contribution-activity-description':
-            self.in_heading = True
-
-        if tag == 'td' and 'ContributionCalendar-day' in classes:
-            date = attributes.get('data-date')
-            level = attributes.get('data-level')
-            if date and level is not None:
-                self.active_day = {
-                    'date': date,
-                    'level': int(level),
-                    'count': 0,
-                }
-                self.days.append(self.active_day)
-
-        if tag == 'tool-tip' and self.active_day is not None:
-            self.in_tooltip = True
-            self.tooltip = []
-
-    def handle_data(self, data):
-        if self.in_heading:
-            self.heading.append(data)
-        if self.in_tooltip:
-            self.tooltip.append(data)
-
-    def handle_endtag(self, tag):
-        if tag == 'h2' and self.in_heading:
-            self.in_heading = False
-
-        if tag == 'tool-tip' and self.in_tooltip:
-            text = ' '.join(self.tooltip)
-            match = re.search(r'([\d,]+) contributions?', text)
-            if match and self.active_day is not None:
-                self.active_day['count'] = int(match.group(1).replace(',', ''))
-            self.in_tooltip = False
-
-    def result(self):
-        heading = ' '.join(self.heading)
-        total_match = re.search(r'([\d,]+)\s+contributions?', heading)
-        if not total_match or not self.days:
-            raise ValueError('GitHub contribution data was incomplete')
-
-        return {
-            'total': int(total_match.group(1).replace(',', '')),
-            'days': sorted(self.days, key=lambda day: day['date']),
-        }
-
-
-def fetch_github_contributions(username=GITHUB_USER):
-    url = f'https://github.com/users/{quote(username)}/contributions'
-    request = Request(
-        url,
-        headers={
-            'Accept': 'text/html',
-            'User-Agent': 'Panel-Dashboard/0.2.0',
-        },
-    )
-    with urlopen(request, timeout=8) as response:
-        html = response.read().decode('utf-8')
-
-    parser = GitHubContributionsParser()
-    parser.feed(html)
-    payload = parser.result()
-    payload.update({
-        'username': username,
-        'profile_url': f'https://github.com/{quote(username)}',
-        'updated_at': datetime.now(timezone.utc).isoformat(),
-        'stale': False,
-    })
-    return payload
-
-
-def get_github_contributions():
-    now = time.monotonic()
-    with contributions_lock:
-        if contributions_cache['payload'] and now < contributions_cache['expires_at']:
-            return contributions_cache['payload']
-
-        try:
-            payload = fetch_github_contributions()
-            contributions_cache['payload'] = payload
-            contributions_cache['expires_at'] = now + CONTRIBUTIONS_CACHE_SECONDS
-            return payload
-        except Exception:
-            if contributions_cache['payload']:
-                stale = dict(contributions_cache['payload'])
-                stale['stale'] = True
-                return stale
-            raise
-
 
 ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 GREETING_CACHE_SECONDS = 3600
@@ -477,13 +366,6 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == '/api/greeting':
             self.send_json(get_greeting())
-            return
-
-        if path == '/api/github-contributions':
-            try:
-                self.send_json(get_github_contributions())
-            except Exception as error:
-                self.send_json({'error': str(error)}, status=502)
             return
 
         super().do_GET()
