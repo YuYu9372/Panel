@@ -38,17 +38,26 @@ const greetingWidget = {
     this.update();
   },
 
-  update() {
-    const hour = new Date().getHours();
+  async update() {
+    const now = new Date();
+    const hour = now.getHours();
     const period = this.periods.find((item) => (
       item.from < item.to
         ? hour >= item.from && hour < item.to
         : hour >= item.from || hour < item.to
     ));
-    const minute = new Date().getMinutes();
 
     this.el.querySelector('.greeting-title').textContent = period.title;
-    this.el.querySelector('.greeting-line').textContent =
-      period.lines[minute % period.lines.length];
+
+    const lineEl = this.el.querySelector('.greeting-line');
+    lineEl.textContent = period.lines[now.getMinutes() % period.lines.length];
+
+    try {
+      const response = await fetch('/api/greeting');
+      if (response.ok) {
+        const { line } = await response.json();
+        if (line) lineEl.textContent = line;
+      }
+    } catch {}
   },
 };
