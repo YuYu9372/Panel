@@ -9,8 +9,9 @@ import socket
 import subprocess
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import unquote, urlparse
 from urllib.request import Request, urlopen
 
@@ -129,85 +130,205 @@ def get_greeting():
         return payload
 
 
-CHAT_MAX_MESSAGES = 20
-CHAT_MAX_CHARS = 4000
-CHAT_DEFAULT_MODEL = 'claude-haiku-4-5'
-CHAT_MODELS = {
-    'claude-haiku-4-5': {'label': 'Claude Haiku 4.5', 'tier': 'normal'},
-    'claude-sonnet-4-6': {'label': 'Claude Sonnet 4.6', 'tier': 'better'},
-    'claude-opus-4-8': {'label': 'Claude Opus 4.8', 'tier': 'best'},
-}
-CHAT_SYSTEM_PROMPT = (
-    'You are the chat assistant of Panel, a personal dashboard on a small screen. '
-    'Answer directly in one or two short sentences; go longer only when clearly '
-    'needed. Never introduce yourself or explain what you are. '
-    'Plain text only: no markdown, no emoji.'
-)
+CALENDAR_CACHE_SECONDS = 600
+TASKS_CACHE_SECONDS = 300
+CALENDAR_WINDOW_DAYS = 7
+calendar_cache = {'payload': None, 'expires_at': 0.0}
+tasks_cache = {'payload': None, 'expires_at': 0.0}
+mcp_session = {'id': None}
+data_lock = threading.Lock()
 
 
-def build_chat_messages(payload):
-    messages = payload.get('messages')
-    if not isinstance(messages, list) or not messages:
-        raise ValueError('messages required')
-
-    cleaned = []
-    for message in messages[-CHAT_MAX_MESSAGES:]:
-        role = message.get('role')
-        content = message.get('content')
-        if role not in ('user', 'assistant') or not isinstance(content, str) or not content.strip():
-            raise ValueError('invalid message')
-        cleaned.append({'role': role, 'content': content[:CHAT_MAX_CHARS]})
-
-    while cleaned and cleaned[0]['role'] != 'user':
-        cleaned.pop(0)
-    if not cleaned:
-        raise ValueError('messages required')
-    return cleaned
+def mcp_configured():
+    return bool(os.environ.get('COMPOSIO_MCP_URL') and os.environ.get('COMPOSIO_MCP_TOKEN'))
 
 
-def fetch_chat_reply(messages, model):
-    body = {
-        'model': model,
-        'system': CHAT_SYSTEM_PROMPT,
-        'messages': messages,
-        'max_tokens': 300,
-    }
-    if model != 'claude-haiku-4-5':
-        body['thinking'] = {'type': 'disabled'}
-        body['output_config'] = {'effort': 'low'}
+def _mcp_parse(raw, content_type):
+    text = raw.decode('utf-8', 'replace')
+    if not text.strip():
+        return None
+    if 'text/event-stream' in (content_type or ''):
+        message = None
+        for line in text.splitlines():
+            if line.startswith('data:'):
+                chunk = line[5:].strip()
+                if chunk and chunk != '[DONE]':
+                    try:
+                        message = json.loads(chunk)
+                    except json.JSONDecodeError:
+                        pass
+        return message
+    return json.loads(text)
 
+
+def _mcp_rpc(payload, expect_response=True):
     headers = {
-        'x-api-key': os.environ['ANTHROPIC_API_KEY'],
-        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream',
+        'Authorization': f"Bearer {os.environ['COMPOSIO_MCP_TOKEN']}",
+    }
+    if mcp_session['id']:
+        headers['Mcp-Session-Id'] = mcp_session['id']
+    request = Request(os.environ['COMPOSIO_MCP_URL'],
+                      data=json.dumps(payload).encode('utf-8'), headers=headers)
+    with urlopen(request, timeout=60) as response:
+        session_id = response.headers.get('Mcp-Session-Id')
+        if session_id:
+            mcp_session['id'] = session_id
+        if not expect_response:
+            return None
+        return _mcp_parse(response.read(), response.headers.get('Content-Type'))
+
+
+def _mcp_initialize():
+    _mcp_rpc({
+        'jsonrpc': '2.0', 'id': 1, 'method': 'initialize',
+        'params': {
+            'protocolVersion': '2025-06-18',
+            'capabilities': {},
+            'clientInfo': {'name': 'panel', 'version': '0.4'},
+        },
+    })
+    _mcp_rpc({'jsonrpc': '2.0', 'method': 'notifications/initialized'}, expect_response=False)
+
+
+def mcp_execute(tool_slug, arguments):
+    payload = {
+        'jsonrpc': '2.0', 'id': 2, 'method': 'tools/call',
+        'params': {
+            'name': 'COMPOSIO_MULTI_EXECUTE_TOOL',
+            'arguments': {
+                'tools': [{'tool_slug': tool_slug, 'arguments': arguments}],
+                'sync_response_to_workbench': False,
+            },
+        },
     }
 
-    mcp_url = os.environ.get('COMPOSIO_MCP_URL')
-    if mcp_url:
-        server = {'type': 'url', 'url': mcp_url, 'name': 'composio'}
-        if os.environ.get('COMPOSIO_MCP_TOKEN'):
-            server['authorization_token'] = os.environ['COMPOSIO_MCP_TOKEN']
-        body['mcp_servers'] = [server]
-        body['tools'] = [{'type': 'mcp_toolset', 'mcp_server_name': 'composio'}]
-        body['max_tokens'] = 1000
-        headers['anthropic-beta'] = 'mcp-client-2025-11-20'
+    last_error = ValueError('MCP unavailable')
+    for attempt in range(2):
+        try:
+            if not mcp_session['id']:
+                _mcp_initialize()
+            envelope = _mcp_rpc(payload)
+        except HTTPError as error:
+            mcp_session['id'] = None
+            last_error = error
+            continue
 
-    conversation = messages
-    for _ in range(4):
-        body['messages'] = conversation
-        request = Request(ANTHROPIC_URL, data=json.dumps(body).encode('utf-8'), headers=headers)
-        with urlopen(request, timeout=90) as response:
-            data = json.loads(response.read())
-        if data.get('stop_reason') != 'pause_turn':
-            break
-        conversation = conversation + [{'role': 'assistant', 'content': data['content']}]
+        rpc_error = (envelope or {}).get('error')
+        if rpc_error:
+            mcp_session['id'] = None
+            last_error = ValueError(rpc_error.get('message', 'MCP error'))
+            continue
 
-    reply = '\n'.join(
-        block['text'] for block in data['content'] if block.get('type') == 'text'
-    ).strip()
-    if not reply:
-        raise ValueError('Empty chat reply')
-    return reply
+        content = envelope['result']['content']
+        outer = json.loads('\n'.join(b['text'] for b in content if b.get('type') == 'text'))
+        result = outer['data']['results'][0]['response']
+        if not result.get('successful'):
+            raise ValueError('Tool execution failed')
+        return result['data']
+
+    raise last_error
+
+
+def _iso_utc(moment):
+    return moment.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+
+
+def fetch_calendar():
+    now = datetime.now(timezone.utc)
+    data = mcp_execute('GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS', {
+        'time_min': _iso_utc(now),
+        'time_max': _iso_utc(now + timedelta(days=CALENDAR_WINDOW_DAYS)),
+        'single_events': True,
+    })
+    events = [
+        {
+            'title': item.get('title') or '(no title)',
+            'start': item.get('start'),
+            'end': item.get('end'),
+            'all_day': bool(item.get('is_all_day')),
+            'calendar': item.get('calendar'),
+        }
+        for item in (data.get('summary_view') or [])
+    ]
+    events.sort(key=lambda event: event['start'] or '')
+    return events
+
+
+def fetch_tasks():
+    data = mcp_execute('GOOGLETASKS_LIST_ALL_TASKS', {})
+    by_list = {}
+    for task in (data.get('tasks') or []):
+        if task.get('status') == 'completed' or task.get('deleted'):
+            continue
+        by_list.setdefault(task.get('tasklist_id'), []).append({
+            'id': task.get('id'),
+            'title': task.get('title') or '(untitled)',
+            'due': task.get('due'),
+            'list_id': task.get('tasklist_id'),
+        })
+
+    folders = []
+    for task_list in (data.get('tasklists') or []):
+        items = by_list.get(task_list.get('id'), [])
+        if not items:
+            continue
+        items.sort(key=lambda task: task['due'] or '9999')
+        folders.append({
+            'list_id': task_list.get('id'),
+            'list_title': task_list.get('title') or 'Tasks',
+            'tasks': items,
+        })
+    return folders
+
+
+def get_calendar():
+    if not mcp_configured():
+        return {'events': None}
+    now = time.monotonic()
+    with data_lock:
+        cached = calendar_cache['payload']
+        if cached is not None and now < calendar_cache['expires_at']:
+            return cached
+        try:
+            payload = {'events': fetch_calendar()}
+            ttl = CALENDAR_CACHE_SECONDS
+        except Exception:
+            payload = cached if cached is not None else {'events': None}
+            ttl = 120
+        calendar_cache['payload'] = payload
+        calendar_cache['expires_at'] = now + ttl
+        return payload
+
+
+def get_tasks():
+    if not mcp_configured():
+        return {'folders': None}
+    now = time.monotonic()
+    with data_lock:
+        cached = tasks_cache['payload']
+        if cached is not None and now < tasks_cache['expires_at']:
+            return cached
+        try:
+            payload = {'folders': fetch_tasks()}
+            ttl = TASKS_CACHE_SECONDS
+        except Exception:
+            payload = cached if cached is not None else {'folders': None}
+            ttl = 120
+        tasks_cache['payload'] = payload
+        tasks_cache['expires_at'] = now + ttl
+        return payload
+
+
+def complete_task(list_id, task_id):
+    with data_lock:
+        mcp_execute('GOOGLETASKS_PATCH_TASK', {
+            'tasklist_id': list_id,
+            'task_id': task_id,
+            'status': 'completed',
+        })
+        tasks_cache['expires_at'] = 0.0
 
 
 def clamp_percent(value):
@@ -472,11 +593,12 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(get_greeting())
             return
 
-        if path == '/api/chat':
-            self.send_json({
-                'models': [{'id': mid, **info} for mid, info in CHAT_MODELS.items()],
-                'default': CHAT_DEFAULT_MODEL,
-            })
+        if path == '/api/calendar':
+            self.send_json(get_calendar())
+            return
+
+        if path == '/api/tasks':
+            self.send_json(get_tasks())
             return
 
         super().do_GET()
@@ -484,7 +606,7 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         path = unquote(urlparse(self.path).path)
 
-        if path != '/api/chat':
+        if path != '/api/tasks/complete':
             self.send_error(404)
             return
 
@@ -493,30 +615,31 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if not self.headers.get('Content-Type', '').startswith('application/json'):
-            self.send_json({'error': 'Invalid chat request'}, status=400)
+            self.send_json({'error': 'Invalid request'}, status=400)
             return
 
-        if not os.environ.get('ANTHROPIC_API_KEY'):
-            self.send_json({'error': 'AI is not configured'}, status=503)
+        if not mcp_configured():
+            self.send_json({'error': 'Tasks are not configured'}, status=503)
             return
 
         try:
             length = int(self.headers.get('Content-Length') or 0)
-            if not 0 < length <= 64 * 1024:
+            if not 0 < length <= 8 * 1024:
                 raise ValueError('bad length')
             payload = json.loads(self.rfile.read(length))
-            messages = build_chat_messages(payload)
-            model = payload.get('model') or CHAT_DEFAULT_MODEL
-            if model not in CHAT_MODELS:
-                raise ValueError('unknown model')
+            list_id = payload['list_id']
+            task_id = payload['task_id']
+            if not isinstance(list_id, str) or not isinstance(task_id, str):
+                raise ValueError('bad ids')
         except Exception:
-            self.send_json({'error': 'Invalid chat request'}, status=400)
+            self.send_json({'error': 'Invalid request'}, status=400)
             return
 
         try:
-            self.send_json({'reply': fetch_chat_reply(messages, model)})
+            complete_task(list_id, task_id)
+            self.send_json({'ok': True})
         except Exception:
-            self.send_json({'error': 'AI request failed'}, status=502)
+            self.send_json({'error': 'Task update failed'}, status=502)
 
 
 def main():
