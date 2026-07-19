@@ -35,7 +35,7 @@ body {
   grid-template-rows: repeat(2, minmax(0, 1fr));
   grid-template-areas:
     'clock weather'
-    'github device';
+    'chat device';
   gap: clamp(12px, 2vmin, 22px);
 }
 
@@ -354,6 +354,117 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- chat: bottom left ---------- */
+
+#chat {
+  grid-area: chat;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(18px, 2.8vmin, 30px);
+  color: #2f3545;
+  background:
+    radial-gradient(34rem 24rem at 110% 120%, rgba(143, 152, 207, 0.28), transparent 62%),
+    linear-gradient(150deg, #f7f3ff 0%, #e8e7f8 100%);
+}
+
+.chat-log {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1vmin, 10px);
+  margin: clamp(10px, 1.6vmin, 16px) 0;
+  padding: clamp(9px, 1.35vmin, 13px);
+  overflow-y: auto;
+  border: 1px solid rgba(82, 83, 119, 0.08);
+  border-radius: clamp(12px, 1.8vmin, 17px);
+  background: rgba(255, 255, 255, 0.53);
+}
+
+.chat-hint {
+  margin: auto;
+  color: #6f7486;
+  font-size: clamp(0.8rem, 1.6vmin, 0.95rem);
+  font-weight: 650;
+}
+
+.chat-bubble {
+  max-width: 84%;
+  padding: 0.5em 0.85em;
+  border-radius: clamp(11px, 1.7vmin, 15px);
+  font-size: clamp(0.8rem, 1.6vmin, 0.95rem);
+  font-weight: 550;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chat-bubble--user {
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  background: #5d68b8;
+  color: #fdfcff;
+}
+
+.chat-bubble--assistant {
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  background: #ebe9f6;
+  color: #33384a;
+}
+
+.chat-bubble--error {
+  color: #a4423a;
+}
+
+.chat-form {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1vmin, 10px);
+}
+
+.chat-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.62em 1.05em;
+  border: 1px solid rgba(82, 83, 119, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  font: inherit;
+  font-size: clamp(0.8rem, 1.6vmin, 0.95rem);
+  font-weight: 550;
+  color: inherit;
+}
+
+.chat-input::placeholder {
+  color: #9a9eae;
+}
+
+.chat-input:focus {
+  outline: 2px solid rgba(93, 104, 184, 0.45);
+  outline-offset: -1px;
+  background: #fff;
+}
+
+.chat-send {
+  flex: 0 0 auto;
+  width: clamp(30px, 4.4vmin, 40px);
+  height: clamp(30px, 4.4vmin, 40px);
+  border: none;
+  border-radius: 50%;
+  background: #5d68b8;
+  color: #fdfcff;
+  font-size: clamp(0.9rem, 1.8vmin, 1.15rem);
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.chat-send:hover {
+  transform: translateY(-1px);
+  opacity: 0.88;
+}
+
 /* ---------- device: bottom right ---------- */
 
 #device-status {
@@ -507,7 +618,7 @@ body {
     grid-template-areas:
       'clock'
       'weather'
-      'github'
+      'chat'
       'device';
   }
 
