@@ -31,7 +31,7 @@ Panel/
     ├── greeting.js
     ├── clock.js
     ├── weather.js
-    ├── github-contributions.js
+    ├── chat.js
     └── device-status.js
 ```
 
@@ -45,7 +45,7 @@ Panel/
 - [x] Greeting bar
 - [x] Add git
 
-### 0.2.0 <- Currently
+### 0.2.0
 - [x] Time-based greeting bar
 - [x] 2 × 2 fullscreen layout
 - [x] Clock (top left)
@@ -54,10 +54,16 @@ Panel/
 - [x] Device status: CPU, GPU, RAM, temperature (bottom right)
 - [x] Green / yellow / red / purple device alert states
 
+### 0.3.0 <- Currently
+- [x] AI greeting line via Anthropic API (local fallback)
+- [x] Remove GitHub contributions widget
+- [x] AI chat widget (bottom left), same API key
+
 ---
 
 ## Notes
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
+- AI: Anthropic API (`claude-haiku-4-5`), key in `.env` as `ANTHROPIC_API_KEY`. Greeting and chat degrade gracefully without it.
 - Layout: time-based greeting bar above a fixed 2 × 2 grid.
 - Device thresholds: warning at 70% load or 75°C; danger at 90% load or 90°C; critical at 98% load or 100°C.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG weather icons.
