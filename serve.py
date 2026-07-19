@@ -132,9 +132,10 @@ def get_greeting():
 CHAT_MAX_MESSAGES = 20
 CHAT_MAX_CHARS = 4000
 CHAT_SYSTEM_PROMPT = (
-    'You are the assistant inside Panel, a personal dashboard shown on a small '
-    'always-on screen. Be helpful and concise: a few short sentences unless more '
-    'is clearly needed. Plain text only: no markdown, no emoji.'
+    'You are the chat assistant of Panel, a personal dashboard on a small screen. '
+    'Answer directly in one or two short sentences; go longer only when clearly '
+    'needed. Never introduce yourself or explain what you are. '
+    'Plain text only: no markdown, no emoji.'
 )
 
 
@@ -165,7 +166,7 @@ def fetch_chat_reply(messages):
             'model': os.environ.get('PANEL_AI_MODEL', 'claude-haiku-4-5'),
             'system': CHAT_SYSTEM_PROMPT,
             'messages': messages,
-            'max_tokens': 600,
+            'max_tokens': 300,
         }).encode('utf-8'),
         headers={
             'x-api-key': os.environ['ANTHROPIC_API_KEY'],
