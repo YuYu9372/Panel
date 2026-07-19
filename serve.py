@@ -11,7 +11,7 @@ import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 from urllib.request import Request, urlopen
 
 try:
@@ -432,7 +432,7 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        path = urlparse(self.path).path
+        path = unquote(urlparse(self.path).path)
 
         if any(part.startswith('.') for part in path.split('/') if part):
             self.send_error(404)
