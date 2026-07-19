@@ -418,6 +418,10 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(get_greeting())
             return
 
+        if path == '/api/chat':
+            self.send_json({'model': os.environ.get('PANEL_AI_MODEL', 'claude-haiku-4-5')})
+            return
+
         super().do_GET()
 
     def do_POST(self):

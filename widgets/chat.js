@@ -8,8 +8,7 @@ const chatWidget = {
     this.el.innerHTML = `
       <div class="widget-heading">
         <div>
-          <div class="widget-kicker">AI</div>
-          <h2>Chat</h2>
+          <h2 class="chat-title">Claude</h2>
         </div>
       </div>
       <div class="chat-log">
@@ -24,6 +23,19 @@ const chatWidget = {
       event.preventDefault();
       this.send();
     });
+    this.loadTitle();
+  },
+
+  async loadTitle() {
+    try {
+      const response = await fetch('/api/chat');
+      const { model } = await response.json();
+      const parts = model.replace(/^claude-/, '').split('-');
+      const words = parts.filter((p) => isNaN(p)).map((p) => p[0].toUpperCase() + p.slice(1));
+      const version = parts.filter((p) => !isNaN(p)).join('.');
+      this.el.querySelector('.chat-title').textContent =
+        ['Claude', ...words, version].filter(Boolean).join(' ');
+    } catch {}
   },
 
   append(role, text) {
