@@ -8,7 +8,8 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac dmg"
+    "dist": "electron-builder --mac dmg",
+    "dist:public": "electron-builder --mac dmg --config electron-builder.public.json"
   },
   "devDependencies": {
     "electron": "^33.2.0",
