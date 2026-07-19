@@ -10,7 +10,7 @@
 ### Stack
 - `HTML` + `CSS` + `JS`, no framework.
 - JS calls APIs directly (front-end only). Add a Node backend only if an API blocks front-end access.
-- Electron (make `.app`) later if needed. Core stays web, so nothing is wasted.
+- Electron wrapper (`electron/main.js`) packages the web app into a full-screen macOS `.dmg`; it spawns `serve.py` and points a kiosk window at it. Core stays web, so nothing is wasted.
 
 ### Rules
 > Adding a new widget should be easy.
@@ -27,6 +27,9 @@ Panel/
 ├── style.css
 ├── serve.py            # Static server + local device API
 ├── app.js              
+├── package.json        # Electron app + electron-builder (.dmg)
+├── electron/
+│   └── main.js         # Spawns serve.py, opens a kiosk window
 └── widgets/
     ├── theme.js
     ├── greeting.js
@@ -72,9 +75,13 @@ Panel/
 ### 0.4.1
 - [x] UV index in weather + color-tier background (blue / green / yellow / red by UV band). Was stranded on the unmerged 0.3.1 branch; re-applied on top of the 0.4.0 layout.
 
-### 0.4.2 <- Currently
+### 0.4.2
 - [x] Time-based dark mode: dark 18:00–05:00, light otherwise. Auto-switches while running; each card keeps its hue.
 - [x] Night owl 🦉 in the "Good Night" greeting during 00:00–04:00.
+
+### 1.0.0-beta <- Currently
+- [x] Package as a full-screen macOS `.dmg`: an Electron wrapper (`electron/main.js`) spawns `serve.py`, waits for the port, and opens a kiosk window. Uses system `python3`; prompts to install if missing. Build with `npm run dist`.
+- [x] Clock ticks aligned to the wall clock: it self-schedules to each whole second (`1000 - Date.now() % 1000`) instead of a free-running `setInterval`, removing the 1–2 s lag and drift.
 
 ---
 
