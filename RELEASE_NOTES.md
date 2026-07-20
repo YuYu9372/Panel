@@ -40,6 +40,25 @@ the app → Open**, then confirm. Only needed once.
 
 ---
 
+## 0.5.0
+
+Network awareness and freshness.
+
+### Added
+- **Connectivity indicator.** A small wifi icon in the top bar — green when
+  online and fast (< 30 ms), yellow when online but slower, red with a slash
+  when offline.
+- **Offline screen.** If the connection drops, a full-screen "No network
+  connection" overlay appears and clears itself the moment you're back online.
+- **Last-updated time.** Weather, Calendar, and Tasks now show when they last
+  refreshed ("Updated 3 min ago"), so stale data is obvious at a glance.
+
+### Fixed
+- The local server failed to start because of a stray indentation error in the
+  greeting code — Calendar, Tasks, and the AI greeting work again.
+
+---
+
 ## 1.0.0-beta
 
 The first packaged release — Panel now ships as a standalone macOS app.

@@ -31,13 +31,15 @@ Panel/
 ├── electron/
 │   └── main.js         # Spawns serve.py, opens a kiosk window
 └── widgets/
+    ├── util.js            # Shared helpers (relative time)
     ├── theme.js
     ├── greeting.js
     ├── clock.js
     ├── weather.js
     ├── calendar.js
     ├── tasks.js
-    └── device-status.js
+    ├── device-status.js
+    └── connectivity.js    # Wifi/latency indicator + offline screen
 ```
 
 ---
@@ -79,9 +81,17 @@ Panel/
 - [x] Time-based dark mode: dark 18:00–05:00, light otherwise. Auto-switches while running; each card keeps its hue.
 - [x] Night owl 🦉 in the "Good Night" greeting during 00:00–04:00.
 
-### 1.0.0-beta <- Currently
+### 1.0.0-beta
 - [x] Package as a full-screen macOS `.dmg`: an Electron wrapper (`electron/main.js`) spawns `serve.py`, waits for the port, and opens a kiosk window. Uses system `python3`; prompts to install if missing. Build with `npm run dist`.
 - [x] Clock ticks aligned to the wall clock: it self-schedules to each whole second (`1000 - Date.now() % 1000`) instead of a free-running `setInterval`, removing the 1–2 s lag and drift.
+
+### 0.5.0 <- Currently
+- [x] Connectivity probe: `serve.py` `/api/net` TCP-pings 1.1.1.1 / 8.8.8.8 by IP, returns online + round-trip latency (cached ~2.5 s).
+- [x] Wifi indicator (top bar, right): green < 30 ms, yellow ≥ 30 ms, red + slashed icon when offline.
+- [x] Offline screen: full-screen overlay shown after the probe fails twice in a row; auto-hides on reconnect.
+- [x] Last-updated time on weather, calendar and tasks ("Updated 3 min ago"), refreshed every 30 s.
+- [x] Fix: `serve.py` `IndentationError` in the greeting prompt that stopped the server from starting.
+- [x] `serve.py` honors `PORT` (fallback after `PANEL_PORT`) so it can run on an assigned port.
 
 ---
 
@@ -89,7 +99,8 @@ Panel/
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
 - Greeting line: Anthropic API (`claude-haiku-4-5`), key in `.env` as `ANTHROPIC_API_KEY`; falls back to a local phrase without it. Only remaining AI/token use.
 - Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) via `COMPOSIO_MCP_URL` / `COMPOSIO_MCP_TOKEN` in `.env`. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Cached 10 min / 5 min.
-- Layout: top bar (greeting + system status) above a fixed 2 × 2 grid (clock, weather, calendar, tasks).
+- Layout: top bar (greeting + system status + wifi indicator) above a fixed 2 × 2 grid (clock, weather, calendar, tasks).
+- Connectivity: `/api/net` measures internet reachability via a raw TCP connect (no DNS, no LLM). Widget polls every 5 s; latency ≈ ping. Offline overlay is debounced (2 fails) so brief blips don't flash it.
 - Device thresholds: warning at 70% load or 75°C; danger at 90% load or 90°C; critical at 98% load or 100°C.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
 - Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. An inline `<head>` script sets it before first paint to avoid a flash.
