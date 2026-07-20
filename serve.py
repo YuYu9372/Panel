@@ -77,10 +77,10 @@ def fetch_ai_greeting(period):
     if weather:
         context += f' The weather in Taipei is {weather}.'
 
-prompt = (
-    f'{context} One short warm line (max 8 words) for a dashboard greeting bar, '
-    f'after "Good {period.capitalize()}!". No repeat greeting, no quotes, no emoji.'
-)
+    prompt = (
+        f'{context} One short warm line (max 8 words) for a dashboard greeting bar, '
+        f'after "Good {period.capitalize()}!". No repeat greeting, no quotes, no emoji.'
+    )
 
     request = Request(
         ANTHROPIC_URL,
