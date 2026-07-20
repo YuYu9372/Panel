@@ -49,8 +49,9 @@ Network awareness and freshness.
   online and fast (< 30 ms), yellow when online but slower, red with a slash
   when offline.
 - **Offline screen.** If the connection drops, the dashboard is replaced by a
-  large clock with "Offline" in red at the bottom, and clears itself the moment
-  you're back online.
+  large clock with "Offline" in red at the bottom — still showing the local
+  system stats (CPU/GPU/RAM/temp) and the version — and clears itself the
+  moment you're back online.
 - **Last-updated time.** Weather, Calendar, and Tasks now show when they last
   refreshed ("Updated 3 min ago"), so stale data is obvious at a glance.
 - **Version tag.** The current build shows in the bottom-left corner.
