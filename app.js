@@ -6,6 +6,7 @@ const widgets = [
   calendarWidget,
   tasksWidget,
   deviceStatusWidget,
+  connectivityWidget,
 ];
 
 widgets.forEach((w) => {

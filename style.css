@@ -459,6 +459,93 @@ body {
 .system-status.device-status--critical { --status-accent: #7839b6; }
 .system-status.device-status--unknown { --status-accent: #6f7777; }
 
+/* ---------- connectivity indicator ---------- */
+
+.connectivity {
+  --net-color: #6f7777;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding-right: clamp(2px, 0.6vw, 8px);
+  color: var(--net-color);
+}
+
+.net-icon {
+  width: clamp(18px, 2.4vmin, 24px);
+  height: clamp(18px, 2.4vmin, 24px);
+  transition: color 400ms ease;
+}
+
+.net-slash {
+  display: none;
+}
+
+.net-latency {
+  font-size: clamp(0.62rem, 1.2vmin, 0.74rem);
+  font-weight: 700;
+  color: var(--net-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.net-latency:empty {
+  display: none;
+}
+
+.connectivity.net--good { --net-color: #2f8b58; }
+.connectivity.net--slow { --net-color: #b47711; }
+.connectivity.net--down { --net-color: #b93d35; }
+.connectivity.net--unknown { --net-color: #6f7777; }
+
+.connectivity.net--down .net-slash { display: block; }
+
+.connectivity.net--down .net-icon path,
+.connectivity.net--down .net-icon circle { opacity: 0.4; }
+
+/* ---------- offline screen ---------- */
+
+.offline-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(243, 238, 228, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.offline-screen[hidden] {
+  display: none;
+}
+
+.offline-card {
+  display: grid;
+  justify-items: center;
+  gap: clamp(10px, 2vmin, 18px);
+  text-align: center;
+}
+
+.offline-glyph {
+  width: clamp(64px, 12vmin, 108px);
+  height: clamp(64px, 12vmin, 108px);
+  color: #c0554a;
+}
+
+.offline-title {
+  font-size: clamp(1.4rem, 3.4vmin, 2.1rem);
+  font-weight: 720;
+  letter-spacing: -0.02em;
+  color: #3d3a33;
+}
+
+.offline-sub {
+  font-size: clamp(0.9rem, 1.9vmin, 1.15rem);
+  font-weight: 550;
+  color: #8c8578;
+}
+
 /* ---------- calendar: bottom left ---------- */
 
 #calendar {
@@ -769,6 +856,12 @@ body {
 
 :root[data-theme='dark'] .greeting-line { color: #9a968c; }
 :root[data-theme='dark'] .system-status { color: #b7b4ab; }
+:root[data-theme='dark'] .connectivity.net--unknown { --net-color: #8b8a82; }
+
+:root[data-theme='dark'] .offline-screen { background: rgba(20, 21, 26, 0.88); }
+:root[data-theme='dark'] .offline-glyph { color: #e08477; }
+:root[data-theme='dark'] .offline-title { color: #f0ebdf; }
+:root[data-theme='dark'] .offline-sub { color: #9a968c; }
 
 :root[data-theme='dark'] #clock {
   background: linear-gradient(150deg, #362a17 0%, #29200f 58%, #221a0d 100%);
