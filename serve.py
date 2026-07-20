@@ -78,8 +78,10 @@ def fetch_ai_greeting(period):
         context += f' The weather in Taipei is {weather}.'
 
     prompt = (
-        f'{context} One short warm line (max 8 words) for a dashboard greeting bar, '
-        f'after "Good {period.capitalize()}!". No repeat greeting, no quotes, no emoji.'
+      f'{context} Write one short, warm line (max 8 words) for the greeting bar '
+      f'of a personal dashboard. It appears right after "Good {period.capitalize()} !" '
+      'so do not greet again. Mention the weather or time only if it feels natural. '
+      'Plain text only: no quotes, no emoji.'
     )
 
     request = Request(
@@ -99,6 +101,10 @@ def fetch_ai_greeting(period):
         data = json.loads(response.read())
 
     line = data['content'][0]['text'].strip().strip('"').strip()
+    line = re.sub(r'^\s*good\s+(morning|afternoon|evening|night|day)\b[\s!,.…—-]*',
+                  '', line, flags=re.I).strip()
+    if line:
+        line = line[0].upper() + line[1:]
     if not line or len(line) > 100:
         raise ValueError('Unusable greeting line')
     return line
