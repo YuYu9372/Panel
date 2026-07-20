@@ -92,6 +92,7 @@ Panel/
 - [x] Last-updated time on weather, calendar and tasks ("Updated 3 min ago"), refreshed every 30 s.
 - [x] Strip a leading "Good <period>" from the AI greeting line so it never doubles the greeting bar's title.
 - [x] Version tag in the bottom-left corner ("0.5.0 Beta-A").
+- [x] Device chips hold their last-known reading on a failed poll instead of blanking to "—" (only blank on a cold start).
 - [x] Fix: `serve.py` `IndentationError` in the greeting prompt that stopped the server from starting.
 - [x] `serve.py` honors `PORT` (fallback after `PANEL_PORT`) so it can run on an assigned port.
 

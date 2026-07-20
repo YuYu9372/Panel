@@ -1,6 +1,7 @@
 const deviceStatusWidget = {
   el: null,
   interval: 2000,
+  hasData: false,
   metricKeys: ['cpu', 'gpu', 'memory', 'temperature'],
 
   init() {
@@ -60,13 +61,17 @@ const deviceStatusWidget = {
       const response = await fetch('/api/device', { cache: 'no-store' });
       if (!response.ok) throw new Error(`Device API returned ${response.status}`);
       this.render(await response.json());
+      this.hasData = true;
     } catch {
-      this.setStatus('unknown');
-      this.metricKeys.forEach((key) => {
-        const chip = this.el.querySelector(`[data-metric="${key}"]`);
-        chip.classList.add('is-unavailable');
-        chip.querySelector('.sys-value').textContent = '—';
-      });
+      // Keep the last good reading once we have one; only blank on a cold start.
+      if (!this.hasData) {
+        this.setStatus('unknown');
+        this.metricKeys.forEach((key) => {
+          const chip = this.el.querySelector(`[data-metric="${key}"]`);
+          chip.classList.add('is-unavailable');
+          chip.querySelector('.sys-value').textContent = '—';
+        });
+      }
     }
     this.syncMirror();
   },
