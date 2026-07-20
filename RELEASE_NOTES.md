@@ -1,5 +1,45 @@
 # Release Notes
 
+## 1.0.0-Public-beta
+
+The first build made for sharing. Same app as `1.0.0-beta`, packaged with **no
+credentials inside** — you bring your own.
+
+**Download:** `panel-1.0.0-Public-beta.dmg` (macOS, Apple Silicon)
+
+### Works out of the box
+No setup, no account, no keys:
+- Analog + digital clock with date
+- Weather for Taipei with UV index and a color-tiered background (Open-Meteo,
+  no key required)
+- System status: CPU, GPU, RAM, temperature
+- Automatic dark mode (18:00–05:00)
+- Time-based greeting bar
+
+### Optional — add your own keys
+Calendar and Tasks show *unavailable* until you configure them. Edit the `.env`
+inside the app (`Panel.app/Contents/Resources/panel/.env`):
+
+| Key | Enables |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | AI-written greeting line (falls back to local phrases without it) |
+| `COMPOSIO_MCP_URL` + `COMPOSIO_MCP_TOKEN` | Google Calendar and Google Tasks widgets |
+
+### Requirements
+- macOS on Apple Silicon (arm64)
+- Python 3 — the app tells you how to install it if it's missing
+
+### First launch
+The app isn't notarized, so macOS will block it the first time. **Right-click
+the app → Open**, then confirm. Only needed once.
+
+### Notes
+- The local server binds to `127.0.0.1` only and its API refuses non-local
+  requests — nothing is exposed to your network.
+- Calendar and Tasks are fetched directly over MCP, with no LLM involved.
+
+---
+
 ## 1.0.0-beta
 
 The first packaged release — Panel now ships as a standalone macOS app.
