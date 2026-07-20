@@ -1,6 +1,7 @@
 const connectivityWidget = {
   el: null,
   overlay: null,
+  clockEl: null,
   interval: 5000,
   failStreak: 0,
   offlineAfter: 2,
@@ -8,6 +9,8 @@ const connectivityWidget = {
   init() {
     this.el = document.getElementById('connectivity');
     this.overlay = document.getElementById('offline-screen');
+    this.clockEl = document.getElementById('offline-clock');
+    this.tickClock();
     this.el.innerHTML = `
       <svg class="net-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"
            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -36,6 +39,16 @@ const connectivityWidget = {
 
   showOffline(show) {
     if (this.overlay) this.overlay.hidden = !show;
+  },
+
+  tickClock() {
+    if (this.clockEl) {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      this.clockEl.textContent =
+        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    }
+    setTimeout(() => this.tickClock(), 1000 - (Date.now() % 1000));
   },
 
   async update() {

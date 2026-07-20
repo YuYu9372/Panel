@@ -11,7 +11,7 @@
       document.documentElement.dataset.theme = (h >= 18 || h < 5) ? 'dark' : 'light';
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=17" />
+  <link rel="stylesheet" href="style.css?v=18" />
 </head>
 <body>
   <header class="topbar" aria-label="Status bar">
@@ -27,19 +27,11 @@
   </main>
 
   <div id="offline-screen" class="offline-screen" hidden>
-    <div class="offline-card">
-      <svg class="offline-glyph" viewBox="0 0 24 24" aria-hidden="true" fill="none"
-           stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M2.5 8.5a15 15 0 0 1 19 0" />
-        <path d="M5.5 12a10.5 10.5 0 0 1 13 0" />
-        <path d="M8.5 15.5a6 6 0 0 1 7 0" />
-        <circle cx="12" cy="19" r="1.1" fill="currentColor" stroke="none" />
-        <line x1="3.5" y1="20.5" x2="20.5" y2="3.5" />
-      </svg>
-      <div class="offline-title">No network connection</div>
-      <div class="offline-sub">Panel will reconnect automatically.</div>
-    </div>
+    <div class="offline-clock" id="offline-clock">--:--:--</div>
+    <div class="offline-tag">Offline</div>
   </div>
+
+  <div class="version-tag">0.5.0 Beta-A</div>
 
   <script src="widgets/util.js?v=1"></script>
   <script src="widgets/theme.js?v=1"></script>
@@ -49,7 +41,7 @@
   <script src="widgets/calendar.js?v=4"></script>
   <script src="widgets/tasks.js?v=3"></script>
   <script src="widgets/device-status.js?v=4"></script>
-  <script src="widgets/connectivity.js?v=1"></script>
+  <script src="widgets/connectivity.js?v=2"></script>
   <script src="app.js?v=10"></script>
 </body>
 </html>
