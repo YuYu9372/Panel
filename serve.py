@@ -537,6 +537,34 @@ def collect_device_stats():
     }
 
 
+NET_PROBE_HOSTS = (('1.1.1.1', 443), ('8.8.8.8', 443))
+NET_CACHE_SECONDS = 2.5
+net_cache = {'payload': None, 'expires_at': 0.0}
+net_lock = threading.Lock()
+
+
+def probe_network():
+    for host, port in NET_PROBE_HOSTS:
+        start = time.monotonic()
+        try:
+            socket.create_connection((host, port), timeout=2).close()
+            return {'online': True, 'latency_ms': round((time.monotonic() - start) * 1000, 1)}
+        except OSError:
+            continue
+    return {'online': False, 'latency_ms': None}
+
+
+def get_network():
+    now = time.monotonic()
+    with net_lock:
+        if net_cache['payload'] is not None and now < net_cache['expires_at']:
+            return net_cache['payload']
+        payload = probe_network()
+        net_cache['payload'] = payload
+        net_cache['expires_at'] = now + NET_CACHE_SECONDS
+        return payload
+
+
 LOCAL_HOSTS = {'localhost', '127.0.0.1', '::1'}
 LOOPBACK_CLIENTS = {'127.0.0.1', '::1', '::ffff:127.0.0.1'}
 
@@ -597,6 +625,10 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == '/api/tasks':
             self.send_json(get_tasks())
+            return
+
+        if path == '/api/net':
+            self.send_json(get_network())
             return
 
         super().do_GET()
