@@ -130,6 +130,18 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.widget-updated:empty {
+  display: none;
+}
+
+#weather .widget-updated {
+  grid-column: 2;
+  grid-row: 5;
+  margin-top: clamp(6px, 1vmin, 10px);
+  color: var(--wx-label);
+  opacity: 1;
+}
+
 /* ---------- clock: top left ---------- */
 
 #clock {
