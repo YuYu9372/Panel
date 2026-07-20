@@ -674,7 +674,7 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     host = os.environ.get('PANEL_HOST', '127.0.0.1')
-    port = int(os.environ.get('PANEL_PORT', '8642'))
+    port = int(os.environ.get('PANEL_PORT') or os.environ.get('PORT') or '8642')
     print(f'Panel running at http://localhost:{port}')
     http.server.ThreadingHTTPServer((host, port), PanelHandler).serve_forever()
 
