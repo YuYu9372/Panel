@@ -5,6 +5,7 @@ const deviceStatusWidget = {
 
   init() {
     this.el = document.getElementById('system-status');
+    this.mirrorEl = document.getElementById('offline-status');
     this.el.innerHTML = `
       <span class="status-dot"></span>
       <div class="sys-chips">
@@ -47,6 +48,13 @@ const deviceStatusWidget = {
     this.metricKeys.forEach((key) => this.renderMetric(key, data.metrics[key]));
   },
 
+  syncMirror() {
+    if (this.mirrorEl && this.el) {
+      this.mirrorEl.className = this.el.className;
+      this.mirrorEl.innerHTML = this.el.innerHTML;
+    }
+  },
+
   async update() {
     try {
       const response = await fetch('/api/device', { cache: 'no-store' });
@@ -60,5 +68,6 @@ const deviceStatusWidget = {
         chip.querySelector('.sys-value').textContent = '—';
       });
     }
+    this.syncMirror();
   },
 };
