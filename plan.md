@@ -88,8 +88,10 @@ Panel/
 ### 0.5.0 <- Currently
 - [x] Connectivity probe: `serve.py` `/api/net` TCP-pings 1.1.1.1 / 8.8.8.8 by IP, returns online + round-trip latency (cached ~2.5 s).
 - [x] Wifi indicator (top bar, right): green < 30 ms, yellow ≥ 30 ms, red + slashed icon when offline.
-- [x] Offline screen: full-screen overlay shown after the probe fails twice in a row; auto-hides on reconnect.
+- [x] Offline screen: after the probe fails twice, the dashboard is replaced by a big live clock with "Offline" in red at the bottom; auto-hides on reconnect. (Device chips are local and keep working — they were only hidden behind the old overlay.)
 - [x] Last-updated time on weather, calendar and tasks ("Updated 3 min ago"), refreshed every 30 s.
+- [x] Strip a leading "Good <period>" from the AI greeting line so it never doubles the greeting bar's title.
+- [x] Version tag in the bottom-left corner ("0.5.0 Beta-A").
 - [x] Fix: `serve.py` `IndentationError` in the greeting prompt that stopped the server from starting.
 - [x] `serve.py` honors `PORT` (fallback after `PANEL_PORT`) so it can run on an assigned port.
 

@@ -48,14 +48,18 @@ Network awareness and freshness.
 - **Connectivity indicator.** A small wifi icon in the top bar — green when
   online and fast (< 30 ms), yellow when online but slower, red with a slash
   when offline.
-- **Offline screen.** If the connection drops, a full-screen "No network
-  connection" overlay appears and clears itself the moment you're back online.
+- **Offline screen.** If the connection drops, the dashboard is replaced by a
+  large clock with "Offline" in red at the bottom, and clears itself the moment
+  you're back online.
 - **Last-updated time.** Weather, Calendar, and Tasks now show when they last
   refreshed ("Updated 3 min ago"), so stale data is obvious at a glance.
+- **Version tag.** The current build shows in the bottom-left corner.
 
 ### Fixed
 - The local server failed to start because of a stray indentation error in the
   greeting code — Calendar, Tasks, and the AI greeting work again.
+- The AI greeting no longer repeats "Good Morning!" after the greeting bar's
+  own title.
 
 ---
 
