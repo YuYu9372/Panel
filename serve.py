@@ -8,6 +8,7 @@ import re
 import shutil
 import socket
 import subprocess
+import sys
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -34,6 +35,12 @@ def load_env(path='.env'):
 
 
 load_env()
+
+
+def log_error(context, error):
+    stamp = datetime.now().isoformat(timespec='seconds')
+    print(f'[{stamp}] {context}: {error}', file=sys.stderr)
+
 
 ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 GREETING_CACHE_SECONDS = 3600
@@ -125,7 +132,8 @@ def get_greeting():
         try:
             payload = {'line': fetch_ai_greeting(period), 'source': 'ai'}
             ttl = GREETING_CACHE_SECONDS
-        except Exception:
+        except Exception as error:
+            log_error('greeting fetch failed', error)
             payload = {'line': None, 'source': 'fallback'}
             ttl = 120
 
@@ -138,8 +146,10 @@ def get_greeting():
 CALENDAR_CACHE_SECONDS = 600
 TASKS_CACHE_SECONDS = 300
 CALENDAR_WINDOW_DAYS = 7
-calendar_cache = {'payload': None, 'expires_at': 0.0}
-tasks_cache = {'payload': None, 'expires_at': 0.0}
+calendar_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
+tasks_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
+NEGATIVE_TTL_BASE = 120
+NEGATIVE_TTL_MAX = 1800
 mcp_session = {'id': None}
 data_lock = threading.Lock()
 
@@ -230,7 +240,10 @@ def mcp_execute(tool_slug, arguments):
         outer = json.loads('\n'.join(b['text'] for b in content if b.get('type') == 'text'))
         result = outer['data']['results'][0]['response']
         if not result.get('successful'):
-            raise ValueError('Tool execution failed')
+            reason = (result.get('data') or {}).get('http_error') or result.get('error') or 'unknown error'
+            if isinstance(reason, str) and len(reason) > 200:
+                reason = reason[:200] + '…'
+            raise ValueError(f'{tool_slug} failed: {reason}')
         return result['data']
 
     raise last_error
@@ -299,9 +312,12 @@ def get_calendar():
         try:
             payload = {'events': fetch_calendar()}
             ttl = CALENDAR_CACHE_SECONDS
-        except Exception:
+            calendar_cache['fails'] = 0
+        except Exception as error:
+            log_error('calendar fetch failed', error)
+            calendar_cache['fails'] += 1
             payload = cached if cached is not None else {'events': None}
-            ttl = 120
+            ttl = min(NEGATIVE_TTL_BASE * 2 ** (calendar_cache['fails'] - 1), NEGATIVE_TTL_MAX)
         calendar_cache['payload'] = payload
         calendar_cache['expires_at'] = now + ttl
         return payload
@@ -318,9 +334,12 @@ def get_tasks():
         try:
             payload = {'folders': fetch_tasks()}
             ttl = TASKS_CACHE_SECONDS
-        except Exception:
+            tasks_cache['fails'] = 0
+        except Exception as error:
+            log_error('tasks fetch failed', error)
+            tasks_cache['fails'] += 1
             payload = cached if cached is not None else {'folders': None}
-            ttl = 120
+            ttl = min(NEGATIVE_TTL_BASE * 2 ** (tasks_cache['fails'] - 1), NEGATIVE_TTL_MAX)
         tasks_cache['payload'] = payload
         tasks_cache['expires_at'] = now + ttl
         return payload
