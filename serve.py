@@ -14,7 +14,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 from urllib.request import Request, urlopen
 
 from macos_sensors import read_apple_temperature
@@ -145,8 +145,8 @@ def get_greeting():
         return payload
 
 
-CALENDAR_CACHE_SECONDS = 600
-TASKS_CACHE_SECONDS = 300
+CALENDAR_CACHE_SECONDS = 900
+TASKS_CACHE_SECONDS = 900
 CALENDAR_WINDOW_DAYS = 7
 calendar_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
 tasks_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
@@ -303,13 +303,13 @@ def fetch_tasks():
     return folders
 
 
-def get_calendar():
+def get_calendar(force=False):
     if not mcp_configured():
         return {'events': None}
     now = time.monotonic()
     with data_lock:
         cached = calendar_cache['payload']
-        if cached is not None and now < calendar_cache['expires_at']:
+        if not force and cached is not None and now < calendar_cache['expires_at']:
             return cached
         try:
             payload = {'events': fetch_calendar()}
@@ -325,13 +325,13 @@ def get_calendar():
         return payload
 
 
-def get_tasks():
+def get_tasks(force=False):
     if not mcp_configured():
         return {'folders': None}
     now = time.monotonic()
     with data_lock:
         cached = tasks_cache['payload']
-        if cached is not None and now < tasks_cache['expires_at']:
+        if not force and cached is not None and now < tasks_cache['expires_at']:
             return cached
         try:
             payload = {'folders': fetch_tasks()}
@@ -864,7 +864,9 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
         return True
 
     def do_GET(self):
-        path = unquote(urlparse(self.path).path)
+        request_url = urlparse(self.path)
+        path = unquote(request_url.path)
+        force_refresh = parse_qs(request_url.query).get('refresh') == ['1']
 
         if any(part.startswith('.') for part in path.split('/') if part):
             self.send_error(404)
@@ -886,11 +888,11 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path == '/api/calendar':
-            self.send_json(get_calendar())
+            self.send_json(get_calendar(force=force_refresh))
             return
 
         if path == '/api/tasks':
-            self.send_json(get_tasks())
+            self.send_json(get_tasks(force=force_refresh))
             return
 
         if path == '/api/net':

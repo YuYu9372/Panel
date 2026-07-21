@@ -1,8 +1,18 @@
 # Release Notes
 
-## 0.5.1A
+## 0.5.1-C
 
 Native RAM and temperature readings for Apple Silicon Macs.
+
+**Private download:** `panel-05.1.dmg` (includes the configured APIs)
+
+**Public download:** `panel-0.5.1-C-public.dmg` (contains no API credentials)
+
+### Changed
+
+- Calendar and Tasks now refresh automatically every 15 minutes.
+- The "Updated … ago" text in Calendar and Tasks is now a button. Clicking it
+  bypasses the server cache and fetches fresh data immediately.
 
 ### Fixed
 
@@ -13,8 +23,9 @@ Native RAM and temperature readings for Apple Silicon Macs.
   temperature sensors directly from Apple's read-only SMC interface and shows
   their average in Celsius. It does not require sudo or a
   separate monitoring app.
-- **Version metadata is consistent.** The dashboard tag and public disk-image
-  name now report 0.5.1A. The app bundle uses the semantic version 0.5.1.
+- **Version metadata is consistent.** The dashboard shows `0.5.1_Beta_C`, the
+  installers use the requested 0.5.1-C names, and the app bundle uses the
+  semantic version 0.5.1.
 - **The installed signature remains valid after launch.** The Electron launcher
   prevents Python from writing bytecode cache files into the signed app bundle.
 

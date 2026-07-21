@@ -134,6 +134,32 @@ body {
   display: none;
 }
 
+button.widget-updated {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+}
+
+button.widget-updated:not(:disabled) {
+  cursor: pointer;
+}
+
+button.widget-updated:not(:disabled):hover {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+button.widget-updated:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 #weather .widget-updated {
   grid-column: 2;
   grid-row: 5;
