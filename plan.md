@@ -136,6 +136,8 @@ Panel/
 - [x] Enforce channel, sequence, expiry, App compatibility, size, and field allowlists.
 - [x] Activate patches atomically and roll back after a failed or missing health confirmation.
 - [x] Keep HTML, JavaScript, API endpoints, preload, Python, and credentials outside hot patches.
+- [x] Use shared Wi-Fi tiers: `<20 / 20-29 / 30-40 / >=41` ms for green/yellow/red/purple.
+- [x] Add an English operations manual to `docs` and every successful `dist` build.
 - [ ] Create the public artifact-only `Panel-Updates` repository and publish notarized releases.
 
 ---
@@ -151,7 +153,7 @@ Panel/
   30-min windows. Completed blocks use p95; the current block uses its running average.
   History persists to `~/.panel/history.json` (home dir — the packaged bundle is read-only).
   Block tiers: CPU/GPU `<60 / 60-79 / 80-93 / >93`; RAM `<40 / 40-69 / 70-85 / >85`;
-  TEMP `<60 / 60-79 / 80-90 / >90`°C; WIFI `<20 / 20-29 / 30-50 / >50`ms →
+  TEMP `<60 / 60-79 / 80-90 / >90`°C; WIFI `<20 / 20-29 / 30-40 / >=41`ms →
   green/yellow/red/purple; gray = no reading / offline.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
 - Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. `widgets/boot-theme.js` sets it before first paint without requiring inline script execution.

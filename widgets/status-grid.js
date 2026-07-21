@@ -18,7 +18,7 @@ const statusGridWidget = {
     gpu: [60, 80, 94],
     ram: [40, 70, 86],
     temp: [60, 80, 91],
-    wifi: [20, 30, 51],
+    wifi: wifiThresholds,
   },
 
   init() {
@@ -38,6 +38,7 @@ const statusGridWidget = {
   },
 
   tierFor(key, value) {
+    if (key === 'wifi') return wifiTierFor(value);
     const [green, yellow, red] = this.tiers[key];
     if (value < green) return 'green';
     if (value < yellow) return 'yellow';
@@ -52,9 +53,6 @@ const statusGridWidget = {
   },
 
   formatValue(key, latest, current) {
-    // Text is always the instant reading (feels live); the color follows the
-    // current block's running-average tier so the number never visually
-    // disagrees with the cell it sits next to.
     const currentValue = current && current[key] != null ? current[key] : null;
 
     if (key === 'wifi') {

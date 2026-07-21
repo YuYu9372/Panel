@@ -864,8 +864,10 @@ button.widget-updated:focus-visible {
   display: none;
 }
 
-.connectivity.net--good { --net-color: #2f8b58; }
-.connectivity.net--slow { --net-color: #b47711; }
+.connectivity.net--green { --net-color: #2f8b58; }
+.connectivity.net--yellow { --net-color: #b47711; }
+.connectivity.net--red { --net-color: #b93d35; }
+.connectivity.net--purple { --net-color: #7839b6; }
 .connectivity.net--down { --net-color: #b93d35; }
 .connectivity.net--unknown { --net-color: #6f7777; }
 
@@ -1280,6 +1282,14 @@ button.widget-updated:focus-visible {
 :root[data-theme='dark'] .greeting-line { color: #9a968c; }
 :root[data-theme='dark'] .status-grid { color: #b7b4ab; }
 :root[data-theme='dark'] .connectivity.net--unknown { --net-color: #8b8a82; }
+
+:root[data-theme='dark'] .connectivity.net--green { --net-color: #5fbf86; }
+
+:root[data-theme='dark'] .connectivity.net--yellow { --net-color: #e0b054; }
+
+:root[data-theme='dark'] .connectivity.net--red { --net-color: #e37568; }
+
+:root[data-theme='dark'] .connectivity.net--purple { --net-color: #b784e0; }
 
 :root[data-theme='dark'] .settings-button {
   color: #a6a49d;

@@ -35,9 +35,18 @@ Signed Stable/Developer updates and restricted UI hot patches.
 - Patch manifests are limited to 128 KiB while streaming, require HTTPS in
   packaged builds, expire within 31 days, and cannot cross channels.
 
+### Changed
+
+- The top Wi-Fi indicator and bottom Wi-Fi history now share one tested tier
+  function: green below 20 ms, yellow from 20 to below 30 ms, red from 30 to
+  below 41 ms, and purple from 41 ms upward.
+- Added an English operations manual covering builds, installation, channel
+  releases, UI hot patches, credential safety, verification, and recovery. A
+  current copy is placed in `dist` after every successful build.
+
 ### Verified
 
-- 28 Node security and behavior tests plus 9 Python tests pass.
+- 31 Node security and behavior tests plus 9 Python tests pass.
 - A real Developer patch was signed outside the repository, fetched from an
   isolated localhost test feed, verified, atomically applied, confirmed healthy,
   and rendered in Electron.

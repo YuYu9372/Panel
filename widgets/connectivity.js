@@ -27,7 +27,7 @@ const connectivityWidget = {
   },
 
   setState(state, latency) {
-    ['unknown', 'good', 'slow', 'down'].forEach((s) =>
+    ['unknown', 'green', 'yellow', 'red', 'purple', 'down'].forEach((s) =>
       this.el.classList.toggle(`net--${s}`, s === state));
     this.el.querySelector('.net-latency').textContent =
       latency == null ? '' : `${Math.round(latency)} ms`;
@@ -58,8 +58,8 @@ const connectivityWidget = {
       const data = await res.json();
       if (!data.online) throw new Error('offline');
       this.failStreak = 0;
-      const good = data.latency_ms != null && data.latency_ms < 30;
-      this.setState(good ? 'good' : 'slow', data.latency_ms);
+      const tier = wifiTierFor(data.latency_ms);
+      this.setState(tier === 'gray' ? 'unknown' : tier, data.latency_ms);
       this.showOffline(false);
     } catch {
       this.failStreak += 1;
