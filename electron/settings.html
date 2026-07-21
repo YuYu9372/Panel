@@ -24,7 +24,7 @@
 
   <main class="settings-layout">
     <nav class="settings-nav" aria-label="Settings sections">
-      <button class="settings-tab is-active" type="button" aria-current="page">
+      <button class="settings-tab is-active" type="button" data-panel="connections-panel" aria-current="page">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M8 12h8"></path>
           <path d="M12 8v8"></path>
@@ -32,9 +32,17 @@
         </svg>
         <span>Connections</span>
       </button>
+      <button class="settings-tab" type="button" data-panel="updates-panel">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12"></path>
+          <path d="m7 10 5 5 5-5"></path>
+          <path d="M5 21h14"></path>
+        </svg>
+        <span>Updates</span>
+      </button>
     </nav>
 
-    <section class="settings-card" aria-labelledby="connections-title">
+    <section id="connections-panel" class="settings-card" data-settings-panel aria-labelledby="connections-title">
       <div class="card-heading">
         <div>
           <div class="settings-kicker">CONNECTIONS</div>
@@ -95,8 +103,56 @@
         </div>
       </form>
     </section>
+
+    <section id="updates-panel" class="settings-card" data-settings-panel aria-labelledby="updates-title" hidden>
+      <div class="card-heading">
+        <div>
+          <div class="settings-kicker">UPDATES</div>
+          <h2 id="updates-title">Release channel</h2>
+        </div>
+        <div class="security-badge">Signed updates</div>
+      </div>
+
+      <div class="channel-options" role="radiogroup" aria-label="Update channel">
+        <button class="channel-option" type="button" data-channel="stable" role="radio" aria-checked="false">
+          <span class="channel-dot stable-dot"></span>
+          <span>
+            <strong>Stable</strong>
+            <small>Public releases with the highest reliability.</small>
+          </span>
+          <span class="channel-check">✓</span>
+        </button>
+        <button class="channel-option" type="button" data-channel="developer" role="radio" aria-checked="false">
+          <span class="channel-dot developer-dot"></span>
+          <span>
+            <strong>Developer</strong>
+            <small>Early alpha builds for testing before public release.</small>
+          </span>
+          <span class="channel-check">✓</span>
+        </button>
+      </div>
+
+      <div class="update-settings-summary">
+        <div>
+          <span>Installed version</span>
+          <strong id="settings-current-version">0.5.2_B</strong>
+        </div>
+        <div>
+          <span>Update status</span>
+          <strong id="settings-update-status">Ready to check</strong>
+        </div>
+      </div>
+
+      <div class="update-settings-actions">
+        <div>
+          Full App updates use Apple code signing. UI hot patches require an
+          additional Ed25519 signature and roll back if their health check fails.
+        </div>
+        <button id="settings-check-update" class="secondary-button" type="button">Check now</button>
+      </div>
+    </section>
   </main>
 
-  <div class="version-tag">0.5.2_A</div>
+  <div class="version-tag">0.5.2_B</div>
 </body>
 </html>

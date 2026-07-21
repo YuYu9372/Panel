@@ -20,6 +20,11 @@ function validateRefreshMinutes(value) {
   return minutes;
 }
 
+function validateUpdateChannel(value) {
+  if (!['stable', 'developer'].includes(value)) throw new Error('Unknown update channel.');
+  return value;
+}
+
 class SettingsStore {
   constructor({ safeStorage, userDataPath, fsModule = fs }) {
     this.safeStorage = safeStorage;
@@ -32,6 +37,7 @@ class SettingsStore {
     return {
       schemaVersion: 1,
       refreshMinutes: DEFAULT_REFRESH_MINUTES,
+      updateChannel: 'stable',
       secrets: {},
     };
   }
@@ -43,6 +49,7 @@ class SettingsStore {
       throw new Error('The saved settings format is not supported.');
     }
     data.refreshMinutes = validateRefreshMinutes(data.refreshMinutes);
+    data.updateChannel = validateUpdateChannel(data.updateChannel || 'stable');
     return data;
   }
 
@@ -66,17 +73,19 @@ class SettingsStore {
     const data = this.readData();
     return {
       refreshMinutes: data.refreshMinutes,
+      updateChannel: data.updateChannel,
       anthropicApiKey: this.decrypt(data.secrets.anthropicApiKey),
       composioMcpToken: this.decrypt(data.secrets.composioMcpToken),
     };
   }
 
   status() {
-    const settings = this.runtimeSettings();
+    const data = this.readData();
     return {
-      refreshMinutes: settings.refreshMinutes,
-      hasAnthropicApiKey: Boolean(settings.anthropicApiKey),
-      hasComposioMcpToken: Boolean(settings.composioMcpToken),
+      refreshMinutes: data.refreshMinutes,
+      updateChannel: data.updateChannel,
+      hasAnthropicApiKey: Boolean(data.secrets.anthropicApiKey),
+      hasComposioMcpToken: Boolean(data.secrets.composioMcpToken),
     };
   }
 
@@ -88,6 +97,7 @@ class SettingsStore {
     };
     return {
       refreshMinutes: validateRefreshMinutes(payload.refreshMinutes ?? current.refreshMinutes),
+      updateChannel: validateUpdateChannel(payload.updateChannel ?? current.updateChannel),
       anthropicApiKey: replacement('anthropicApiKey'),
       composioMcpToken: replacement('composioMcpToken'),
     };
@@ -98,6 +108,7 @@ class SettingsStore {
     const data = {
       schemaVersion: 1,
       refreshMinutes: settings.refreshMinutes,
+      updateChannel: settings.updateChannel,
       secrets: {
         anthropicApiKey: this.encrypt(settings.anthropicApiKey),
         composioMcpToken: this.encrypt(settings.composioMcpToken),
@@ -106,6 +117,11 @@ class SettingsStore {
     Object.keys(data.secrets).forEach((key) => {
       if (!data.secrets[key]) delete data.secrets[key];
     });
+    this.writeData(data);
+    return this.status();
+  }
+
+  writeData(data) {
     this.fs.mkdirSync(this.directory, { recursive: true, mode: 0o700 });
     this.fs.chmodSync(this.directory, 0o700);
     const temporaryFile = path.join(this.directory, `settings-${crypto.randomUUID()}.tmp`);
@@ -116,6 +132,12 @@ class SettingsStore {
     });
     this.fs.renameSync(temporaryFile, this.file);
     this.fs.chmodSync(this.file, 0o600);
+  }
+
+  setUpdateChannel(channel) {
+    const data = this.readData();
+    data.updateChannel = validateUpdateChannel(channel);
+    this.writeData(data);
     return this.status();
   }
 }
@@ -126,4 +148,5 @@ module.exports = {
   MIN_REFRESH_MINUTES,
   SettingsStore,
   validateRefreshMinutes,
+  validateUpdateChannel,
 };

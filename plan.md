@@ -117,7 +117,7 @@ Panel/
 - [x] Refresh Calendar and Tasks every 15 minutes, with click-to-refresh updated labels.
 - [x] Build separate private (`panel-05.1.dmg`) and credential-free public (`panel-0.5.1-C-public.dmg`) installers.
 
-### 0.5.2_A <- Currently
+### 0.5.2_A
 - [x] Add a Settings gear beside Wi-Fi with no surrounding frame.
 - [x] Open a dashboard-matched Settings screen only when the gear is clicked.
 - [x] Add Connections fields for refresh minutes, Anthropic API key, and Composio MCP token.
@@ -126,6 +126,17 @@ Panel/
 - [x] Encrypt credentials with macOS-backed Electron `safeStorage` and owner-only files.
 - [x] Use one credential-free installer; each device keeps its own credentials.
 - [x] Restore weather and clock graphics under the stricter renderer content policy.
+
+### 0.5.2_B <- Currently
+- [x] Add an update indicator to the left of Wi-Fi only when a new build exists.
+- [x] Add an anchored update card with versions, release notes, progress, and install action.
+- [x] Add Stable and Developer channels as a per-device setting.
+- [x] Build DMG and ZIP artifacts with macOS update metadata.
+- [x] Add a separate Ed25519 trust layer for restricted update-interface hot patches.
+- [x] Enforce channel, sequence, expiry, App compatibility, size, and field allowlists.
+- [x] Activate patches atomically and roll back after a failed or missing health confirmation.
+- [x] Keep HTML, JavaScript, API endpoints, preload, Python, and credentials outside hot patches.
+- [ ] Create the public artifact-only `Panel-Updates` repository and publish notarized releases.
 
 ---
 
@@ -144,3 +155,4 @@ Panel/
   green/yellow/red/purple; gray = no reading / offline.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
 - Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. `widgets/boot-theme.js` sets it before first paint without requiring inline script execution.
+- Updates: full releases use electron-updater, macOS code signing, DMG + ZIP, and Stable/Developer channels. Update-interface hot patches use independent Ed25519 keys, declarative allowlisted fields, anti-replay sequence numbers, expiry, atomic activation, and rollback. Operational steps are in `docs/UPDATES.md`.

@@ -8,6 +8,8 @@ const refreshMinutes = document.getElementById('refresh-minutes');
 const formMessage = document.getElementById('form-message');
 const testButton = document.getElementById('test-button');
 const saveButton = document.getElementById('save-button');
+const checkUpdateButton = document.getElementById('settings-check-update');
+const channelButtons = [...document.querySelectorAll('.channel-option')];
 
 function applyTheme() {
   const hour = new Date().getHours();
@@ -18,6 +20,13 @@ function setBusy(busy) {
   testButton.disabled = busy;
   saveButton.disabled = busy;
   document.getElementById('back-button').disabled = busy;
+}
+
+function setUpdateBusy(busy) {
+  checkUpdateButton.disabled = busy;
+  channelButtons.forEach((button) => {
+    button.disabled = busy;
+  });
 }
 
 function setMessage(message, state = '') {
@@ -47,15 +56,75 @@ function applyStatus(status) {
   fields.composioMcpToken.placeholder = status.hasComposioMcpToken
     ? 'Saved — enter a new token to replace it'
     : 'Enter Composio MCP token';
+  channelButtons.forEach((button) => {
+    const active = button.dataset.channel === status.updateChannel;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-checked', String(active));
+  });
+}
+
+function renderUpdateState(state) {
+  document.getElementById('settings-current-version').textContent = state.currentDisplayVersion;
+  document.getElementById('settings-update-status').textContent = state.message || 'Ready to check';
+  channelButtons.forEach((button) => {
+    const active = button.dataset.channel === state.channel;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-checked', String(active));
+  });
 }
 
 async function loadStatus() {
   try {
-    applyStatus(await window.panelApp.getSettingsStatus());
+    const [status, updateState] = await Promise.all([
+      window.panelApp.getSettingsStatus(),
+      window.panelApp.getUpdateState(),
+    ]);
+    applyStatus(status);
+    renderUpdateState(updateState);
   } catch {
     setMessage('Settings could not be loaded.', 'error');
   }
 }
+
+document.querySelectorAll('.settings-tab').forEach((tab) => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.settings-tab').forEach((candidate) => {
+      const active = candidate === tab;
+      candidate.classList.toggle('is-active', active);
+      if (active) candidate.setAttribute('aria-current', 'page');
+      else candidate.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('[data-settings-panel]').forEach((panel) => {
+      panel.hidden = panel.id !== tab.dataset.panel;
+    });
+  });
+});
+
+channelButtons.forEach((button) => {
+  button.addEventListener('click', async () => {
+    setUpdateBusy(true);
+    try {
+      const state = await window.panelApp.setUpdateChannel(button.dataset.channel);
+      renderUpdateState(state);
+    } catch {
+      document.getElementById('settings-update-status').textContent = 'The channel could not be changed.';
+    } finally {
+      setUpdateBusy(false);
+    }
+  });
+});
+
+checkUpdateButton.addEventListener('click', async () => {
+  setUpdateBusy(true);
+  document.getElementById('settings-update-status').textContent = 'Checking for updates…';
+  try {
+    renderUpdateState(await window.panelApp.checkForUpdates());
+  } catch {
+    document.getElementById('settings-update-status').textContent = 'The secure update check failed.';
+  } finally {
+    setUpdateBusy(false);
+  }
+});
 
 document.querySelectorAll('.reveal-button').forEach((button) => {
   button.addEventListener('click', () => {
@@ -125,4 +194,5 @@ form.addEventListener('submit', async (event) => {
 });
 
 applyTheme();
+window.panelApp.onUpdateState((state) => renderUpdateState(state));
 loadStatus();

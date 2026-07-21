@@ -1,0 +1,100 @@
+# Panel Updates and UI Hot Patches
+
+Panel uses two deliberately separate update paths.
+
+| Path | Can change | Verification | Recovery |
+| --- | --- | --- | --- |
+| Full App update | Electron, Python, dashboard logic, preload, and all UI | electron-updater SHA-512 metadata plus the macOS application signature | Install only after verification; publish a higher fixed version to recover a bad release |
+| UI hot patch | Update-card text and allowlisted visual tokens only | Independent Ed25519 signature, HTTPS, channel, sequence, expiry, and App-version range | Atomic activation, renderer health confirmation, previous-patch rollback |
+
+UI hot patches cannot contain HTML, JavaScript, API endpoints, preload code, or
+Python. This restriction is intentional. A full App update is required when
+behavior or security-sensitive code changes.
+
+## Channels
+
+- **Stable** maps to electron-updater's `latest` channel and the stable patch
+  signing key.
+- **Developer** maps to the `alpha` channel and the developer patch signing key.
+- Changing channels never enables version downgrades.
+- Each Mac stores its own choice in its owner-only settings file.
+
+Use Stable on a public device and Developer on the test device.
+
+## Artifact repository
+
+The source repository may remain private. Update artifacts should be published
+from a separate public repository named `YuYu9372/Panel-Updates`. The client
+contains no GitHub token and must never receive a private-repository PAT.
+
+The repository does not exist yet, so the update client reports a safe check
+failure until it is created and the first release is published. Compromising
+the repository would not be enough to forge a UI patch because the separate
+Ed25519 signature is still required. Full App updates are protected by the
+macOS application signature.
+
+## Full App release
+
+1. For a Developer build, use a semantic version such as
+   `0.5.3-alpha.1`, set the GitHub publish channel to `alpha`, and select
+   Developer in Panel Settings.
+2. For a Stable build, use a version such as `0.5.3`, set the publish channel to
+   `latest`, and select Stable in Panel Settings.
+3. Run `npm test` and `npm audit`.
+4. Run `npm run dist`. The macOS build produces DMG and ZIP artifacts plus
+   update metadata. ZIP is the automatic-update payload; DMG remains the manual
+   installer.
+5. Verify the DMG checksum and the nested App signature.
+6. Sign with a **Developer ID Application** certificate and notarize with Apple
+   before a public release. An Apple Development certificate is suitable only
+   for local testing.
+7. Upload the generated DMG, ZIP, channel metadata, and block maps to the
+   matching GitHub release in `Panel-Updates`.
+8. Install the release on the Developer device first. Promote a separately
+   built Stable release only after validation.
+
+electron-builder requires the macOS ZIP target for automatic updates and
+generates `latest-mac.yml` or channel-specific metadata. See the
+[electron-builder auto-update guide](https://www.electron.build/docs/features/auto-update/)
+and [channel guide](https://www.electron.build/docs/tutorials/release-using-channels/).
+
+## UI hot-patch release
+
+The private keys created for this project are outside the repository under:
+
+`/Users/yu/Library/Application Support/Panel Developer/update-signing/`
+
+The App contains only the corresponding public keys. Move
+`stable-private.pem` to encrypted offline storage before public distribution.
+Keep the Developer key separate so frequent test signing cannot compromise the
+Stable channel.
+
+1. Copy `patches/developer-ui-patch.example.json` and edit the draft.
+2. Increase `sequence`. A used sequence is never accepted again, even after a
+   rollback.
+3. Keep `appVersionRange` narrow and set `lifetimeDays` from 1 to 30.
+4. Sign the draft:
+
+   ```bash
+   PANEL_PATCH_SIGNING_KEY='/Users/your-name/Library/Application Support/Panel Developer/update-signing/developer-private.pem' \
+   PANEL_PATCH_KEY_ID='panel-developer-2026-01' \
+   npm run sign:patch -- patches/developer-ui-patch.example.json dist/developer-ui-patch.json
+   ```
+
+5. Commit it as `patches/developer-ui-patch.json` in the public artifact
+   repository. Use the Stable key and `patches/stable-ui-patch.json` only for
+   approved public patches. The fixed files work independently of whether the
+   newest full-App release is Stable or a Developer prerelease.
+6. Panel verifies the patch before an atomic write. The immutable renderer
+   applies allowlisted values and confirms health. If it crashes or reports a
+   failure before confirmation, the next launch restores the previous patch.
+
+## Incident response
+
+- A bad unsigned or modified patch is rejected without changing the active UI.
+- A signed patch that fails health validation rolls back automatically and its
+  sequence remains blocked.
+- If a private patch key is exposed, remove the manifest, ship a full signed App
+  update with a replacement public key, and retire the affected key ID.
+- If a full release is bad, publish a higher fixed version. Reusing the same
+  version does not recover devices that already installed it.

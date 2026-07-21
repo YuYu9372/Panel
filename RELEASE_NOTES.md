@@ -1,5 +1,54 @@
 # Release Notes
 
+## 0.5.2_B
+
+Signed Stable/Developer updates and restricted UI hot patches.
+
+**Manual installer:** `panel-0.5.2-B.dmg`
+
+**Automatic-update payload:** `panel-0.5.2-B.zip`
+
+### Added
+
+- An update icon to the left of Wi-Fi that only appears after a newer build is
+  detected. It opens an anchored card with installed and available versions,
+  plain-text release notes, progress, and restart-to-install.
+- An Updates tab in Settings with per-device Stable and Developer channels.
+- Full-App updates through `electron-updater`. macOS builds now include DMG,
+  ZIP, channel metadata, and block maps.
+- Independently signed UI hot patches for the update card. Ed25519 verification
+  covers the channel, monotonic sequence, issue and expiry times, compatible App
+  range, text, and allowlisted Light/Dark design tokens.
+- Atomic patch activation, an immutable-renderer health confirmation, crash
+  detection, rollback to the previous patch, and replay prevention.
+- Separate Stable and Developer signing keys. Only public keys are packaged.
+
+### Security
+
+- UI patches cannot contain HTML, JavaScript, API endpoints, preload code, or
+  Python. Behavior changes require a fully signed App update.
+- Update release notes are rendered as plain text and are length-limited.
+- The client contains no GitHub PAT and does not expose update URLs, local paths,
+  or credentials to the dashboard.
+- Checking settings status no longer decrypts credentials. Decryption happens
+  only when starting the managed server or testing connections.
+- Patch manifests are limited to 128 KiB while streaming, require HTTPS in
+  packaged builds, expire within 31 days, and cannot cross channels.
+
+### Verified
+
+- 28 Node security and behavior tests plus 9 Python tests pass.
+- A real Developer patch was signed outside the repository, fetched from an
+  isolated localhost test feed, verified, atomically applied, confirmed healthy,
+  and rendered in Electron.
+- Forged signatures, expired patches, cross-channel patches, arbitrary script
+  fields, sequence replay, oversized manifests, and failed health checks are
+  rejected or rolled back in automated tests.
+- The production artifact feed remains intentionally inactive until the public
+  `YuYu9372/Panel-Updates` repository and Developer ID/notarization are ready.
+
+---
+
 ## 0.5.2_A
 
 Secure per-device connections and a dashboard-matched Settings screen.

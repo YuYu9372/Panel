@@ -10,11 +10,11 @@ Then open [http://localhost:8642](http://localhost:8642).
 
 ### Or run it as a Mac app
 
-Package Panel into one credential-free full-screen `.dmg`:
+Package Panel into credential-free manual and automatic-update artifacts:
 
 ```bash
 npm install             # once, pulls Electron + electron-builder
-npm run dist            # dist/panel-0.5.2-A.dmg
+npm run dist            # dist/0.5.2/Beta_B: DMG + automatic-update ZIP
 ```
 
 Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it is missing). During development, `npm start` runs the same window without packaging.
@@ -25,6 +25,11 @@ and Composio MCP token for that Mac. Credentials are encrypted with macOS
 `safeStorage`, stay outside the signed app bundle, and are never returned to the
 dashboard renderer. The Composio MCP URL is fixed by Panel and is not a user
 setting.
+
+The **Updates** tab selects Stable or Developer releases on each Mac. When a
+verified update exists, a download icon appears to the left of Wi-Fi and opens
+the update details card. See [docs/UPDATES.md](docs/UPDATES.md) for the signed
+full-update and restricted UI hot-patch workflow.
 
 The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the fixed Composio MCP service directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
 
@@ -41,17 +46,15 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current: **0.5.2_A**
+Current: **0.5.2_B**
 
-- Added a manually opened Settings screen matching the dashboard design.
-- Added encrypted per-device Anthropic and Composio credentials, mask/reveal
-  controls, and connection tests.
-- Made the Calendar and Tasks refresh interval configurable from 1 to 1440
-  minutes, with a 15-minute default and click-to-refresh retained.
-- Replaced private/public installers with one credential-free DMG.
-- Kept the Composio MCP URL fixed inside Panel.
-- Restored the weather icon and clock graphics under the stricter app security
-  policy, and removed the frame around the Settings gear.
+- Added Stable and Developer update channels per device.
+- Added the update icon and anchored release-details card beside Wi-Fi.
+- Added signed full-App update support with DMG, ZIP, channel metadata, download
+  progress, and restart-to-install.
+- Added restricted Ed25519-signed UI hot patches with expiry, compatibility,
+  anti-replay sequences, atomic activation, health checks, and rollback.
+- Kept API credentials outside both update artifacts and patch data.
 
 ### 0.4.2
 

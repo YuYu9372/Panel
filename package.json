@@ -1,6 +1,6 @@
 {
   "name": "panel",
-  "version": "0.5.2-alpha.1",
+  "version": "0.5.2-alpha.2",
   "description": "Panel — personal dashboard, packaged as a macOS app.",
   "author": "Sirius",
   "license": "UNLICENSED",
@@ -8,7 +8,8 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac dmg",
+    "dist": "electron-builder --mac",
+    "sign:patch": "node scripts/sign-ui-patch.js",
     "test:node": "node --test tests-js/*.test.js",
     "test:python": "python3 -m unittest discover -s tests -v",
     "test": "npm run test:node && npm run test:python"
@@ -20,26 +21,65 @@
   "build": {
     "appId": "com.sirius.panel",
     "productName": "Panel",
-    "artifactName": "panel-0.5.2-A.${ext}",
+    "artifactName": "panel-0.5.2-B.${ext}",
+    "generateUpdatesFilesForAllChannels": true,
+    "electronUpdaterCompatibility": ">=2.16",
     "directories": {
-      "output": "dist"
+      "output": "dist/0.5.2/Beta_B"
     },
     "files": [
       "electron/**/*",
       "package.json"
     ],
     "extraResources": [
-      { "from": "serve.py", "to": "panel/serve.py" },
-      { "from": "macos_sensors.py", "to": "panel/macos_sensors.py" },
-      { "from": "THIRD_PARTY_NOTICES.md", "to": "panel/THIRD_PARTY_NOTICES.md" },
-      { "from": "index.html", "to": "panel/index.html" },
-      { "from": "style.css", "to": "panel/style.css" },
-      { "from": "app.js", "to": "panel/app.js" },
-      { "from": "widgets", "to": "panel/widgets" }
+      {
+        "from": "serve.py",
+        "to": "panel/serve.py"
+      },
+      {
+        "from": "macos_sensors.py",
+        "to": "panel/macos_sensors.py"
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "panel/THIRD_PARTY_NOTICES.md"
+      },
+      {
+        "from": "index.html",
+        "to": "panel/index.html"
+      },
+      {
+        "from": "style.css",
+        "to": "panel/style.css"
+      },
+      {
+        "from": "app.js",
+        "to": "panel/app.js"
+      },
+      {
+        "from": "widgets",
+        "to": "panel/widgets"
+      }
     ],
     "mac": {
-      "target": "dmg",
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "category": "public.app-category.utilities"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "YuYu9372",
+        "repo": "Panel-Updates",
+        "releaseType": "draft",
+        "channel": "alpha"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "semver": "^7.8.5"
   }
 }

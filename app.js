@@ -7,6 +7,7 @@ const widgets = [
   tasksWidget,
   statusGridWidget,
   connectivityWidget,
+  updateWidget,
   settingsWidget,
 ];
 

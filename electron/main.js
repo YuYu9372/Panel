@@ -12,8 +12,12 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const { pathToFileURL } = require('url');
+const { autoUpdater } = require('electron-updater');
 const { SettingsStore } = require('./settings-store');
 const { testConnections } = require('./connections');
+const { PatchManager } = require('./patch-manager');
+const { UpdateManager } = require('./update-manager');
+const { PATCH_MANIFEST_BASE_URL, PATCH_TRUST } = require('./update-trust');
 
 const HOST = '127.0.0.1';
 const PORT = 8642;
@@ -25,6 +29,9 @@ const SETTINGS_URL = pathToFileURL(SETTINGS_FILE).href;
 let pyProc = null;
 let win = null;
 let settingsStore = null;
+let updateManager = null;
+let patchManager = null;
+const updateTimers = [];
 
 function panelDir() {
   return app.isPackaged
@@ -190,6 +197,10 @@ function isSettingsSender(event) {
   return senderLocation(event) === SETTINGS_URL;
 }
 
+function isPanelSender(event) {
+  return isDashboardSender(event) || isSettingsSender(event);
+}
+
 function requireSender(event, validator) {
   if (!validator(event)) throw new Error('Unauthorized Panel request.');
 }
@@ -209,6 +220,53 @@ async function showDashboard() {
 async function showSettings() {
   await win.loadFile(SETTINGS_FILE);
   return true;
+}
+
+function combinedUpdateState() {
+  const fullUpdate = updateManager.snapshot();
+  return {
+    ...fullUpdate,
+    uiPatch: patchManager.snapshot(fullUpdate.channel),
+  };
+}
+
+function publishUpdateState() {
+  if (!win || win.isDestroyed()) return;
+  win.webContents.send('panel:update-state', combinedUpdateState());
+}
+
+async function checkAllUpdates() {
+  const channel = updateManager.snapshot().channel;
+  await Promise.allSettled([
+    updateManager.check(),
+    patchManager.check(channel),
+  ]);
+  publishUpdateState();
+  return combinedUpdateState();
+}
+
+function createUpdateServices() {
+  updateManager = new UpdateManager({
+    app,
+    updater: autoUpdater,
+    settingsStore,
+    enabled: app.isPackaged,
+  });
+  const developmentPatchUrl = process.env.PANEL_PATCH_MANIFEST_BASE_URL || '';
+  patchManager = new PatchManager({
+    appVersion: app.getVersion(),
+    userDataPath: app.getPath('userData'),
+    fetcher: (url, options) => net.fetch(url, options),
+    manifestBaseUrl: app.isPackaged ? PATCH_MANIFEST_BASE_URL : developmentPatchUrl,
+    trust: PATCH_TRUST,
+    allowHttp: !app.isPackaged,
+  });
+  updateManager.on('state', publishUpdateState);
+  patchManager.on('state', publishUpdateState);
+  if (app.isPackaged) {
+    updateTimers.push(setTimeout(checkAllUpdates, 15000));
+    updateTimers.push(setInterval(checkAllUpdates, 4 * 60 * 60 * 1000));
+  }
 }
 
 function registerIpc() {
@@ -238,6 +296,44 @@ function registerIpc() {
     const status = settingsStore.save(payload);
     const servicesRestarted = await restartManagedServer();
     return { ...status, servicesRestarted };
+  });
+
+  ipcMain.handle('panel:get-update-state', (event) => {
+    requireSender(event, isPanelSender);
+    return combinedUpdateState();
+  });
+
+  ipcMain.handle('panel:check-for-updates', async (event) => {
+    requireSender(event, isPanelSender);
+    return checkAllUpdates();
+  });
+
+  ipcMain.handle('panel:download-update', async (event) => {
+    requireSender(event, isDashboardSender);
+    await updateManager.download();
+    return combinedUpdateState();
+  });
+
+  ipcMain.handle('panel:install-update', (event) => {
+    requireSender(event, isDashboardSender);
+    return updateManager.install();
+  });
+
+  ipcMain.handle('panel:set-update-channel', (event, channel) => {
+    requireSender(event, isPanelSender);
+    updateManager.setChannel(channel);
+    patchManager.publish(channel);
+    return combinedUpdateState();
+  });
+
+  ipcMain.handle('panel:confirm-ui-patch', (event, patchId) => {
+    requireSender(event, isDashboardSender);
+    return patchManager.confirm(patchId, updateManager.snapshot().channel);
+  });
+
+  ipcMain.handle('panel:report-ui-patch-failure', (event, patchId) => {
+    requireSender(event, isDashboardSender);
+    return patchManager.reportFailure(patchId, updateManager.snapshot().channel);
   });
 }
 
@@ -274,6 +370,7 @@ app.whenReady().then(async () => {
     safeStorage,
     userDataPath: app.getPath('userData'),
   });
+  createUpdateServices();
   registerIpc();
   createWindow();
   await showDashboard();
@@ -282,6 +379,7 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => app.quit());
 
 app.on('will-quit', () => {
+  updateTimers.forEach((timer) => clearTimeout(timer));
   if (!pyProc || pyProc.killed) return;
   try {
     pyProc.kill('SIGTERM');
