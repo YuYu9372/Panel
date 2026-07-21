@@ -477,14 +477,16 @@ body {
 }
 
 .status-dock .status-grid {
+  --status-section-gap: clamp(10px, 1.6vw, 22px);
   width: 100%;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: clamp(10px, 1.6vw, 22px);
+  gap: var(--status-section-gap);
 }
 
 .status-dock .status-row {
   min-width: 0;
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto auto;
@@ -493,6 +495,16 @@ body {
     'track track';
   column-gap: 8px;
   row-gap: clamp(4px, 0.65vmin, 6px);
+}
+
+.status-dock .status-row + .status-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--status-section-gap) / -2);
+  width: 1px;
+  background: rgba(61, 58, 51, 0.14);
 }
 
 .row-label {
@@ -1009,6 +1021,9 @@ body {
 :root[data-theme='dark'] .system-uptime { color: #b7b4ab; }
 :root[data-theme='dark'] .status-summary-detail,
 :root[data-theme='dark'] .status-dock .row-value::before { color: #85827a; }
+:root[data-theme='dark'] .status-dock .status-row + .status-row::before {
+  background: rgba(255, 255, 255, 0.12);
+}
 
 :root[data-theme='dark'] .cell,
 :root[data-theme='dark'] .cell--empty { background: rgba(255, 255, 255, 0.09); }
@@ -1216,6 +1231,10 @@ body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     row-gap: 12px;
   }
+
+  .status-dock .status-row:nth-child(3n + 1)::before {
+    display: none;
+  }
 }
 
 @media (max-width: 540px) {
@@ -1230,6 +1249,14 @@ body {
 
   .status-dock .status-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .status-dock .status-row:nth-child(3n + 1)::before {
+    display: block;
+  }
+
+  .status-dock .status-row:nth-child(odd)::before {
+    display: none;
   }
 
   #clock,
