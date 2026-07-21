@@ -342,6 +342,49 @@ def clamp_percent(value):
     return round(max(0.0, min(100.0, float(value))), 1)
 
 
+def read_system_boot_time():
+    if psutil:
+        try:
+            return float(psutil.boot_time())
+        except (AttributeError, OSError, ValueError):
+            pass
+
+    if platform.system() == 'Linux':
+        try:
+            uptime = float(Path('/proc/uptime').read_text().split()[0])
+            return time.time() - uptime
+        except (IndexError, OSError, ValueError):
+            pass
+
+    if platform.system() == 'Darwin':
+        executable = shutil.which('sysctl')
+        if executable:
+            try:
+                output = subprocess.run(
+                    [executable, '-n', 'kern.boottime'],
+                    capture_output=True,
+                    check=True,
+                    text=True,
+                    timeout=1.5,
+                ).stdout
+                match = re.search(r'sec\s*=\s*(\d+)', output)
+                if match:
+                    return float(match.group(1))
+            except (OSError, subprocess.SubprocessError):
+                pass
+
+    return None
+
+
+SYSTEM_BOOT_TIME = read_system_boot_time()
+
+
+def get_system_uptime():
+    if SYSTEM_BOOT_TIME is None:
+        return max(0, int(time.monotonic()))
+    return max(0, int(time.time() - SYSTEM_BOOT_TIME))
+
+
 def read_cpu():
     if psutil:
         return clamp_percent(psutil.cpu_percent(interval=0.1))
@@ -608,13 +651,31 @@ def p95(values):
     return clean[index]
 
 
-def freeze_window(window):
+def average(values):
+    clean = [value for value in values if value is not None]
+    if not clean:
+        return None
+    return round(sum(clean) / len(clean), 1)
+
+
+def aggregate_window(window, reducer):
     samples = window['samples']
     block = {'start': window['start']}
     for key in ('cpu', 'gpu', 'ram', 'temp'):
-        block[key] = p95([sample[key] for sample in samples])
-    block['wifi'] = p95([s['wifi'] for s in samples if s.get('online') and s['wifi'] is not None])
+        block[key] = reducer([sample[key] for sample in samples])
+    block['wifi'] = reducer([
+        sample['wifi'] for sample in samples
+        if sample.get('online') and sample['wifi'] is not None
+    ])
     return block
+
+
+def freeze_window(window):
+    return aggregate_window(window, p95)
+
+
+def average_window(window):
+    return aggregate_window(window, average)
 
 
 def persist_history():
@@ -683,10 +744,14 @@ def get_history():
         for offset in range(HISTORY_BLOCKS - 1, -1, -1):
             slot = now_slot - offset * step
             if slot == now_slot:
-                blocks.append(freeze_window(current) if current and current['samples'] else {'start': slot})
+                blocks.append(average_window(current) if current and current['samples'] else {'start': slot})
             else:
                 blocks.append(by_start.get(slot) or {'start': slot})
-        return {'latest': history_state['latest'] or {}, 'blocks': blocks}
+        return {
+            'latest': history_state['latest'] or {},
+            'blocks': blocks,
+            'uptime_seconds': get_system_uptime(),
+        }
 
 
 LOCAL_HOSTS = {'localhost', '127.0.0.1', '::1'}

@@ -97,9 +97,11 @@ Panel/
 - [x] `serve.py` honors `PORT` (fallback after `PANEL_PORT`) so it can run on an assigned port.
 
 ### 0.5.0 Beta-B <- Currently
-- [x] Status bar → **history grid**: 5 rows (CPU/GPU/RAM/TEMP/WIFI), each 12 blocks of
-  clock-aligned **30-min windows** (11 frozen + 1 live), colored by the window's **95th
-  percentile** against per-metric thresholds; live value at the row end (~2 s). Replaces the old chips.
+- [x] Bottom **system history dock**: 5 horizontal metric groups (CPU/GPU/RAM/TEMP/WIFI),
+  each with 12 clock-aligned **30-min windows**. The first 11 blocks are frozen p95 values;
+  block 12 is the current window's running average. Raw live values update every ~2 s.
+- [x] Device uptime appears in the dock summary. The current block has a visible outline,
+  and every block exposes its time range, aggregation, and value in an English tooltip.
 - [x] `serve.py` background sampler + `/api/history`: samples every 2 s (live) / every 30 s
   (window), finalizes each half-hour, persists to `~/.panel/history.json` and restores on restart.
 - [x] Offline / no-reading blocks render gray; wifi icon + offline screen unchanged (offline screen mirrors the grid).
@@ -110,8 +112,14 @@ Panel/
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
 - Greeting line: Anthropic API (`claude-haiku-4-5`), key in `.env` as `ANTHROPIC_API_KEY`; falls back to a local phrase without it. Only remaining AI/token use.
 - Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) via `COMPOSIO_MCP_URL` / `COMPOSIO_MCP_TOKEN` in `.env`. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Cached 10 min / 5 min.
-- Layout: top bar (greeting + system status + wifi indicator) above a fixed 2 × 2 grid (clock, weather, calendar, tasks).
+- Layout: top bar (greeting + wifi indicator), fixed 2 × 2 dashboard grid (clock, weather,
+  calendar, tasks), and a full-width system history dock at the bottom.
 - Connectivity: `/api/net` measures internet reachability via a raw TCP connect (no DNS, no LLM). Widget polls every 5 s; latency ≈ ping. Offline overlay is debounced (2 fails) so brief blips don't flash it.
-- Status grid (`/api/history`): server samples device + net, aggregates into clock-aligned 30-min windows, colors each block by the window's 95th percentile, persists to `~/.panel/history.json` (home dir — the packaged bundle is read-only). Block tiers (per metric): CPU/GPU `<60 / 60-79 / 80-93 / >93`; RAM `<40 / 40-69 / 70-85 / >85`; TEMP `<60 / 60-79 / 80-90 / >90`°C; WIFI `<20 / 20-29 / 30-50 / >50`ms → green/yellow/red/purple; gray = no reading / offline.
+- Status grid (`/api/history`): server samples device + net and aggregates clock-aligned
+  30-min windows. Completed blocks use p95; the current block uses its running average.
+  History persists to `~/.panel/history.json` (home dir — the packaged bundle is read-only).
+  Block tiers: CPU/GPU `<60 / 60-79 / 80-93 / >93`; RAM `<40 / 40-69 / 70-85 / >85`;
+  TEMP `<60 / 60-79 / 80-90 / >90`°C; WIFI `<20 / 20-29 / 30-50 / >50`ms →
+  green/yellow/red/purple; gray = no reading / offline.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
 - Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. An inline `<head>` script sets it before first paint to avoid a flash.

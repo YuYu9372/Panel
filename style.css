@@ -17,7 +17,7 @@ body {
   height: 100vh;
   height: 100dvh;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: clamp(10px, 1.6vmin, 18px);
   padding: clamp(12px, 2.2vmin, 24px);
   overflow: hidden;
@@ -403,8 +403,6 @@ body {
   display: none;
 }
 
-/* ---------- top bar: greeting + system status ---------- */
-
 .topbar {
   display: flex;
   align-items: center;
@@ -413,6 +411,54 @@ body {
 
 .greeting-bar {
   flex: 1 1 auto;
+}
+
+.status-dock {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(108px, 0.7fr) minmax(0, 5fr);
+  align-items: center;
+  column-gap: clamp(12px, 1.8vw, 24px);
+  padding: clamp(8px, 1.15vmin, 12px) clamp(12px, 1.8vw, 22px);
+  border-radius: clamp(14px, 2vmin, 20px);
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 1px 2px rgba(93, 77, 55, 0.04),
+    0 8px 22px -12px rgba(93, 77, 55, 0.2);
+  outline: 1px solid rgba(255, 255, 255, 0.58);
+  outline-offset: -1px;
+}
+
+.status-summary {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: clamp(10px, 1.5vw, 20px);
+  border-right: 1px solid rgba(61, 58, 51, 0.12);
+  white-space: nowrap;
+}
+
+.status-summary-title {
+  font-size: clamp(0.62rem, 1.15vmin, 0.76rem);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.system-uptime {
+  color: #6a665d;
+  font-size: clamp(0.58rem, 1.05vmin, 0.7rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-summary-detail {
+  color: #8c8578;
+  font-size: clamp(0.46rem, 0.78vmin, 0.56rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .status-grid {
@@ -430,6 +476,25 @@ body {
   column-gap: clamp(6px, 1vw, 12px);
 }
 
+.status-dock .status-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(10px, 1.6vw, 22px);
+}
+
+.status-dock .status-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    'label value'
+    'track track';
+  column-gap: 8px;
+  row-gap: clamp(4px, 0.65vmin, 6px);
+}
+
 .row-label {
   font-size: clamp(0.5rem, 1vmin, 0.62rem);
   font-weight: 800;
@@ -437,9 +502,21 @@ body {
   opacity: 0.55;
 }
 
+.status-dock .row-label {
+  grid-area: label;
+  opacity: 0.68;
+}
+
 .row-track {
   display: flex;
   gap: clamp(1px, 0.35vmin, 3px);
+}
+
+.status-dock .row-track {
+  grid-area: track;
+  width: 100%;
+  justify-content: space-between;
+  gap: clamp(1px, 0.22vw, 3px);
 }
 
 .cell {
@@ -457,12 +534,36 @@ body {
 .cell--gray { background: #b3aea3; }
 .cell--empty { background: rgba(60, 50, 40, 0.08); }
 
+.cell--current {
+  outline: 1px solid rgba(61, 58, 51, 0.58);
+  outline-offset: 2px;
+}
+
+.status-dock .cell {
+  width: clamp(6px, 0.72vw, 9px);
+  height: clamp(6px, 0.72vw, 9px);
+}
+
 .row-value {
   justify-self: end;
   font-size: clamp(0.62rem, 1.2vmin, 0.76rem);
   font-weight: 750;
   font-variant-numeric: tabular-nums;
   color: #6f7777;
+}
+
+.status-dock .row-value {
+  grid-area: value;
+  font-size: clamp(0.68rem, 1.25vmin, 0.84rem);
+}
+
+.status-dock .row-value::before {
+  content: 'NOW ';
+  margin-right: 0.25em;
+  color: #8c8578;
+  font-size: 0.68em;
+  font-weight: 750;
+  letter-spacing: 0.08em;
 }
 
 .row-value[data-tier='green'] { color: #2f8b58; }
@@ -501,6 +602,10 @@ body {
 }
 
 .net-latency:empty {
+  display: none;
+}
+
+.topbar .net-latency {
   display: none;
 }
 
@@ -889,6 +994,22 @@ body {
 :root[data-theme='dark'] .status-grid { color: #b7b4ab; }
 :root[data-theme='dark'] .connectivity.net--unknown { --net-color: #8b8a82; }
 
+:root[data-theme='dark'] .status-dock {
+  background: rgba(255, 255, 255, 0.045);
+  outline-color: rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.22),
+    0 8px 22px -12px rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme='dark'] .status-summary {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme='dark'] .system-uptime { color: #b7b4ab; }
+:root[data-theme='dark'] .status-summary-detail,
+:root[data-theme='dark'] .status-dock .row-value::before { color: #85827a; }
+
 :root[data-theme='dark'] .cell,
 :root[data-theme='dark'] .cell--empty { background: rgba(255, 255, 255, 0.09); }
 :root[data-theme='dark'] .cell--green { background: #3fa66c; }
@@ -896,6 +1017,7 @@ body {
 :root[data-theme='dark'] .cell--red { background: #d65043; }
 :root[data-theme='dark'] .cell--purple { background: #9a5cd0; }
 :root[data-theme='dark'] .cell--gray { background: #5a5750; }
+:root[data-theme='dark'] .cell--current { outline-color: rgba(230, 228, 222, 0.62); }
 :root[data-theme='dark'] .row-value[data-tier='green'] { color: #5fbf86; }
 :root[data-theme='dark'] .row-value[data-tier='yellow'] { color: #e0b054; }
 :root[data-theme='dark'] .row-value[data-tier='red'] { color: #e37568; }
@@ -1056,7 +1178,7 @@ body {
   }
 
   body {
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
   }
 
   .cal-timeline,
@@ -1065,17 +1187,51 @@ body {
   }
 }
 
-@media (max-width: 620px) {
-  .topbar {
-    flex-wrap: wrap;
+@media (max-width: 720px) {
+  .status-dock {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 10px;
   }
 
-  .system-status {
-    padding-left: clamp(24px, 5vw, 34px);
+  .status-summary {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 6px 16px;
+    padding-right: 0;
+    padding-bottom: 7px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(61, 58, 51, 0.12);
+  }
+
+  :root[data-theme='dark'] .status-summary {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .status-summary-detail {
+    justify-self: end;
+  }
+
+  .status-dock .status-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 12px;
   }
 }
 
 @media (max-width: 540px) {
+  .status-summary {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .status-summary-detail {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .status-dock .status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   #clock,
   #weather {
     grid-template-columns: 1fr;
