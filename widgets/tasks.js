@@ -1,6 +1,7 @@
 const tasksWidget = {
   el: null,
   interval: 300000,
+  lastUpdated: 0,
 
   init() {
     this.el = document.getElementById('tasks');
@@ -9,6 +10,7 @@ const tasksWidget = {
         <div>
           <div class="widget-kicker">TO-DO</div>
           <h2>Tasks</h2>
+          <div class="widget-updated"></div>
         </div>
         <svg class="tasks-glyph" viewBox="0 0 24 24" aria-hidden="true" fill="none"
              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -109,13 +111,21 @@ const tasksWidget = {
     }
   },
 
+  refreshUpdated() {
+    if (!this.el) return;
+    const el = this.el.querySelector('.widget-updated');
+    if (el) el.textContent = this.lastUpdated ? `Updated ${timeAgo(this.lastUpdated)}` : '';
+  },
+
   async update() {
     try {
       const response = await fetch('/api/tasks');
       const data = await response.json();
       this.render(data.folders);
+      if (data.folders !== null) this.lastUpdated = Date.now();
     } catch {
       this.render(null);
     }
+    this.refreshUpdated();
   },
 };

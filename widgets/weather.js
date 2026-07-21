@@ -1,6 +1,7 @@
 const weatherWidget = {
   el: null,
   interval: 600000,
+  lastUpdated: 0,
 
   lat: 25.03,
   lon: 121.56,
@@ -51,8 +52,15 @@ const weatherWidget = {
         <span class="weather-range"></span>
         <span class="weather-uv"></span>
       </div>
+      <div class="widget-updated"></div>
     `;
     this.update();
+  },
+
+  refreshUpdated() {
+    if (!this.el) return;
+    const el = this.el.querySelector('.widget-updated');
+    if (el) el.textContent = this.lastUpdated ? `Updated ${timeAgo(this.lastUpdated)}` : '';
   },
 
   uvTier(uv) {
@@ -90,6 +98,9 @@ const weatherWidget = {
         'weather--low', 'weather--moderate', 'weather--high', 'weather--extreme',
       );
       this.el.classList.add(`weather--${this.uvTier(uv)}`);
+
+      this.lastUpdated = Date.now();
+      this.refreshUpdated();
     } catch {
       this.el.querySelector('.weather-desc').textContent = 'Weather unavailable';
     }

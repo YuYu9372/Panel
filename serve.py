@@ -1,12 +1,14 @@
 import glob
 import http.server
 import json
+import math
 import os
 import platform
 import re
 import shutil
 import socket
 import subprocess
+import sys
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -33,6 +35,12 @@ def load_env(path='.env'):
 
 
 load_env()
+
+
+def log_error(context, error):
+    stamp = datetime.now().isoformat(timespec='seconds')
+    print(f'[{stamp}] {context}: {error}', file=sys.stderr)
+
 
 ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 GREETING_CACHE_SECONDS = 3600
@@ -77,10 +85,12 @@ def fetch_ai_greeting(period):
     if weather:
         context += f' The weather in Taipei is {weather}.'
 
-prompt = (
-    f'{context} One short warm line (max 8 words) for a dashboard greeting bar, '
-    f'after "Good {period.capitalize()}!". No repeat greeting, no quotes, no emoji.'
-)
+    prompt = (
+      f'{context} Write one short, warm line (max 8 words) for the greeting bar '
+      f'of a personal dashboard. It appears right after "Good {period.capitalize()} !" '
+      'so do not greet again. Mention the weather or time only if it feels natural. '
+      'Plain text only: no quotes, no emoji.'
+    )
 
     request = Request(
         ANTHROPIC_URL,
@@ -99,6 +109,10 @@ prompt = (
         data = json.loads(response.read())
 
     line = data['content'][0]['text'].strip().strip('"').strip()
+    line = re.sub(r'^\s*good\s+(morning|afternoon|evening|night|day)\b[\s!,.…—-]*',
+                  '', line, flags=re.I).strip()
+    if line:
+        line = line[0].upper() + line[1:]
     if not line or len(line) > 100:
         raise ValueError('Unusable greeting line')
     return line
@@ -118,7 +132,8 @@ def get_greeting():
         try:
             payload = {'line': fetch_ai_greeting(period), 'source': 'ai'}
             ttl = GREETING_CACHE_SECONDS
-        except Exception:
+        except Exception as error:
+            log_error('greeting fetch failed', error)
             payload = {'line': None, 'source': 'fallback'}
             ttl = 120
 
@@ -131,8 +146,10 @@ def get_greeting():
 CALENDAR_CACHE_SECONDS = 600
 TASKS_CACHE_SECONDS = 300
 CALENDAR_WINDOW_DAYS = 7
-calendar_cache = {'payload': None, 'expires_at': 0.0}
-tasks_cache = {'payload': None, 'expires_at': 0.0}
+calendar_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
+tasks_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
+NEGATIVE_TTL_BASE = 120
+NEGATIVE_TTL_MAX = 1800
 mcp_session = {'id': None}
 data_lock = threading.Lock()
 
@@ -223,7 +240,10 @@ def mcp_execute(tool_slug, arguments):
         outer = json.loads('\n'.join(b['text'] for b in content if b.get('type') == 'text'))
         result = outer['data']['results'][0]['response']
         if not result.get('successful'):
-            raise ValueError('Tool execution failed')
+            reason = (result.get('data') or {}).get('http_error') or result.get('error') or 'unknown error'
+            if isinstance(reason, str) and len(reason) > 200:
+                reason = reason[:200] + '…'
+            raise ValueError(f'{tool_slug} failed: {reason}')
         return result['data']
 
     raise last_error
@@ -292,9 +312,12 @@ def get_calendar():
         try:
             payload = {'events': fetch_calendar()}
             ttl = CALENDAR_CACHE_SECONDS
-        except Exception:
+            calendar_cache['fails'] = 0
+        except Exception as error:
+            log_error('calendar fetch failed', error)
+            calendar_cache['fails'] += 1
             payload = cached if cached is not None else {'events': None}
-            ttl = 120
+            ttl = min(NEGATIVE_TTL_BASE * 2 ** (calendar_cache['fails'] - 1), NEGATIVE_TTL_MAX)
         calendar_cache['payload'] = payload
         calendar_cache['expires_at'] = now + ttl
         return payload
@@ -311,9 +334,12 @@ def get_tasks():
         try:
             payload = {'folders': fetch_tasks()}
             ttl = TASKS_CACHE_SECONDS
-        except Exception:
+            tasks_cache['fails'] = 0
+        except Exception as error:
+            log_error('tasks fetch failed', error)
+            tasks_cache['fails'] += 1
             payload = cached if cached is not None else {'folders': None}
-            ttl = 120
+            ttl = min(NEGATIVE_TTL_BASE * 2 ** (tasks_cache['fails'] - 1), NEGATIVE_TTL_MAX)
         tasks_cache['payload'] = payload
         tasks_cache['expires_at'] = now + ttl
         return payload
@@ -333,6 +359,49 @@ def clamp_percent(value):
     if value is None:
         return None
     return round(max(0.0, min(100.0, float(value))), 1)
+
+
+def read_system_boot_time():
+    if psutil:
+        try:
+            return float(psutil.boot_time())
+        except (AttributeError, OSError, ValueError):
+            pass
+
+    if platform.system() == 'Linux':
+        try:
+            uptime = float(Path('/proc/uptime').read_text().split()[0])
+            return time.time() - uptime
+        except (IndexError, OSError, ValueError):
+            pass
+
+    if platform.system() == 'Darwin':
+        executable = shutil.which('sysctl')
+        if executable:
+            try:
+                output = subprocess.run(
+                    [executable, '-n', 'kern.boottime'],
+                    capture_output=True,
+                    check=True,
+                    text=True,
+                    timeout=1.5,
+                ).stdout
+                match = re.search(r'sec\s*=\s*(\d+)', output)
+                if match:
+                    return float(match.group(1))
+            except (OSError, subprocess.SubprocessError):
+                pass
+
+    return None
+
+
+SYSTEM_BOOT_TIME = read_system_boot_time()
+
+
+def get_system_uptime():
+    if SYSTEM_BOOT_TIME is None:
+        return max(0, int(time.monotonic()))
+    return max(0, int(time.time() - SYSTEM_BOOT_TIME))
 
 
 def read_cpu():
@@ -537,6 +606,173 @@ def collect_device_stats():
     }
 
 
+NET_PROBE_HOSTS = (('1.1.1.1', 443), ('8.8.8.8', 443))
+NET_CACHE_SECONDS = 2.5
+net_cache = {'payload': None, 'expires_at': 0.0}
+net_lock = threading.Lock()
+
+
+def probe_network():
+    for host, port in NET_PROBE_HOSTS:
+        start = time.monotonic()
+        try:
+            socket.create_connection((host, port), timeout=2).close()
+            return {'online': True, 'latency_ms': round((time.monotonic() - start) * 1000, 1)}
+        except OSError:
+            continue
+    return {'online': False, 'latency_ms': None}
+
+
+def get_network():
+    now = time.monotonic()
+    with net_lock:
+        if net_cache['payload'] is not None and now < net_cache['expires_at']:
+            return net_cache['payload']
+        payload = probe_network()
+        net_cache['payload'] = payload
+        net_cache['expires_at'] = now + NET_CACHE_SECONDS
+        return payload
+
+
+LIVE_SECONDS = 2
+WINDOW_SAMPLE_SECONDS = 30
+WINDOW_MINUTES = 30
+HISTORY_BLOCKS = 12
+HISTORY_FILE = os.environ.get('PANEL_HISTORY_FILE') or str(Path.home() / '.panel' / 'history.json')
+
+history_lock = threading.Lock()
+history_state = {'latest': None, 'frozen': [], 'current': None}
+
+
+def read_sample():
+    metrics = collect_device_stats()['metrics']
+    net = get_network()
+    return {
+        'cpu': metrics['cpu']['value'],
+        'gpu': metrics['gpu']['value'],
+        'ram': metrics['memory']['value'],
+        'temp': metrics['temperature']['value'],
+        'wifi': net.get('latency_ms'),
+        'online': bool(net.get('online')),
+    }
+
+
+def slot_start(moment):
+    minute = (moment.minute // WINDOW_MINUTES) * WINDOW_MINUTES
+    return int(moment.replace(minute=minute, second=0, microsecond=0).timestamp())
+
+
+def p95(values):
+    clean = sorted(value for value in values if value is not None)
+    if not clean:
+        return None
+    index = max(0, min(len(clean) - 1, math.ceil(0.95 * len(clean)) - 1))
+    return clean[index]
+
+
+def average(values):
+    clean = [value for value in values if value is not None]
+    if not clean:
+        return None
+    return round(sum(clean) / len(clean), 1)
+
+
+def aggregate_window(window, reducer):
+    samples = window['samples']
+    block = {'start': window['start']}
+    for key in ('cpu', 'gpu', 'ram', 'temp'):
+        block[key] = reducer([sample[key] for sample in samples])
+    block['wifi'] = reducer([
+        sample['wifi'] for sample in samples
+        if sample.get('online') and sample['wifi'] is not None
+    ])
+    return block
+
+
+def freeze_window(window):
+    return aggregate_window(window, p95)
+
+
+def average_window(window):
+    return aggregate_window(window, average)
+
+
+def persist_history():
+    # Caller holds history_lock.
+    try:
+        path = Path(HISTORY_FILE)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_name(path.name + '.tmp')
+        tmp.write_text(json.dumps({'frozen': history_state['frozen'], 'current': history_state['current']}))
+        os.replace(tmp, path)
+    except OSError:
+        pass
+
+
+def load_history():
+    try:
+        data = json.loads(Path(HISTORY_FILE).read_text())
+    except (OSError, ValueError):
+        return
+    now_slot = slot_start(datetime.now())
+    cutoff = now_slot - HISTORY_BLOCKS * WINDOW_MINUTES * 60
+    frozen = [b for b in (data.get('frozen') or []) if isinstance(b, dict) and b.get('start', 0) > cutoff]
+    current = data.get('current')
+    if current and current.get('start') == now_slot:
+        history_state['current'] = current
+    elif current and current.get('start', 0) < now_slot and current.get('samples'):
+        frozen.append(freeze_window(current))
+    history_state['frozen'] = frozen[-(HISTORY_BLOCKS - 1):]
+
+
+def sampler_loop():
+    last_window_sample = 0.0
+    while True:
+        started = time.monotonic()
+        try:
+            sample = read_sample()
+        except Exception:
+            sample = None
+        cur_slot = slot_start(datetime.now())
+        with history_lock:
+            if sample is not None:
+                history_state['latest'] = sample
+            current = history_state['current']
+            if current is None:
+                current = history_state['current'] = {'start': cur_slot, 'samples': []}
+            elif current['start'] != cur_slot:
+                if current['samples']:
+                    history_state['frozen'].append(freeze_window(current))
+                    history_state['frozen'] = history_state['frozen'][-(HISTORY_BLOCKS - 1):]
+                current = history_state['current'] = {'start': cur_slot, 'samples': []}
+                persist_history()
+            if sample is not None and started - last_window_sample >= WINDOW_SAMPLE_SECONDS:
+                current['samples'].append(sample)
+                last_window_sample = started
+                persist_history()
+        time.sleep(max(0.0, LIVE_SECONDS - (time.monotonic() - started)))
+
+
+def get_history():
+    step = WINDOW_MINUTES * 60
+    now_slot = slot_start(datetime.now())
+    with history_lock:
+        by_start = {b['start']: b for b in history_state['frozen']}
+        current = history_state['current']
+        blocks = []
+        for offset in range(HISTORY_BLOCKS - 1, -1, -1):
+            slot = now_slot - offset * step
+            if slot == now_slot:
+                blocks.append(average_window(current) if current and current['samples'] else {'start': slot})
+            else:
+                blocks.append(by_start.get(slot) or {'start': slot})
+        return {
+            'latest': history_state['latest'] or {},
+            'blocks': blocks,
+            'uptime_seconds': get_system_uptime(),
+        }
+
+
 LOCAL_HOSTS = {'localhost', '127.0.0.1', '::1'}
 LOOPBACK_CLIENTS = {'127.0.0.1', '::1', '::ffff:127.0.0.1'}
 
@@ -599,6 +835,14 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(get_tasks())
             return
 
+        if path == '/api/net':
+            self.send_json(get_network())
+            return
+
+        if path == '/api/history':
+            self.send_json(get_history())
+            return
+
         super().do_GET()
 
     def do_POST(self):
@@ -642,7 +886,9 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     host = os.environ.get('PANEL_HOST', '127.0.0.1')
-    port = int(os.environ.get('PANEL_PORT', '8642'))
+    port = int(os.environ.get('PANEL_PORT') or os.environ.get('PORT') or '8642')
+    load_history()
+    threading.Thread(target=sampler_loop, daemon=True).start()
     print(f'Panel running at http://localhost:{port}')
     http.server.ThreadingHTTPServer((host, port), PanelHandler).serve_forever()
 

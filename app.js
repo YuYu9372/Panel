@@ -5,10 +5,15 @@ const widgets = [
   weatherWidget,
   calendarWidget,
   tasksWidget,
-  deviceStatusWidget,
+  statusGridWidget,
+  connectivityWidget,
 ];
 
 widgets.forEach((w) => {
   w.init();
   if (w.interval) setInterval(() => w.update(), w.interval);
 });
+
+setInterval(() => {
+  widgets.forEach((w) => w.refreshUpdated && w.refreshUpdated());
+}, 30000);
