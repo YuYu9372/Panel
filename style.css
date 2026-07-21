@@ -435,6 +435,13 @@ button.widget-updated:focus-visible {
   gap: clamp(10px, 2.2vw, 26px);
 }
 
+.topbar-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.2vw, 14px);
+}
+
 .greeting-bar {
   flex: 1 1 auto;
 }
@@ -656,6 +663,38 @@ button.widget-updated:focus-visible {
 
 .connectivity.net--down .net-icon path,
 .connectivity.net--down .net-icon circle { opacity: 0.4; }
+
+.settings-button {
+  appearance: none;
+  flex: 0 0 auto;
+  width: clamp(34px, 5vmin, 42px);
+  height: clamp(34px, 5vmin, 42px);
+  display: grid;
+  place-items: center;
+  border: 0;
+  color: #77766f;
+  background: transparent;
+  cursor: pointer;
+}
+
+.settings-button svg {
+  width: clamp(19px, 2.8vmin, 23px);
+  height: clamp(19px, 2.8vmin, 23px);
+}
+
+.settings-button:hover {
+  color: #4f6f5b;
+}
+
+.settings-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.settings-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
 
 /* ---------- offline screen ---------- */
 
@@ -1031,6 +1070,15 @@ button.widget-updated:focus-visible {
 :root[data-theme='dark'] .greeting-line { color: #9a968c; }
 :root[data-theme='dark'] .status-grid { color: #b7b4ab; }
 :root[data-theme='dark'] .connectivity.net--unknown { --net-color: #8b8a82; }
+
+:root[data-theme='dark'] .settings-button {
+  color: #a6a49d;
+  background: transparent;
+}
+
+:root[data-theme='dark'] .settings-button:hover {
+  color: #c8d8cc;
+}
 
 :root[data-theme='dark'] .status-dock {
   background: rgba(255, 255, 255, 0.045);

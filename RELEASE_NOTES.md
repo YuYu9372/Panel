@@ -1,5 +1,54 @@
 # Release Notes
 
+## 0.5.2_A
+
+Secure per-device connections and a dashboard-matched Settings screen.
+
+**Download:** `panel-0.5.2-A.dmg` (contains no API credentials)
+
+### Added
+
+- A Settings gear beside the Wi-Fi indicator. Settings only opens when the gear
+  is clicked and uses the same visual language as the dashboard.
+- A Connections tab with a configurable Calendar and Tasks refresh time,
+  Anthropic API key, Composio MCP token, mask/reveal controls, connection tests,
+  and Save changes.
+- Encrypted credential storage through Electron `safeStorage`. Secrets live in
+  the current macOS user's application-data directory instead of the app bundle,
+  are written with owner-only permissions, and are never returned to the
+  dashboard renderer.
+- A single credential-free installer for both personal and public devices. Each
+  device stores its own settings after installation.
+
+### Changed
+
+- The Composio MCP URL is fixed to Panel's supported endpoint and no longer
+  appears as an editable setting.
+- Calendar and Tasks use the selected refresh interval from 1 to 1440 minutes;
+  the default remains 15 minutes and their Updated text still refreshes
+  immediately when clicked.
+- Electron was updated to 43.1.1 and electron-builder to 26.15.3.
+- Weather requests now pass through Panel's local server, allowing the renderer
+  to keep a same-origin network policy.
+
+### Fixed
+
+- Removed the visible frame around the Settings gear.
+- Restored the weather condition icon after the strict content policy blocked
+  its external request.
+- Restored analog clock hand transforms after the strict content policy blocked
+  dynamic style attributes.
+
+### Verified
+
+- 9 Node tests and 9 Python tests pass.
+- The packaged dependency audit reports 0 known vulnerabilities.
+- The dashboard was exercised in Electron: Settings opens only from the gear,
+  credentials remain masked, Calendar and Tasks receive the configured interval,
+  and weather and clock graphics render correctly.
+
+---
+
 ## 0.5.1-C
 
 Native RAM and temperature readings for Apple Silicon Macs.

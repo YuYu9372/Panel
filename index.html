@@ -3,20 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <title>Panel</title>
   <link rel="icon" href="data:," />
-  <script>
-    (function () {
-      var h = new Date().getHours();
-      document.documentElement.dataset.theme = (h >= 18 || h < 5) ? 'dark' : 'light';
-    })();
-  </script>
-  <link rel="stylesheet" href="style.css?v=23" />
+  <script src="widgets/boot-theme.js?v=1"></script>
+  <link rel="stylesheet" href="style.css?v=25" />
 </head>
 <body>
   <header class="topbar" aria-label="Status bar">
     <div id="greeting" class="greeting-bar" aria-label="Time-based greeting"></div>
-    <div id="connectivity" class="connectivity net--unknown" aria-label="Network status"></div>
+    <div class="topbar-actions">
+      <div id="connectivity" class="connectivity net--unknown" aria-label="Network status"></div>
+      <button id="settings-button" class="settings-button" type="button" aria-label="Open settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 8.97 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.52-1H3v-4h.08A1.7 1.7 0 0 0 4.6 8.97a1.7 1.7 0 0 0-.34-1.88l-.06-.06L7.03 4.2l.06.06A1.7 1.7 0 0 0 8.97 4.6 1.7 1.7 0 0 0 10 3.08V3h4v.08a1.7 1.7 0 0 0 1.03 1.52 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06a1.7 1.7 0 0 0-.34 1.88A1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"></path>
+        </svg>
+      </button>
+    </div>
   </header>
   <main class="dashboard" aria-label="Personal dashboard">
     <section id="clock" class="widget" aria-label="Clock"></section>
@@ -40,17 +44,18 @@
     <div class="offline-tag">Offline</div>
   </div>
 
-  <div class="version-tag">0.5.1_Beta_C</div>
+  <div class="version-tag">0.5.2_A</div>
 
   <script src="widgets/util.js?v=1"></script>
   <script src="widgets/theme.js?v=1"></script>
   <script src="widgets/greeting.js?v=8"></script>
   <script src="widgets/clock.js?v=5"></script>
-  <script src="widgets/weather.js?v=6"></script>
+  <script src="widgets/weather.js?v=7"></script>
   <script src="widgets/calendar.js?v=5"></script>
   <script src="widgets/tasks.js?v=4"></script>
   <script src="widgets/status-grid.js?v=3"></script>
   <script src="widgets/connectivity.js?v=2"></script>
-  <script src="app.js?v=10"></script>
+  <script src="widgets/settings.js?v=1"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

@@ -29,7 +29,10 @@ Panel/
 ├── app.js              
 ├── package.json        # Electron app + electron-builder (.dmg)
 ├── electron/
-│   └── main.js         # Spawns serve.py, opens a kiosk window
+│   ├── main.js         # Spawns serve.py, opens the kiosk and Settings windows
+│   ├── preload.js      # Narrow dashboard and Settings IPC bridge
+│   ├── settings-store.js
+│   └── settings.html   # Manually opened Connections screen
 └── widgets/
     ├── util.js            # Shared helpers (relative time)
     ├── theme.js
@@ -106,7 +109,7 @@ Panel/
   (window), finalizes each half-hour, persists to `~/.panel/history.json` and restores on restart.
 - [x] Offline / no-reading blocks render gray; wifi icon + offline screen unchanged (offline screen mirrors the grid).
 
-### 0.5.1-C <- Currently
+### 0.5.1-C
 - [x] Read macOS RAM from `vm_stat` and `sysctl`, independent of `psutil`.
 - [x] Read Apple Silicon CPU temperature directly from the SMC without sudo.
 - [x] Show 0.5.1_Beta_C in the dashboard while retaining bundle version 0.5.1.
@@ -114,12 +117,22 @@ Panel/
 - [x] Refresh Calendar and Tasks every 15 minutes, with click-to-refresh updated labels.
 - [x] Build separate private (`panel-05.1.dmg`) and credential-free public (`panel-0.5.1-C-public.dmg`) installers.
 
+### 0.5.2_A <- Currently
+- [x] Add a Settings gear beside Wi-Fi with no surrounding frame.
+- [x] Open a dashboard-matched Settings screen only when the gear is clicked.
+- [x] Add Connections fields for refresh minutes, Anthropic API key, and Composio MCP token.
+- [x] Keep the Composio MCP URL fixed inside the app instead of exposing an editable field.
+- [x] Add mask/reveal controls and connection tests without returning submitted secrets.
+- [x] Encrypt credentials with macOS-backed Electron `safeStorage` and owner-only files.
+- [x] Use one credential-free installer; each device keeps its own credentials.
+- [x] Restore weather and clock graphics under the stricter renderer content policy.
+
 ---
 
 ## Notes
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
-- Greeting line: Anthropic API (`claude-haiku-4-5`), key in `.env` as `ANTHROPIC_API_KEY`; falls back to a local phrase without it. Only remaining AI/token use.
-- Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) via `COMPOSIO_MCP_URL` / `COMPOSIO_MCP_TOKEN` in `.env`. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Cached 15 min; click the updated label to bypass the cache.
+- Greeting line: Anthropic API (`claude-haiku-4-5`); the packaged app reads its key from encrypted per-user Settings and falls back to a local phrase without it. Only remaining AI/token use.
+- Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) through Panel's fixed MCP URL. The packaged app reads the token from encrypted per-user Settings. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Cached for the configured interval; click the updated label to bypass the cache.
 - Layout: top bar (greeting + wifi indicator), fixed 2 × 2 dashboard grid (clock, weather,
   calendar, tasks), and a full-width system history dock at the bottom.
 - Connectivity: `/api/net` measures internet reachability via a raw TCP connect (no DNS, no LLM). Widget polls every 5 s; latency ≈ ping. Offline overlay is debounced (2 fails) so brief blips don't flash it.
@@ -130,4 +143,4 @@ Panel/
   TEMP `<60 / 60-79 / 80-90 / >90`°C; WIFI `<20 / 20-29 / 30-50 / >50`ms →
   green/yellow/red/purple; gray = no reading / offline.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
-- Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. An inline `<head>` script sets it before first paint to avoid a flash.
+- Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. `widgets/boot-theme.js` sets it before first paint without requiring inline script execution.

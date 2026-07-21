@@ -1,6 +1,7 @@
 const calendarWidget = {
   el: null,
   interval: 900000,
+  usesConfiguredRefresh: true,
   lastUpdated: 0,
   updating: false,
 

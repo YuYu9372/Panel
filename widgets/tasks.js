@@ -1,6 +1,7 @@
 const tasksWidget = {
   el: null,
   interval: 900000,
+  usesConfiguredRefresh: true,
   lastUpdated: 0,
   updating: false,
 

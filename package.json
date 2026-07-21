@@ -1,6 +1,6 @@
 {
   "name": "panel",
-  "version": "0.5.1",
+  "version": "0.5.2-alpha.1",
   "description": "Panel — personal dashboard, packaged as a macOS app.",
   "author": "Sirius",
   "license": "UNLICENSED",
@@ -9,16 +9,18 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --mac dmg",
-    "dist:public": "electron-builder --mac dmg --config electron-builder.public.json"
+    "test:node": "node --test tests-js/*.test.js",
+    "test:python": "python3 -m unittest discover -s tests -v",
+    "test": "npm run test:node && npm run test:python"
   },
   "devDependencies": {
-    "electron": "^33.2.0",
-    "electron-builder": "^25.1.8"
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3"
   },
   "build": {
     "appId": "com.sirius.panel",
     "productName": "Panel",
-    "artifactName": "panel-0.5.1-C-dev.${ext}",
+    "artifactName": "panel-0.5.2-A.${ext}",
     "directories": {
       "output": "dist"
     },
@@ -33,8 +35,7 @@
       { "from": "index.html", "to": "panel/index.html" },
       { "from": "style.css", "to": "panel/style.css" },
       { "from": "app.js", "to": "panel/app.js" },
-      { "from": "widgets", "to": "panel/widgets" },
-      { "from": ".env", "to": "panel/.env" }
+      { "from": "widgets", "to": "panel/widgets" }
     ],
     "mac": {
       "target": "dmg",
