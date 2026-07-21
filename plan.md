@@ -38,7 +38,7 @@ Panel/
     ├── weather.js
     ├── calendar.js
     ├── tasks.js
-    ├── device-status.js
+    ├── status-grid.js     # 5×12 status history grid (CPU/GPU/RAM/TEMP/WIFI)
     └── connectivity.js    # Wifi/latency indicator + offline screen
 ```
 
@@ -85,7 +85,7 @@ Panel/
 - [x] Package as a full-screen macOS `.dmg`: an Electron wrapper (`electron/main.js`) spawns `serve.py`, waits for the port, and opens a kiosk window. Uses system `python3`; prompts to install if missing. Build with `npm run dist`.
 - [x] Clock ticks aligned to the wall clock: it self-schedules to each whole second (`1000 - Date.now() % 1000`) instead of a free-running `setInterval`, removing the 1–2 s lag and drift.
 
-### 0.5.0 <- Currently
+### 0.5.0
 - [x] Connectivity probe: `serve.py` `/api/net` TCP-pings 1.1.1.1 / 8.8.8.8 by IP, returns online + round-trip latency (cached ~2.5 s).
 - [x] Wifi indicator (top bar, right): green < 30 ms, yellow ≥ 30 ms, red + slashed icon when offline.
 - [x] Offline screen: after the probe fails twice, the dashboard is replaced by a big live clock with "Offline" in red at the bottom, plus the (local) CPU/GPU/RAM/temp chips and the version tag; auto-hides on reconnect.
@@ -96,6 +96,14 @@ Panel/
 - [x] Fix: `serve.py` `IndentationError` in the greeting prompt that stopped the server from starting.
 - [x] `serve.py` honors `PORT` (fallback after `PANEL_PORT`) so it can run on an assigned port.
 
+### 0.5.0 Beta-B <- Currently
+- [x] Status bar → **history grid**: 5 rows (CPU/GPU/RAM/TEMP/WIFI), each 12 blocks of
+  clock-aligned **30-min windows** (11 frozen + 1 live), colored by the window's **95th
+  percentile** against per-metric thresholds; live value at the row end (~2 s). Replaces the old chips.
+- [x] `serve.py` background sampler + `/api/history`: samples every 2 s (live) / every 30 s
+  (window), finalizes each half-hour, persists to `~/.panel/history.json` and restores on restart.
+- [x] Offline / no-reading blocks render gray; wifi icon + offline screen unchanged (offline screen mirrors the grid).
+
 ---
 
 ## Notes
@@ -104,6 +112,6 @@ Panel/
 - Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) via `COMPOSIO_MCP_URL` / `COMPOSIO_MCP_TOKEN` in `.env`. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Cached 10 min / 5 min.
 - Layout: top bar (greeting + system status + wifi indicator) above a fixed 2 × 2 grid (clock, weather, calendar, tasks).
 - Connectivity: `/api/net` measures internet reachability via a raw TCP connect (no DNS, no LLM). Widget polls every 5 s; latency ≈ ping. Offline overlay is debounced (2 fails) so brief blips don't flash it.
-- Device thresholds: warning at 70% load or 75°C; danger at 90% load or 90°C; critical at 98% load or 100°C.
+- Status grid (`/api/history`): server samples device + net, aggregates into clock-aligned 30-min windows, colors each block by the window's 95th percentile, persists to `~/.panel/history.json` (home dir — the packaged bundle is read-only). Block tiers (per metric): CPU/GPU `<60 / 60-79 / 80-93 / >93`; RAM `<40 / 40-69 / 70-85 / >85`; TEMP `<60 / 60-79 / 80-90 / >90`°C; WIFI `<20 / 20-29 / 30-50 / >50`ms → green/yellow/red/purple; gray = no reading / offline.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
 - Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. An inline `<head>` script sets it before first paint to avoid a flash.

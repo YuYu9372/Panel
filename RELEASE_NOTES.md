@@ -40,6 +40,19 @@ the app → Open**, then confirm. Only needed once.
 
 ---
 
+## 0.5.0 Beta-B
+
+### Added
+- **System status history grid.** The top-bar chips became a GitHub-style strip: five
+  rows (CPU/GPU/RAM/TEMP/WIFI), each 12 blocks of clock-aligned **30-minute windows**
+  (11 frozen + 1 live). Each block is colored by that window's **95th percentile**, so a
+  brief spike won't turn it red but sustained load will. The live value sits at the end of
+  each row and refreshes every ~2 s. Offline / no-reading blocks are gray.
+- **Server-side history log.** `serve.py` samples in the background and keeps the history in
+  `~/.panel/history.json`, so the strip survives reloads and restarts.
+
+---
+
 ## 0.5.0
 
 Network awareness and freshness.
