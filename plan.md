@@ -106,10 +106,11 @@ Panel/
   (window), finalizes each half-hour, persists to `~/.panel/history.json` and restores on restart.
 - [x] Offline / no-reading blocks render gray; wifi icon + offline screen unchanged (offline screen mirrors the grid).
 
-### 0.5.1 <- Currently
+### 0.5.1A <- Currently
 - [x] Read macOS RAM from `vm_stat` and `sysctl`, independent of `psutil`.
 - [x] Read Apple Silicon CPU temperature directly from the SMC without sudo.
-- [x] Align the app bundle, dashboard, package, and public artifact version at 0.5.1.
+- [x] Show 0.5.1A in the dashboard and public artifact while retaining bundle version 0.5.1.
+- [x] Keep the packaged signature valid by disabling Python bytecode writes inside the app bundle.
 
 ---
 

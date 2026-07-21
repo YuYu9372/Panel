@@ -33,7 +33,7 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current: **0.5.1**
+Current: **0.5.1A**
 
 - Fixed RAM reporting when Panel launches through a Python installation without `psutil`.
 - Added native Apple Silicon CPU temperature reporting through the SMC.

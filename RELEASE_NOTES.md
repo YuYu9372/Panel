@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.5.1
+## 0.5.1A
 
 Native RAM and temperature readings for Apple Silicon Macs.
 
@@ -13,8 +13,10 @@ Native RAM and temperature readings for Apple Silicon Macs.
   temperature sensors directly from Apple's read-only SMC interface and shows
   their average in Celsius. It does not require sudo or a
   separate monitoring app.
-- **Version metadata is consistent.** The app bundle, dashboard tag, package
-  metadata, and public disk-image name now report 0.5.1.
+- **Version metadata is consistent.** The dashboard tag and public disk-image
+  name now report 0.5.1A. The app bundle uses the semantic version 0.5.1.
+- **The installed signature remains valid after launch.** The Electron launcher
+  prevents Python from writing bytecode cache files into the signed app bundle.
 
 ### Verified
 

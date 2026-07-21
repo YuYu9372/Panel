@@ -93,7 +93,12 @@ function startServer() {
   }
   pyProc = spawn(python, ['serve.py'], {
     cwd: panelDir(),
-    env: { ...process.env, PANEL_HOST: HOST, PANEL_PORT: String(PORT) },
+    env: {
+      ...process.env,
+      PANEL_HOST: HOST,
+      PANEL_PORT: String(PORT),
+      PYTHONDONTWRITEBYTECODE: '1',
+    },
     stdio: 'ignore',
   });
   pyProc.on('error', (err) => fail('Could not start Panel server', String(err)));
