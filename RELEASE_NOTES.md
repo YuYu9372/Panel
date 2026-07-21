@@ -1,5 +1,52 @@
 # Release Notes
 
+## 0.5.0 Beta-B (Public)
+
+Network status, a system history dock, and a proper offline screen.
+
+**Download:** `panel-0.5.0-Beta-B-Public.dmg` (macOS, Apple Silicon)
+
+### Works out of the box
+No setup, no account, no keys:
+- Analog + digital clock with date
+- Weather for Taipei with UV index and a color-tiered background (Open-Meteo,
+  no key required)
+- **System status history dock.** CPU, GPU, RAM, temperature, and wifi latency
+  each get a 12-block, ~6-hour history strip (GitHub-contributions style), plus
+  a live value and device uptime.
+- **Connectivity indicator.** Wifi icon — green (fast), yellow (slow), red
+  (offline).
+- **Offline screen.** A big clock and "Offline" replace the dashboard when the
+  connection drops; local system stats stay visible; clears itself on reconnect.
+- Automatic dark mode (18:00–05:00)
+- Time-based greeting bar
+
+### Optional — add your own keys
+Calendar and Tasks show *unavailable* until you configure them. Edit the `.env`
+inside the app (`Panel.app/Contents/Resources/panel/.env`):
+
+| Key | Enables |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | AI-written greeting line (falls back to local phrases without it) |
+| `COMPOSIO_MCP_URL` + `COMPOSIO_MCP_TOKEN` | Google Calendar and Google Tasks widgets |
+
+### Requirements
+- macOS on Apple Silicon (arm64)
+- Python 3 — the app tells you how to install it if it's missing
+
+### First launch
+The app isn't notarized, so macOS will block it the first time. **Right-click
+the app → Open**, then confirm. Only needed once.
+
+### Notes
+- The local server binds to `127.0.0.1` only and its API refuses non-local
+  requests — nothing is exposed to your network.
+- Calendar and Tasks are fetched directly over MCP, with no LLM involved.
+- The connectivity check is a raw TCP connect to public DNS servers — no data
+  leaves your machine beyond that.
+
+---
+
 ## 1.0.0-Public-beta
 
 The first build made for sharing. Same app as `1.0.0-beta`, packaged with **no
