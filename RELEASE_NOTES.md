@@ -1,5 +1,46 @@
 # Release Notes
 
+## 0.5.2_C
+
+Developer update publishing trial with revised status color thresholds.
+
+**Manual installer:** `panel-0.5.2-C.dmg`
+
+**Automatic-update payload:** `panel-0.5.2-C.zip`
+
+### Changed
+
+- Updated the semantic App version to `0.5.2-alpha.3`, displayed as
+  `0.5.2_C` throughout Panel.
+- CPU is green below 80%, yellow from 80 to below 90%, red from 90 to below
+  94%, and purple from 94% upward.
+- GPU is green below 80%, yellow from 80 to below 90%, red from 90 to below
+  96%, and purple from 96% upward.
+- RAM is green below 70%, yellow from 70 to below 80%, red from 80 to below
+  90%, and purple from 90% upward.
+- Temperature is green below 70°C, yellow from 70 to below 80°C, red from 80
+  to below 95°C, and purple from 95°C upward.
+- Wi-Fi is green below 25 ms, yellow from 25 to below 35 ms, red from 35 to
+  below 45 ms, and purple from 45 ms upward.
+
+### Publishing
+
+- Produces the Developer-channel DMG, ZIP, block maps, and `alpha-mac.yml`.
+- The public artifact-only `YuYu9372/Panel-Updates` repository must be created
+  before the first automatic-update release can be published.
+- This build uses an Apple Development signature for testing. Public macOS
+  distribution still requires Developer ID Application signing and notarization.
+
+### Verified
+
+- 32 Node security and behavior tests plus 9 Python tests pass.
+- The JSON, built-in fallback, boundary tests, and packaged App use identical
+  color rules.
+- The DMG, ZIP, App signature, update metadata, and absence of packaged API
+  credentials are verified before release.
+
+---
+
 ## 0.5.2_B
 
 Signed Stable/Developer updates and restricted UI hot patches.

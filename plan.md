@@ -127,7 +127,7 @@ Panel/
 - [x] Use one credential-free installer; each device keeps its own credentials.
 - [x] Restore weather and clock graphics under the stricter renderer content policy.
 
-### 0.5.2_B <- Currently
+### 0.5.2_B
 - [x] Add an update indicator to the left of Wi-Fi only when a new build exists.
 - [x] Add an anchored update card with versions, release notes, progress, and install action.
 - [x] Add Stable and Developer channels as a per-device setting.
@@ -139,7 +139,13 @@ Panel/
 - [x] Use shared Wi-Fi tiers: `<20 / 20-29 / 30-40 / >=41` ms for green/yellow/red/purple.
 - [x] Load every CPU, GPU, RAM, Temperature, and Wi-Fi color range from validated JSON.
 - [x] Add an English operations manual to `docs` and every successful `dist` build.
-- [ ] Create the public artifact-only `Panel-Updates` repository and publish notarized releases.
+
+### 0.5.2_C <- Currently
+- [x] Use semantic version `0.5.2-alpha.3` and display `0.5.2_C`.
+- [x] Update all status color boundaries through the validated JSON file.
+- [x] Build Developer DMG, ZIP, block maps, and `alpha-mac.yml` release metadata.
+- [ ] Create the public artifact-only `Panel-Updates` repository and publish the first Developer release.
+- [ ] Replace the testing certificate with Developer ID Application signing and notarization before public Stable distribution.
 
 ---
 
@@ -153,8 +159,9 @@ Panel/
 - Status grid (`/api/history`): server samples device + net and aggregates clock-aligned
   30-min windows. Completed blocks use p95; the current block uses its running average.
   History persists to `~/.panel/history.json` (home dir — the packaged bundle is read-only).
-  Block tiers: CPU/GPU `<60 / 60-79 / 80-93 / >93`; RAM `<40 / 40-69 / 70-85 / >85`;
-  TEMP `<60 / 60-79 / 80-90 / >90`°C; WIFI `<20 / 20-29 / 30-40 / >=41`ms →
+  Block tiers: CPU `<80 / 80-89 / 90-93 / >=94`; GPU `<80 / 80-89 / 90-95 / >=96`;
+  RAM `<70 / 70-79 / 80-89 / >=90`; TEMP `<70 / 70-79 / 80-94 / >=95`°C;
+  WIFI `<25 / 25-34 / 35-44 / >=45`ms →
   green/yellow/red/purple; gray = no reading / offline.
   Editable ranges live in `config/status-colors.json` and are validated before use.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.

@@ -21,11 +21,11 @@ test('status color JSON contains every metric and matches the safe fallback', ()
 
 test('all metric boundaries have no gaps or overlaps', () => {
   const cases = {
-    cpu: [[59.99, 'green'], [60, 'yellow'], [80, 'red'], [94, 'purple']],
-    gpu: [[59.99, 'green'], [60, 'yellow'], [80, 'red'], [94, 'purple']],
-    ram: [[39.99, 'green'], [40, 'yellow'], [70, 'red'], [86, 'purple']],
-    temp: [[59.99, 'green'], [60, 'yellow'], [80, 'red'], [91, 'purple']],
-    wifi: [[19.99, 'green'], [20, 'yellow'], [30, 'red'], [41, 'purple']],
+    cpu: [[79.99, 'green'], [80, 'yellow'], [90, 'red'], [94, 'purple']],
+    gpu: [[79.99, 'green'], [80, 'yellow'], [90, 'red'], [96, 'purple']],
+    ram: [[69.99, 'green'], [70, 'yellow'], [80, 'red'], [90, 'purple']],
+    temp: [[69.99, 'green'], [70, 'yellow'], [80, 'red'], [95, 'purple']],
+    wifi: [[24.99, 'green'], [25, 'yellow'], [35, 'red'], [45, 'purple']],
   };
   for (const [metric, values] of Object.entries(cases)) {
     for (const [value, color] of values) {

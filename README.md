@@ -14,7 +14,7 @@ Package Panel into credential-free manual and automatic-update artifacts:
 
 ```bash
 npm install             # once, pulls Electron + electron-builder
-npm run dist            # dist/0.5.2/Beta_B: DMG + automatic-update ZIP
+npm run dist            # dist/0.5.2/Beta_C: DMG + automatic-update ZIP
 ```
 
 Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it is missing). During development, `npm start` runs the same window without packaging.
@@ -52,19 +52,14 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current: **0.5.2_B**
+Current: **0.5.2_C**
 
-- Added Stable and Developer update channels per device.
-- Added the update icon and anchored release-details card beside Wi-Fi.
-- Added signed full-App update support with DMG, ZIP, channel metadata, download
-  progress, and restart-to-install.
-- Added restricted Ed25519-signed UI hot patches with expiry, compatibility,
-  anti-replay sequences, atomic activation, health checks, and rollback.
-- Kept API credentials outside both update artifacts and patch data.
-- Changed Wi-Fi colors to green below 20 ms, yellow from 20 to below 30 ms,
-  red from 30 to below 41 ms, and purple from 41 ms upward.
-- Moved all CPU, GPU, RAM, Temperature, and Wi-Fi color ranges into a validated
-  JSON file that is used directly by the dashboard.
+- Prepared a `0.5.2-alpha.3` Developer update with DMG, ZIP, block maps, and
+  `alpha-mac.yml` metadata.
+- Updated every CPU, GPU, RAM, Temperature, and Wi-Fi range through the
+  validated `config/status-colors.json` file.
+- Retained per-device Stable/Developer channels, signed full-App updates,
+  restricted Ed25519 UI patches, and credential-free artifacts.
 
 ### 0.4.2
 

@@ -9,7 +9,7 @@ recovery.
 | Purpose | Location |
 | --- | --- |
 | Source repository | `/Users/yu/Dev_code/Panel` |
-| Current build output | `dist/0.5.2/Beta_B` |
+| Current build output | `dist/0.5.2/Beta_C` |
 | Editable status color JSON | `config/status-colors.json` |
 | Installed App | `/Applications/Panel.app` |
 | Encrypted per-user settings | `~/Library/Application Support/Panel/secure-settings/settings.json` |
@@ -38,11 +38,11 @@ controls CPU, GPU, RAM, Temperature, and Wi-Fi colors:
 
 | Metric | Green | Yellow | Red | Purple |
 | --- | --- | --- | --- | --- |
-| CPU | `< 60%` | `60–<80%` | `80–<94%` | `≥ 94%` |
-| GPU | `< 60%` | `60–<80%` | `80–<94%` | `≥ 94%` |
-| RAM | `< 40%` | `40–<70%` | `70–<86%` | `≥ 86%` |
-| Temperature | `< 60°C` | `60–<80°C` | `80–<91°C` | `≥ 91°C` |
-| Wi-Fi | `< 20 ms` | `20–<30 ms` | `30–<41 ms` | `≥ 41 ms` |
+| CPU | `< 80%` | `80–<90%` | `90–<94%` | `≥ 94%` |
+| GPU | `< 80%` | `80–<90%` | `90–<96%` | `≥ 96%` |
+| RAM | `< 70%` | `70–<80%` | `80–<90%` | `≥ 90%` |
+| Temperature | `< 70°C` | `70–<80°C` | `80–<95°C` | `≥ 95°C` |
+| Wi-Fi | `< 25 ms` | `25–<35 ms` | `35–<45 ms` | `≥ 45 ms` |
 
 The same Wi-Fi rules apply to the top indicator and the bottom history row.
 Missing readings use the `unavailable` color. Offline Wi-Fi uses the `offline`
@@ -83,10 +83,10 @@ Panel's actual JSON representation uses explicit ranges:
     "wifi": {
       "unit": "ms",
       "rules": [
-        { "minInclusive": 0, "maxExclusive": 20, "color": "green" },
-        { "minInclusive": 20, "maxExclusive": 30, "color": "yellow" },
-        { "minInclusive": 30, "maxExclusive": 41, "color": "red" },
-        { "minInclusive": 41, "maxExclusive": null, "color": "purple" }
+        { "minInclusive": 0, "maxExclusive": 25, "color": "green" },
+        { "minInclusive": 25, "maxExclusive": 35, "color": "yellow" },
+        { "minInclusive": 35, "maxExclusive": 45, "color": "red" },
+        { "minInclusive": 45, "maxExclusive": null, "color": "purple" }
       ]
     }
   }
@@ -162,11 +162,11 @@ metadata, and matching block maps belong to the same release.
 Replace the paths when the version changes:
 
 ```bash
-hdiutil verify dist/0.5.2/Beta_B/panel-0.5.2-B.dmg
-unzip -tq dist/0.5.2/Beta_B/panel-0.5.2-B.zip
-codesign --verify --deep --strict --verbose=2 dist/0.5.2/Beta_B/mac-arm64/Panel.app
-shasum -a 256 dist/0.5.2/Beta_B/panel-0.5.2-B.dmg
-shasum -a 256 dist/0.5.2/Beta_B/panel-0.5.2-B.zip
+hdiutil verify dist/0.5.2/Beta_C/panel-0.5.2-C.dmg
+unzip -tq dist/0.5.2/Beta_C/panel-0.5.2-C.zip
+codesign --verify --deep --strict --verbose=2 dist/0.5.2/Beta_C/mac-arm64/Panel.app
+shasum -a 256 dist/0.5.2/Beta_C/panel-0.5.2-C.dmg
+shasum -a 256 dist/0.5.2/Beta_C/panel-0.5.2-C.zip
 ```
 
 For a public release, the App must use a Developer ID Application certificate
@@ -179,7 +179,7 @@ Quit Panel first. Keep a recoverable backup of the installed App:
 
 ```bash
 mv /Applications/Panel.app /Users/yu/.Trash/Panel-before-new-build.app
-ditto dist/0.5.2/Beta_B/mac-arm64/Panel.app /Applications/Panel.app
+ditto dist/0.5.2/Beta_C/mac-arm64/Panel.app /Applications/Panel.app
 codesign --verify --deep --strict /Applications/Panel.app
 open /Applications/Panel.app
 ```
