@@ -10,22 +10,44 @@ Then open [http://localhost:8642](http://localhost:8642).
 
 ### Or run it as a Mac app
 
-Package Panel into either full-screen `.dmg`:
+Package Panel into credential-free manual and automatic-update artifacts:
 
 ```bash
 npm install             # once, pulls Electron + electron-builder
-npm run dist            # private: dist/panel-0.5.1-C-dev.dmg, includes .env
-npm run dist:public     # public: dist/panel-0.5.1-C-public.dmg, no API credentials
+npm run dist            # dist/0.5.2/Beta_D: DMG + automatic-update ZIP
 ```
 
-Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it's missing). During development, `npm start` runs the same window without packaging.
+Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it is missing). During development, `npm start` runs the same window without packaging.
 
-> The private build bundles your `.env` inside the app, so keep `panel-0.5.1-C-dev.dmg`
-> to yourself. The public build includes `.env.example` with blank credentials.
+The installer never contains API credentials. Click the gear beside the Wi-Fi
+indicator to open the minimal **Settings** screen, then enter the Anthropic API
+key and Composio MCP token for that Mac. Credentials are encrypted with macOS
+`safeStorage`, stay outside the signed app bundle, and are never returned to the
+dashboard renderer. The Composio MCP URL is fixed by Panel and is not a user
+setting.
 
-The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the Composio MCP directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
+The **Update channel** row selects Stable or Developer releases on each Mac.
+When a verified update exists, a download icon appears to the left of Wi-Fi and
+opens the update details card. See [docs/UPDATES.md](docs/UPDATES.md) for the
+signed full-update and declarative live-patch workflow.
 
-Set `ANTHROPIC_API_KEY` (greeting) and `COMPOSIO_MCP_URL` / `COMPOSIO_MCP_TOKEN` (calendar + tasks) in `.env` — see [.env.example](.env.example). Everything degrades gracefully when a key is missing.
+The English [operations manual](docs/OPERATIONS.md) covers routine development,
+status color changes, testing, builds, installation, releases, live patches, and
+recovery. CPU, GPU, RAM, Temperature, and Wi-Fi tiers are defined in the
+validated `config/status-colors.json` file. Day/night refresh behavior is in
+`config/refresh-policy.json`. The safe Settings field order and labels are in
+`config/settings-layout.json`. Every successful `npm run dist` copies the
+manual, all three JSON files, and a Developer patch example into `dist` and the
+current version's build folder.
+
+The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the fixed Composio MCP service directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
+
+Calendar and Tasks refresh at the interval selected in Settings (15 minutes by
+default), except from 00:00 through 05:59 local time when they refresh every 30
+minutes on clock-aligned boundaries. Click either widget's "Updated … ago" text
+to refresh it immediately without changing the automatic schedule.
+For browser-only development, `.env.example` documents the two optional
+credentials. Everything degrades gracefully when a key is missing.
 
 ## About
 
@@ -35,13 +57,18 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current: **0.5.1-C**
+Current: **0.5.2_D**
 
-- Fixed RAM reporting when Panel launches through a Python installation without `psutil`.
-- Added native Apple Silicon CPU temperature reporting through the SMC.
-- Calendar and Tasks refresh every 15 minutes and can be refreshed immediately
-  by clicking their "Updated … ago" text.
-- Packaged as a full-screen macOS `.dmg` app with a six-hour system history dock.
+- Prepared a `0.5.2-alpha.4` Developer update with DMG, ZIP, block maps, and
+  `alpha-mac.yml` metadata.
+- Replaced the tabbed Settings UI with one compact screen for both encrypted
+  connections, refresh time, and the per-device update channel.
+- Added a strictly validated `settingsLayout` live-patch field that may only
+  change the title, four labels, and the order of the four mandatory rows.
+- Kept Test connections, Save, mask/reveal, fixed MCP URL, and encrypted secret
+  storage immutable so a patch cannot weaken the Settings security controls.
+- Retained per-device Stable/Developer channels, signed full-App updates,
+  atomic patch activation and rollback, and credential-free artifacts.
 
 ### 0.4.2
 

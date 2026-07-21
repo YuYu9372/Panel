@@ -71,12 +71,9 @@ const weatherWidget = {
   },
 
   async update() {
-    const url =
-      `https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}` +
-      `&current=temperature_2m,weather_code,uv_index&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
-
     try {
-      const res = await fetch(url);
+      const res = await fetch('/api/weather', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`weather ${res.status}`);
       const data = await res.json();
 
       const code = data.current.weather_code;

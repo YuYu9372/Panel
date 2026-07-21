@@ -36,7 +36,8 @@ def load_env(path='.env'):
         pass
 
 
-load_env()
+if os.environ.get('PANEL_MANAGED_SETTINGS') != '1':
+    load_env()
 
 
 def log_error(context, error):
@@ -45,6 +46,7 @@ def log_error(context, error):
 
 
 ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
+COMPOSIO_MCP_URL = 'https://connect.composio.dev/mcp'
 GREETING_CACHE_SECONDS = 3600
 greeting_cache = {'payload': None, 'expires_at': 0.0, 'period': None}
 greeting_lock = threading.Lock()
@@ -55,6 +57,12 @@ WEATHER_TEXT = {
     61: 'rainy', 63: 'rainy', 65: 'pouring', 80: 'showery', 81: 'showery',
     82: 'pouring', 95: 'stormy', 96: 'stormy', 99: 'stormy',
 }
+
+WEATHER_URL = (
+    'https://api.open-meteo.com/v1/forecast?latitude=25.03&longitude=121.56'
+    '&current=temperature_2m,weather_code,uv_index'
+    '&daily=temperature_2m_max,temperature_2m_min&timezone=auto'
+)
 
 
 def current_period(hour):
@@ -68,10 +76,8 @@ def current_period(hour):
 
 
 def fetch_weather_brief():
-    url = ('https://api.open-meteo.com/v1/forecast?latitude=25.03&longitude=121.56'
-           '&current=temperature_2m,weather_code&timezone=auto')
     try:
-        with urlopen(url, timeout=5) as response:
+        with urlopen(WEATHER_URL, timeout=5) as response:
             current = json.loads(response.read())['current']
         text = WEATHER_TEXT.get(current['weather_code'])
         if text is None:
@@ -79,6 +85,24 @@ def fetch_weather_brief():
         return f"{text}, {round(current['temperature_2m'])}C"
     except Exception:
         return None
+
+
+def get_weather():
+    with urlopen(WEATHER_URL, timeout=10) as response:
+        data = json.loads(response.read())
+    current = data['current']
+    daily = data['daily']
+    return {
+        'current': {
+            'temperature_2m': current['temperature_2m'],
+            'weather_code': current['weather_code'],
+            'uv_index': current.get('uv_index'),
+        },
+        'daily': {
+            'temperature_2m_max': daily['temperature_2m_max'][:1],
+            'temperature_2m_min': daily['temperature_2m_min'][:1],
+        },
+    }
 
 
 def fetch_ai_greeting(period):
@@ -145,8 +169,17 @@ def get_greeting():
         return payload
 
 
-CALENDAR_CACHE_SECONDS = 900
-TASKS_CACHE_SECONDS = 900
+def refresh_minutes():
+    try:
+        value = int(os.environ.get('PANEL_REFRESH_MINUTES', '15'))
+    except ValueError:
+        value = 15
+    return min(1440, max(1, value))
+
+
+REFRESH_MINUTES = refresh_minutes()
+CALENDAR_CACHE_SECONDS = REFRESH_MINUTES * 60
+TASKS_CACHE_SECONDS = REFRESH_MINUTES * 60
 CALENDAR_WINDOW_DAYS = 7
 calendar_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
 tasks_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
@@ -157,7 +190,7 @@ data_lock = threading.Lock()
 
 
 def mcp_configured():
-    return bool(os.environ.get('COMPOSIO_MCP_URL') and os.environ.get('COMPOSIO_MCP_TOKEN'))
+    return bool(os.environ.get('COMPOSIO_MCP_TOKEN'))
 
 
 def _mcp_parse(raw, content_type):
@@ -186,7 +219,7 @@ def _mcp_rpc(payload, expect_response=True):
     }
     if mcp_session['id']:
         headers['Mcp-Session-Id'] = mcp_session['id']
-    request = Request(os.environ['COMPOSIO_MCP_URL'],
+    request = Request(COMPOSIO_MCP_URL,
                       data=json.dumps(payload).encode('utf-8'), headers=headers)
     with urlopen(request, timeout=60) as response:
         session_id = response.headers.get('Mcp-Session-Id')
@@ -881,6 +914,18 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json(collect_device_stats())
             except Exception as error:
                 self.send_json({'error': str(error)}, status=500)
+            return
+
+        if path == '/api/config':
+            self.send_json({'refresh_minutes': REFRESH_MINUTES})
+            return
+
+        if path == '/api/weather':
+            try:
+                self.send_json(get_weather())
+            except Exception as error:
+                log_error('weather fetch failed', error)
+                self.send_json({'error': 'Weather unavailable'}, status=502)
             return
 
         if path == '/api/greeting':

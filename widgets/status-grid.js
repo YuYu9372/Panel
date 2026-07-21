@@ -13,14 +13,6 @@ const statusGridWidget = {
     { key: 'wifi', label: 'WIFI' },
   ],
 
-  tiers: {
-    cpu: [60, 80, 94],
-    gpu: [60, 80, 94],
-    ram: [40, 70, 86],
-    temp: [60, 80, 91],
-    wifi: [20, 30, 51],
-  },
-
   init() {
     this.el = document.getElementById('system-status');
     this.mirrorEl = document.getElementById('offline-status');
@@ -38,32 +30,27 @@ const statusGridWidget = {
   },
 
   tierFor(key, value) {
-    const [green, yellow, red] = this.tiers[key];
-    if (value < green) return 'green';
-    if (value < yellow) return 'yellow';
-    if (value < red) return 'red';
-    return 'purple';
+    return statusTierFor(key, value);
   },
 
   cellClass(key, block) {
     if (!block || !(key in block)) return 'cell cell--empty';
-    if (block[key] == null) return 'cell cell--gray';
+    if (block[key] == null) return `cell cell--${statusUnavailableColor()}`;
     return `cell cell--${this.tierFor(key, block[key])}`;
   },
 
   formatValue(key, latest, current) {
-    // Text is always the instant reading (feels live); the color follows the
-    // current block's running-average tier so the number never visually
-    // disagrees with the cell it sits next to.
     const currentValue = current && current[key] != null ? current[key] : null;
 
     if (key === 'wifi') {
-      if (!latest.online || latest.wifi == null) return { text: 'offline', tier: 'gray' };
+      if (!latest.online || latest.wifi == null) {
+        return { text: 'offline', tier: statusUnavailableColor() };
+      }
       const tierValue = currentValue != null ? currentValue : latest.wifi;
       return { text: `${Math.round(latest.wifi)}ms`, tier: this.tierFor('wifi', tierValue) };
     }
     const value = latest[key];
-    if (value == null) return { text: '—', tier: 'gray' };
+    if (value == null) return { text: '—', tier: statusUnavailableColor() };
     const tierValue = currentValue != null ? currentValue : value;
     return { text: `${Math.round(value)}${key === 'temp' ? '°' : '%'}`, tier: this.tierFor(key, tierValue) };
   },

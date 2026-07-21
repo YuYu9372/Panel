@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "title": "Settings",
+  "fieldOrder": [
+    "anthropicApiKey",
+    "composioMcpToken",
+    "refreshMinutes",
+    "updateChannel"
+  ],
+  "labels": {
+    "anthropicApiKey": "Anthropic API Key",
+    "composioMcpToken": "Composio MCP Token",
+    "refreshMinutes": "Refresh time",
+    "updateChannel": "Update channel"
+  }
+}

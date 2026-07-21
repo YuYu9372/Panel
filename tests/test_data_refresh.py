@@ -1,6 +1,8 @@
+import json
+import os
 import time
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import serve
 
@@ -19,6 +21,48 @@ class DataRefreshTests(unittest.TestCase):
     def test_refresh_intervals_are_fifteen_minutes(self):
         self.assertEqual(serve.CALENDAR_CACHE_SECONDS, 900)
         self.assertEqual(serve.TASKS_CACHE_SECONDS, 900)
+
+    def test_refresh_minutes_are_bounded(self):
+        with patch.dict(os.environ, {'PANEL_REFRESH_MINUTES': '30'}):
+            self.assertEqual(serve.refresh_minutes(), 30)
+        with patch.dict(os.environ, {'PANEL_REFRESH_MINUTES': '0'}):
+            self.assertEqual(serve.refresh_minutes(), 1)
+        with patch.dict(os.environ, {'PANEL_REFRESH_MINUTES': '9999'}):
+            self.assertEqual(serve.refresh_minutes(), 1440)
+        with patch.dict(os.environ, {'PANEL_REFRESH_MINUTES': 'invalid'}):
+            self.assertEqual(serve.refresh_minutes(), 15)
+
+    @patch.object(serve, 'urlopen')
+    def test_weather_proxy_returns_only_widget_fields(self, urlopen):
+        response = MagicMock()
+        response.read.return_value = json.dumps({
+            'current': {
+                'temperature_2m': 26.4,
+                'weather_code': 1,
+                'uv_index': 3.2,
+                'unexpected': 'discarded',
+            },
+            'daily': {
+                'temperature_2m_max': [31.0, 32.0],
+                'temperature_2m_min': [24.0, 25.0],
+                'unexpected': ['discarded'],
+            },
+            'unexpected': 'discarded',
+        }).encode('utf-8')
+        urlopen.return_value.__enter__.return_value = response
+
+        self.assertEqual(serve.get_weather(), {
+            'current': {
+                'temperature_2m': 26.4,
+                'weather_code': 1,
+                'uv_index': 3.2,
+            },
+            'daily': {
+                'temperature_2m_max': [31.0],
+                'temperature_2m_min': [24.0],
+            },
+        })
+        urlopen.assert_called_once_with(serve.WEATHER_URL, timeout=10)
 
     @patch.object(serve, 'mcp_configured', return_value=True)
     @patch.object(serve, 'fetch_calendar', return_value=[{'title': 'Fresh'}])

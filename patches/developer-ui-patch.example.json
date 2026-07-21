@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "patchId": "developer-update-ui-2",
+  "channel": "developer",
+  "sequence": 2,
+  "appVersionRange": ">=0.5.2-alpha.2 <0.5.3",
+  "lifetimeDays": 7,
+  "ui": {
+    "eyebrow": "DEVELOPER UPDATE",
+    "availableTitle": "A test build is ready",
+    "downloadedTitle": "Test build downloaded",
+    "releaseLabel": "TEST CHANGES",
+    "downloadLabel": "Download test build",
+    "installLabel": "Restart into test build",
+    "accent": "#d1843f",
+    "accentSoft": "#f8eadb",
+    "darkAccent": "#df924c",
+    "darkAccentSoft": "#332417",
+    "darkSurface": "#1b1d21",
+    "darkText": "#e8e6e0",
+    "darkMuted": "#aaa69d",
+    "radius": 18,
+    "width": 410,
+    "density": "comfortable"
+  }
+}

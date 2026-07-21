@@ -27,8 +27,15 @@ const connectivityWidget = {
   },
 
   setState(state, latency) {
-    ['unknown', 'good', 'slow', 'down'].forEach((s) =>
-      this.el.classList.toggle(`net--${s}`, s === state));
+    const offline = statusOfflineStyle();
+    const visualState = state === 'down'
+      ? offline.color
+      : state === 'unknown' ? statusUnavailableColor() : state;
+    this.el.classList.remove('net--unknown');
+    ['green', 'yellow', 'red', 'purple', 'gray'].forEach((color) =>
+      this.el.classList.toggle(`net--${color}`, color === visualState));
+    this.el.classList.toggle('net--down', state === 'down');
+    this.el.classList.toggle('net--slash', state === 'down' && offline.showSlash);
     this.el.querySelector('.net-latency').textContent =
       latency == null ? '' : `${Math.round(latency)} ms`;
     this.el.setAttribute('aria-label',
@@ -58,8 +65,8 @@ const connectivityWidget = {
       const data = await res.json();
       if (!data.online) throw new Error('offline');
       this.failStreak = 0;
-      const good = data.latency_ms != null && data.latency_ms < 30;
-      this.setState(good ? 'good' : 'slow', data.latency_ms);
+      const tier = statusTierFor('wifi', data.latency_ms);
+      this.setState(tier === 'gray' ? 'unknown' : tier, data.latency_ms);
       this.showOffline(false);
     } catch {
       this.failStreak += 1;

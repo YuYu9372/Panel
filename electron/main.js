@@ -1,31 +1,44 @@
-// Electron wrapper for Panel.
-// Launches the existing Python server (serve.py) as a child process, waits for
-// it to answer on the local port, then opens a full-screen kiosk window at it.
-// Uses the system python3 — if none is found, it tells the user to install it.
-
-const { app, BrowserWindow, dialog } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  net,
+  safeStorage,
+  session,
+} = require('electron');
 const { spawn } = require('child_process');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const { pathToFileURL } = require('url');
+const { autoUpdater } = require('electron-updater');
+const { SettingsStore } = require('./settings-store');
+const { testConnections } = require('./connections');
+const { PatchManager } = require('./patch-manager');
+const { UpdateManager } = require('./update-manager');
+const { PATCH_MANIFEST_BASE_URL, PATCH_TRUST } = require('./update-trust');
 
 const HOST = '127.0.0.1';
 const PORT = 8642;
 const APP_URL = `http://${HOST}:${PORT}/`;
+const APP_ORIGIN = `http://${HOST}:${PORT}`;
+const SETTINGS_FILE = path.join(__dirname, 'settings.html');
+const SETTINGS_URL = pathToFileURL(SETTINGS_FILE).href;
 
 let pyProc = null;
 let win = null;
+let settingsStore = null;
+let updateManager = null;
+let patchManager = null;
+const updateTimers = [];
 
-// serve.py + the static assets live in the repo root during dev, and in
-// Resources/panel inside the packaged .app.
 function panelDir() {
   return app.isPackaged
     ? path.join(process.resourcesPath, 'panel')
     : path.join(__dirname, '..');
 }
 
-// Apps launched from Finder inherit a minimal PATH (no Homebrew dirs), so probe
-// the usual python3 locations directly instead of relying on `python3` in PATH.
 function findPython() {
   const homes = [
     '/opt/homebrew/bin/python3',
@@ -35,7 +48,7 @@ function findPython() {
   const fromPath = (process.env.PATH || '')
     .split(':')
     .filter(Boolean)
-    .map((dir) => path.join(dir, 'python3'));
+    .map((directory) => path.join(directory, 'python3'));
   for (const candidate of [...homes, ...fromPath]) {
     try {
       if (fs.existsSync(candidate)) return candidate;
@@ -44,16 +57,15 @@ function findPython() {
   return null;
 }
 
-// True if a Panel server is already answering on the port.
 function ping() {
   return new Promise((resolve) => {
-    const req = http.get(APP_URL, (res) => {
-      res.destroy();
+    const request = http.get(APP_URL, (response) => {
+      response.destroy();
       resolve(true);
     });
-    req.on('error', () => resolve(false));
-    req.setTimeout(800, () => {
-      req.destroy();
+    request.on('error', () => resolve(false));
+    request.setTimeout(800, () => {
+      request.destroy();
       resolve(false);
     });
   });
@@ -63,7 +75,16 @@ async function waitForServer(timeoutMs = 15000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await ping()) return true;
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+  return false;
+}
+
+async function waitForServerStop(timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (!(await ping())) return true;
+    await new Promise((resolve) => setTimeout(resolve, 150));
   }
   return false;
 }
@@ -79,6 +100,23 @@ function fail(title, detail) {
   app.quit();
 }
 
+function serverEnvironment() {
+  const settings = settingsStore.runtimeSettings();
+  const environment = {
+    ...process.env,
+    PANEL_HOST: HOST,
+    PANEL_PORT: String(PORT),
+    PANEL_MANAGED_SETTINGS: '1',
+    PANEL_REFRESH_MINUTES: String(settings.refreshMinutes),
+    PYTHONDONTWRITEBYTECODE: '1',
+  };
+  delete environment.ANTHROPIC_API_KEY;
+  delete environment.COMPOSIO_MCP_TOKEN;
+  if (settings.anthropicApiKey) environment.ANTHROPIC_API_KEY = settings.anthropicApiKey;
+  if (settings.composioMcpToken) environment.COMPOSIO_MCP_TOKEN = settings.composioMcpToken;
+  return environment;
+}
+
 function startServer() {
   const python = findPython();
   if (!python) {
@@ -91,18 +129,212 @@ function startServer() {
     );
     return false;
   }
+  let environment;
+  try {
+    environment = serverEnvironment();
+  } catch (error) {
+    fail('Panel settings could not be read', String(error));
+    return false;
+  }
   pyProc = spawn(python, ['serve.py'], {
     cwd: panelDir(),
-    env: {
-      ...process.env,
-      PANEL_HOST: HOST,
-      PANEL_PORT: String(PORT),
-      PYTHONDONTWRITEBYTECODE: '1',
-    },
+    env: environment,
     stdio: 'ignore',
   });
-  pyProc.on('error', (err) => fail('Could not start Panel server', String(err)));
+  const processReference = pyProc;
+  pyProc.on('error', (error) => fail('Could not start Panel server', String(error)));
+  pyProc.on('exit', () => {
+    if (pyProc === processReference) pyProc = null;
+  });
   return true;
+}
+
+function stopServer() {
+  const processReference = pyProc;
+  if (!processReference || processReference.killed) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    let finished = false;
+    const complete = () => {
+      if (finished) return;
+      finished = true;
+      resolve(true);
+    };
+    const timeout = setTimeout(complete, 4000);
+    processReference.once('exit', () => {
+      clearTimeout(timeout);
+      complete();
+    });
+    try {
+      processReference.kill('SIGTERM');
+    } catch {
+      clearTimeout(timeout);
+      complete();
+    }
+  });
+}
+
+async function restartManagedServer() {
+  if (!pyProc) return false;
+  await stopServer();
+  if (!(await waitForServerStop())) return false;
+  if (!startServer()) return false;
+  return waitForServer();
+}
+
+function senderLocation(event) {
+  return event.senderFrame && event.senderFrame.url ? event.senderFrame.url : '';
+}
+
+function isDashboardSender(event) {
+  try {
+    return new URL(senderLocation(event)).origin === APP_ORIGIN;
+  } catch {
+    return false;
+  }
+}
+
+function isSettingsSender(event) {
+  return senderLocation(event) === SETTINGS_URL;
+}
+
+function isPanelSender(event) {
+  return isDashboardSender(event) || isSettingsSender(event);
+}
+
+function requireSender(event, validator) {
+  if (!validator(event)) throw new Error('Unauthorized Panel request.');
+}
+
+async function showDashboard() {
+  if (!(await ping())) {
+    if (!startServer()) return false;
+    if (!(await waitForServer())) {
+      fail('Panel server did not respond', 'The local server did not come up in time.');
+      return false;
+    }
+  }
+  await win.loadURL(APP_URL);
+  return true;
+}
+
+async function showSettings() {
+  await win.loadFile(SETTINGS_FILE);
+  return true;
+}
+
+function combinedUpdateState() {
+  const fullUpdate = updateManager.snapshot();
+  return {
+    ...fullUpdate,
+    uiPatch: patchManager.snapshot(fullUpdate.channel),
+  };
+}
+
+function publishUpdateState() {
+  if (!win || win.isDestroyed()) return;
+  win.webContents.send('panel:update-state', combinedUpdateState());
+}
+
+async function checkAllUpdates() {
+  const channel = updateManager.snapshot().channel;
+  await Promise.allSettled([
+    updateManager.check(),
+    patchManager.check(channel),
+  ]);
+  publishUpdateState();
+  return combinedUpdateState();
+}
+
+function createUpdateServices() {
+  updateManager = new UpdateManager({
+    app,
+    updater: autoUpdater,
+    settingsStore,
+    enabled: app.isPackaged,
+  });
+  const developmentPatchUrl = process.env.PANEL_PATCH_MANIFEST_BASE_URL || '';
+  patchManager = new PatchManager({
+    appVersion: app.getVersion(),
+    userDataPath: app.getPath('userData'),
+    fetcher: (url, options) => net.fetch(url, options),
+    manifestBaseUrl: app.isPackaged ? PATCH_MANIFEST_BASE_URL : developmentPatchUrl,
+    trust: PATCH_TRUST,
+    allowHttp: !app.isPackaged,
+  });
+  updateManager.on('state', publishUpdateState);
+  patchManager.on('state', publishUpdateState);
+  if (app.isPackaged) {
+    updateTimers.push(setTimeout(checkAllUpdates, 15000));
+    updateTimers.push(setInterval(checkAllUpdates, 4 * 60 * 60 * 1000));
+  }
+}
+
+function registerIpc() {
+  ipcMain.handle('panel:open-settings', async (event) => {
+    requireSender(event, isDashboardSender);
+    return showSettings();
+  });
+
+  ipcMain.handle('panel:close-settings', async (event) => {
+    requireSender(event, isSettingsSender);
+    return showDashboard();
+  });
+
+  ipcMain.handle('panel:get-settings-status', (event) => {
+    requireSender(event, isSettingsSender);
+    return settingsStore.status();
+  });
+
+  ipcMain.handle('panel:test-connections', async (event, payload) => {
+    requireSender(event, isSettingsSender);
+    const settings = settingsStore.mergePayload(payload);
+    return testConnections((url, options) => net.fetch(url, options), settings);
+  });
+
+  ipcMain.handle('panel:save-settings', async (event, payload) => {
+    requireSender(event, isSettingsSender);
+    const status = settingsStore.save(payload);
+    const servicesRestarted = await restartManagedServer();
+    return { ...status, servicesRestarted };
+  });
+
+  ipcMain.handle('panel:get-update-state', (event) => {
+    requireSender(event, isPanelSender);
+    return combinedUpdateState();
+  });
+
+  ipcMain.handle('panel:check-for-updates', async (event) => {
+    requireSender(event, isPanelSender);
+    return checkAllUpdates();
+  });
+
+  ipcMain.handle('panel:download-update', async (event) => {
+    requireSender(event, isDashboardSender);
+    await updateManager.download();
+    return combinedUpdateState();
+  });
+
+  ipcMain.handle('panel:install-update', (event) => {
+    requireSender(event, isDashboardSender);
+    return updateManager.install();
+  });
+
+  ipcMain.handle('panel:set-update-channel', (event, channel) => {
+    requireSender(event, isPanelSender);
+    updateManager.setChannel(channel);
+    patchManager.publish(channel);
+    return combinedUpdateState();
+  });
+
+  ipcMain.handle('panel:confirm-ui-patch', (event, patchId) => {
+    requireSender(event, isDashboardSender);
+    return patchManager.confirm(patchId, updateManager.snapshot().channel);
+  });
+
+  ipcMain.handle('panel:report-ui-patch-failure', (event, patchId) => {
+    requireSender(event, isDashboardSender);
+    return patchManager.reportFailure(patchId, updateManager.snapshot().channel);
+  });
 }
 
 function createWindow() {
@@ -111,27 +343,48 @@ function createWindow() {
     kiosk: true,
     backgroundColor: '#f3eee4',
     autoHideMenuBar: true,
-    webPreferences: { contextIsolation: true },
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+      preload: path.join(__dirname, 'preload.js'),
+    },
   });
-  win.loadURL(APP_URL);
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  win.webContents.on('will-navigate', (event, targetUrl) => {
+    const currentUrl = win.webContents.getURL();
+    if (targetUrl !== APP_URL && targetUrl !== SETTINGS_URL && targetUrl !== currentUrl) {
+      event.preventDefault();
+    }
+  });
   win.on('closed', () => {
     win = null;
   });
 }
 
 app.whenReady().then(async () => {
-  // Reuse a server that's already running (e.g. started from Terminal).
-  if (!(await ping())) {
-    if (!startServer()) return;
-  }
-  if (!(await waitForServer())) {
-    fail('Panel server did not respond', 'The local server did not come up in time.');
-    return;
-  }
+  session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false);
+  });
+  settingsStore = new SettingsStore({
+    safeStorage,
+    userDataPath: app.getPath('userData'),
+  });
+  createUpdateServices();
+  registerIpc();
   createWindow();
+  await showDashboard();
 });
 
 app.on('window-all-closed', () => app.quit());
+
+app.on('will-quit', () => {
+  updateTimers.forEach((timer) => clearTimeout(timer));
+  if (!pyProc || pyProc.killed) return;
+  try {
+    pyProc.kill('SIGTERM');
+  } catch {}
+});
 
 app.on('will-quit', () => {
   if (pyProc && !pyProc.killed) {

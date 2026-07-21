@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Panel Settings</title>
+  <link rel="stylesheet" href="settings.css">
+  <script src="settings.js" defer></script>
+</head>
+<body>
+  <header class="settings-topbar">
+    <div>
+      <div class="settings-kicker">PANEL</div>
+      <h1 id="settings-title">Settings</h1>
+    </div>
+    <button id="back-button" class="icon-button" type="button" aria-label="Return to dashboard">
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5"></path>
+        <path d="m11 18-6-6 6-6"></path>
+      </svg>
+    </button>
+  </header>
+
+  <main class="settings-layout">
+    <form id="connections-form" class="settings-panel" novalidate>
+      <div id="settings-fields" class="settings-fields">
+        <div id="settings-field-anthropicApiKey" class="settings-row" data-setting-field="anthropicApiKey">
+          <label id="settings-label-anthropicApiKey" for="anthropic-api-key">Anthropic API Key</label>
+          <div class="row-content">
+            <div class="secret-control">
+              <input id="anthropic-api-key" name="anthropicApiKey" type="password" autocomplete="off" spellcheck="false">
+              <button class="reveal-button" type="button" data-target="anthropic-api-key">Show</button>
+            </div>
+            <span id="anthropic-status" class="connection-status">Not tested</span>
+          </div>
+        </div>
+
+        <div id="settings-field-composioMcpToken" class="settings-row" data-setting-field="composioMcpToken">
+          <label id="settings-label-composioMcpToken" for="composio-mcp-token">Composio MCP Token</label>
+          <div class="row-content">
+            <div class="secret-control">
+              <input id="composio-mcp-token" name="composioMcpToken" type="password" autocomplete="off" spellcheck="false">
+              <button class="reveal-button" type="button" data-target="composio-mcp-token">Show</button>
+            </div>
+            <span id="composio-status" class="connection-status">Not tested</span>
+          </div>
+        </div>
+
+        <div id="settings-field-refreshMinutes" class="settings-row" data-setting-field="refreshMinutes">
+          <label id="settings-label-refreshMinutes" for="refresh-minutes">Refresh time</label>
+          <div class="row-content">
+            <div class="number-control">
+              <input id="refresh-minutes" name="refreshMinutes" type="number" min="1" max="1440" step="1" inputmode="numeric" value="15" required>
+              <span>min</span>
+            </div>
+            <span class="field-note">Calendar and Tasks</span>
+          </div>
+        </div>
+
+        <div id="settings-field-updateChannel" class="settings-row" data-setting-field="updateChannel">
+          <label id="settings-label-updateChannel" for="update-channel">Update channel</label>
+          <div class="row-content">
+            <div class="channel-control">
+              <select id="update-channel" name="updateChannel">
+                <option value="stable">Stable</option>
+                <option value="developer">Developer</option>
+              </select>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m7 9 5 5 5-5"></path>
+              </svg>
+            </div>
+            <div class="update-meta">
+              <span id="settings-update-status">Ready to check</span>
+              <button id="settings-check-update" class="text-button" type="button">Check now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="form-message" class="form-message" role="status" aria-live="polite"></div>
+
+      <div class="form-actions">
+        <button id="test-button" class="secondary-button" type="button">Test connections</button>
+        <button id="save-button" class="primary-button" type="submit">Save</button>
+      </div>
+    </form>
+  </main>
+
+  <div class="version-tag">0.5.2_D</div>
+</body>
+</html>

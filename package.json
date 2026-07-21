@@ -1,6 +1,6 @@
 {
   "name": "panel",
-  "version": "0.5.1",
+  "version": "0.5.2-alpha.4",
   "description": "Panel — personal dashboard, packaged as a macOS app.",
   "author": "Sirius",
   "license": "UNLICENSED",
@@ -8,37 +8,84 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac dmg",
-    "dist:public": "electron-builder --mac dmg --config electron-builder.public.json"
+    "dist": "electron-builder --mac && node scripts/copy-operation-manual.js",
+    "sign:patch": "node scripts/sign-ui-patch.js",
+    "test:node": "node --test tests-js/*.test.js",
+    "test:python": "python3 -m unittest discover -s tests -v",
+    "test": "npm run test:node && npm run test:python"
   },
   "devDependencies": {
-    "electron": "^33.2.0",
-    "electron-builder": "^25.1.8"
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3"
   },
   "build": {
     "appId": "com.sirius.panel",
     "productName": "Panel",
-    "artifactName": "panel-0.5.1-C-dev.${ext}",
+    "artifactName": "panel-0.5.2-D.${ext}",
+    "generateUpdatesFilesForAllChannels": true,
+    "electronUpdaterCompatibility": ">=2.16",
     "directories": {
-      "output": "dist"
+      "output": "dist/0.5.2/Beta_D"
     },
     "files": [
       "electron/**/*",
+      "widgets/refresh-policy.js",
+      "widgets/status-tiers.js",
       "package.json"
     ],
     "extraResources": [
-      { "from": "serve.py", "to": "panel/serve.py" },
-      { "from": "macos_sensors.py", "to": "panel/macos_sensors.py" },
-      { "from": "THIRD_PARTY_NOTICES.md", "to": "panel/THIRD_PARTY_NOTICES.md" },
-      { "from": "index.html", "to": "panel/index.html" },
-      { "from": "style.css", "to": "panel/style.css" },
-      { "from": "app.js", "to": "panel/app.js" },
-      { "from": "widgets", "to": "panel/widgets" },
-      { "from": ".env", "to": "panel/.env" }
+      {
+        "from": "serve.py",
+        "to": "panel/serve.py"
+      },
+      {
+        "from": "macos_sensors.py",
+        "to": "panel/macos_sensors.py"
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "panel/THIRD_PARTY_NOTICES.md"
+      },
+      {
+        "from": "index.html",
+        "to": "panel/index.html"
+      },
+      {
+        "from": "style.css",
+        "to": "panel/style.css"
+      },
+      {
+        "from": "app.js",
+        "to": "panel/app.js"
+      },
+      {
+        "from": "config",
+        "to": "panel/config"
+      },
+      {
+        "from": "widgets",
+        "to": "panel/widgets"
+      }
     ],
     "mac": {
-      "target": "dmg",
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "category": "public.app-category.utilities"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "YuYu9372",
+        "repo": "Panel-Updates",
+        "releaseType": "draft",
+        "channel": "alpha"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "semver": "^7.8.5"
   }
 }
