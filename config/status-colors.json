@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "metrics": {
+    "cpu": {
+      "unit": "%",
+      "rules": [
+        { "minInclusive": 0, "maxExclusive": 60, "color": "green" },
+        { "minInclusive": 60, "maxExclusive": 80, "color": "yellow" },
+        { "minInclusive": 80, "maxExclusive": 94, "color": "red" },
+        { "minInclusive": 94, "maxExclusive": null, "color": "purple" }
+      ]
+    },
+    "gpu": {
+      "unit": "%",
+      "rules": [
+        { "minInclusive": 0, "maxExclusive": 60, "color": "green" },
+        { "minInclusive": 60, "maxExclusive": 80, "color": "yellow" },
+        { "minInclusive": 80, "maxExclusive": 94, "color": "red" },
+        { "minInclusive": 94, "maxExclusive": null, "color": "purple" }
+      ]
+    },
+    "ram": {
+      "unit": "%",
+      "rules": [
+        { "minInclusive": 0, "maxExclusive": 40, "color": "green" },
+        { "minInclusive": 40, "maxExclusive": 70, "color": "yellow" },
+        { "minInclusive": 70, "maxExclusive": 86, "color": "red" },
+        { "minInclusive": 86, "maxExclusive": null, "color": "purple" }
+      ]
+    },
+    "temp": {
+      "unit": "°C",
+      "rules": [
+        { "minInclusive": 0, "maxExclusive": 60, "color": "green" },
+        { "minInclusive": 60, "maxExclusive": 80, "color": "yellow" },
+        { "minInclusive": 80, "maxExclusive": 91, "color": "red" },
+        { "minInclusive": 91, "maxExclusive": null, "color": "purple" }
+      ]
+    },
+    "wifi": {
+      "unit": "ms",
+      "rules": [
+        { "minInclusive": 0, "maxExclusive": 20, "color": "green" },
+        { "minInclusive": 20, "maxExclusive": 30, "color": "yellow" },
+        { "minInclusive": 30, "maxExclusive": 41, "color": "red" },
+        { "minInclusive": 41, "maxExclusive": null, "color": "purple" }
+      ]
+    }
+  },
+  "offline": {
+    "color": "red",
+    "showSlash": true
+  },
+  "unavailable": {
+    "color": "gray"
+  }
+}

@@ -137,6 +137,7 @@ Panel/
 - [x] Activate patches atomically and roll back after a failed or missing health confirmation.
 - [x] Keep HTML, JavaScript, API endpoints, preload, Python, and credentials outside hot patches.
 - [x] Use shared Wi-Fi tiers: `<20 / 20-29 / 30-40 / >=41` ms for green/yellow/red/purple.
+- [x] Load every CPU, GPU, RAM, Temperature, and Wi-Fi color range from validated JSON.
 - [x] Add an English operations manual to `docs` and every successful `dist` build.
 - [ ] Create the public artifact-only `Panel-Updates` repository and publish notarized releases.
 
@@ -155,6 +156,7 @@ Panel/
   Block tiers: CPU/GPU `<60 / 60-79 / 80-93 / >93`; RAM `<40 / 40-69 / 70-85 / >85`;
   TEMP `<60 / 60-79 / 80-90 / >90`°C; WIFI `<20 / 20-29 / 30-40 / >=41`ms →
   green/yellow/red/purple; gray = no reading / offline.
+  Editable ranges live in `config/status-colors.json` and are validated before use.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
 - Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. `widgets/boot-theme.js` sets it before first paint without requiring inline script execution.
 - Updates: full releases use electron-updater, macOS code signing, DMG + ZIP, and Stable/Developer channels. Update-interface hot patches use independent Ed25519 keys, declarative allowlisted fields, anti-replay sequence numbers, expiry, atomic activation, and rollback. Operational steps are in `docs/UPDATES.md`.

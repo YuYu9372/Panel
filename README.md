@@ -32,9 +32,10 @@ the update details card. See [docs/UPDATES.md](docs/UPDATES.md) for the signed
 full-update and restricted UI hot-patch workflow.
 
 The English [operations manual](docs/OPERATIONS.md) covers routine development,
-Wi-Fi tier changes, testing, builds, installation, releases, hot patches, and
-recovery. Every successful `npm run dist` also copies it into `dist` and the
-current version's build folder.
+status color changes, testing, builds, installation, releases, hot patches, and
+recovery. CPU, GPU, RAM, Temperature, and Wi-Fi tiers are defined in the
+validated `config/status-colors.json` file. Every successful `npm run dist`
+copies the manual and JSON into `dist` and the current version's build folder.
 
 The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the fixed Composio MCP service directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
 
@@ -62,6 +63,8 @@ Current: **0.5.2_B**
 - Kept API credentials outside both update artifacts and patch data.
 - Changed Wi-Fi colors to green below 20 ms, yellow from 20 to below 30 ms,
   red from 30 to below 41 ms, and purple from 41 ms upward.
+- Moved all CPU, GPU, RAM, Temperature, and Wi-Fi color ranges into a validated
+  JSON file that is used directly by the dashboard.
 
 ### 0.4.2
 

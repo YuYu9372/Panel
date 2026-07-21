@@ -1,6 +1,6 @@
 # Panel Operations Manual
 
-This manual covers routine development, Wi-Fi tier changes, testing, packaging,
+This manual covers routine development, status color changes, testing, packaging,
 installation, Stable and Developer releases, restricted UI hot patches, and
 recovery.
 
@@ -10,6 +10,7 @@ recovery.
 | --- | --- |
 | Source repository | `/Users/yu/Dev_code/Panel` |
 | Current build output | `dist/0.5.2/Beta_B` |
+| Editable status color JSON | `config/status-colors.json` |
 | Installed App | `/Applications/Panel.app` |
 | Encrypted per-user settings | `~/Library/Application Support/Panel/secure-settings/settings.json` |
 | UI patch state | `~/Library/Application Support/Panel/ui-patches/state.json` |
@@ -30,27 +31,27 @@ npm start
 The development App uses the source files directly. Quit it before testing an
 installed build so that two copies do not compete for local port `8642`.
 
-## 3. Wi-Fi latency tiers
+## 3. Status color JSON
 
-The shared Wi-Fi thresholds are in `widgets/wifi-tiers.js`:
+Panel reads `config/status-colors.json` before starting the widgets. The file
+controls CPU, GPU, RAM, Temperature, and Wi-Fi colors:
 
-```js
-const wifiThresholds = Object.freeze([20, 30, 41]);
-```
+| Metric | Green | Yellow | Red | Purple |
+| --- | --- | --- | --- | --- |
+| CPU | `< 60%` | `60–<80%` | `80–<94%` | `≥ 94%` |
+| GPU | `< 60%` | `60–<80%` | `80–<94%` | `≥ 94%` |
+| RAM | `< 40%` | `40–<70%` | `70–<86%` | `≥ 86%` |
+| Temperature | `< 60°C` | `60–<80°C` | `80–<91°C` | `≥ 91°C` |
+| Wi-Fi | `< 20 ms` | `20–<30 ms` | `30–<41 ms` | `≥ 41 ms` |
 
-They apply to both the top Wi-Fi indicator and the bottom history row:
+The same Wi-Fi rules apply to the top indicator and the bottom history row.
+Missing readings use the `unavailable` color. Offline Wi-Fi uses the `offline`
+color and slash setting.
 
-| Latency | Tier |
-| --- | --- |
-| Less than 20 ms | green |
-| 20 ms through less than 30 ms | yellow |
-| 30 ms through less than 41 ms | red |
-| 41 ms and above | purple |
-| Missing or offline | gray or offline red |
-
-After changing these numbers, update the Wi-Fi tests and run `npm test`. This is
-App behavior, so it requires a full App build. The restricted UI hot-patch path
-cannot change network logic.
+Edit only the source JSON. Do not edit a JSON file inside
+`/Applications/Panel.app`, because changing an installed bundle invalidates its
+signature. Run `npm test` after an edit, then run `npm run dist` and install the
+new build. This behavior cannot be changed by a restricted UI hot patch.
 
 ### JSON lesson
 
@@ -73,24 +74,29 @@ every label literally, values under 20 also match `<30ms` and `<40ms`. Values
 equal to 40 or 41 match nothing because `<40` excludes 40 and `>41` excludes
 41.
 
-An explicit JSON representation would be:
+Panel's actual JSON representation uses explicit ranges:
 
 ```json
 {
-  "wifi": {
-    "rules": [
-      { "minInclusiveMs": 0, "maxExclusiveMs": 20, "color": "green" },
-      { "minInclusiveMs": 20, "maxExclusiveMs": 30, "color": "yellow" },
-      { "minInclusiveMs": 30, "maxExclusiveMs": 41, "color": "red" },
-      { "minInclusiveMs": 41, "maxExclusiveMs": null, "color": "purple" }
-    ]
+  "schemaVersion": 1,
+  "metrics": {
+    "wifi": {
+      "unit": "ms",
+      "rules": [
+        { "minInclusive": 0, "maxExclusive": 20, "color": "green" },
+        { "minInclusive": 20, "maxExclusive": 30, "color": "yellow" },
+        { "minInclusive": 30, "maxExclusive": 41, "color": "red" },
+        { "minInclusive": 41, "maxExclusive": null, "color": "purple" }
+      ]
+    }
   }
 }
 ```
 
-`null` means that the last range has no upper limit. Panel currently uses the
-short JavaScript threshold array because the evaluation order is defined in
-one tested function.
+`minInclusive` includes the lower number. `maxExclusive` excludes the upper
+number. `null` means that the final range has no upper limit. The validator
+requires ordered, continuous ranges and falls back to safe built-in values if
+the file is missing or invalid.
 
 ## 4. Run checks before every build
 
@@ -146,6 +152,7 @@ The command builds:
 - DMG and ZIP block maps
 - Channel metadata such as `alpha-mac.yml` or `latest-mac.yml`
 - A copy of this operations manual in `dist` and the current output directory
+- A copy of `status-colors.json` in `dist` and the current output directory
 
 Do not move only the DMG when publishing an automatic update. The ZIP, channel
 metadata, and matching block maps belong to the same release.
@@ -292,7 +299,7 @@ Check these items:
 - [ ] RAM and temperature return numeric values on the target Mac.
 - [ ] Weather and clock graphics render.
 - [ ] Calendar and Tasks load and manual refresh works.
-- [ ] Wi-Fi boundary tests pass.
+- [ ] Status color JSON validation and all metric boundary tests pass.
 - [ ] Developer update is tested before Stable release.
 - [ ] Public build is notarized.
 - [ ] Git changes are reviewed and committed.

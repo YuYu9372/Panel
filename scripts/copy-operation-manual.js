@@ -2,15 +2,23 @@ const fs = require('fs');
 const path = require('path');
 const packageJson = require('../package.json');
 
-const source = path.resolve(__dirname, '..', 'docs', 'OPERATIONS.md');
 const output = path.resolve(__dirname, '..', packageJson.build.directories.output);
-const targets = [
-  path.resolve(__dirname, '..', 'dist', 'OPERATIONS.md'),
-  path.join(output, 'OPERATIONS.md'),
+const copies = [
+  {
+    source: path.resolve(__dirname, '..', 'docs', 'OPERATIONS.md'),
+    name: 'OPERATIONS.md',
+  },
+  {
+    source: path.resolve(__dirname, '..', 'config', 'status-colors.json'),
+    name: 'status-colors.json',
+  },
 ];
 
-for (const target of targets) {
-  fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.copyFileSync(source, target);
-  process.stdout.write(`Copied operations manual to ${target}\n`);
+for (const copy of copies) {
+  for (const directory of [path.resolve(__dirname, '..', 'dist'), output]) {
+    const target = path.join(directory, copy.name);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(copy.source, target);
+    process.stdout.write(`Copied release resource to ${target}\n`);
+  }
 }

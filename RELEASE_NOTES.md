@@ -40,13 +40,17 @@ Signed Stable/Developer updates and restricted UI hot patches.
 - The top Wi-Fi indicator and bottom Wi-Fi history now share one tested tier
   function: green below 20 ms, yellow from 20 to below 30 ms, red from 30 to
   below 41 ms, and purple from 41 ms upward.
+- CPU, GPU, RAM, Temperature, Wi-Fi, offline, and unavailable colors now come
+  from `config/status-colors.json`. Panel rejects gaps, overlaps, missing
+  metrics, unsupported fields, and unsupported colors before using the file.
 - Added an English operations manual covering builds, installation, channel
   releases, UI hot patches, credential safety, verification, and recovery. A
-  current copy is placed in `dist` after every successful build.
+  current copy and the status color JSON are placed in `dist` after every
+  successful build.
 
 ### Verified
 
-- 31 Node security and behavior tests plus 9 Python tests pass.
+- 32 Node security and behavior tests plus 9 Python tests pass.
 - A real Developer patch was signed outside the repository, fetched from an
   isolated localhost test feed, verified, atomically applied, confirmed healthy,
   and rendered in Electron.

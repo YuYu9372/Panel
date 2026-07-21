@@ -13,6 +13,7 @@ const widgets = [
 
 async function startWidgets() {
   let refreshMilliseconds = 15 * 60 * 1000;
+  await loadStatusTierConfig();
   try {
     const response = await fetch('/api/config', { cache: 'no-store' });
     const config = await response.json();
