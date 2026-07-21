@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const semver = require('semver');
 const { validateRefreshPolicy } = require('../widgets/refresh-policy');
 const { validateStatusTierConfig } = require('../widgets/status-tiers');
+const { validateSettingsLayout } = require('./settings-layout');
 
 const ALLOWED_CHANNELS = new Set(['stable', 'developer']);
 const MAX_PATCH_LIFETIME_MS = 31 * 24 * 60 * 60 * 1000;
@@ -121,6 +122,7 @@ function validateSignedPayload(signed, options) {
     'ui',
     'statusColors',
     'refreshPolicy',
+    'settingsLayout',
   ]);
   ensureExactKeys(signed, allowed, 'Signed patch');
   if (signed.schemaVersion !== 1) throw new Error('Unsupported patch schema.');
@@ -149,7 +151,7 @@ function validateSignedPayload(signed, options) {
   if (expiresAt <= issuedAt || expiresAt - issuedAt > MAX_PATCH_LIFETIME_MS) {
     throw new Error('Patch lifetime is not valid.');
   }
-  const patchFields = ['ui', 'statusColors', 'refreshPolicy'];
+  const patchFields = ['ui', 'statusColors', 'refreshPolicy', 'settingsLayout'];
   if (!patchFields.some((field) => signed[field] !== undefined)) {
     throw new Error('Patch has no supported content.');
   }
@@ -160,6 +162,9 @@ function validateSignedPayload(signed, options) {
   }
   if (signed.refreshPolicy !== undefined) {
     validated.refreshPolicy = validateRefreshPolicy(signed.refreshPolicy);
+  }
+  if (signed.settingsLayout !== undefined) {
+    validated.settingsLayout = validateSettingsLayout(signed.settingsLayout);
   }
   return validated;
 }
@@ -207,6 +212,7 @@ function signPatchPayload(signed, privateKey, keyId) {
 module.exports = {
   canonicalJson,
   signPatchPayload,
+  validateSettingsLayout,
   validateUiPatch,
   verifyPatchEnvelope,
 };

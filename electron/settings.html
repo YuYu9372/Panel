@@ -12,7 +12,7 @@
   <header class="settings-topbar">
     <div>
       <div class="settings-kicker">PANEL</div>
-      <h1>Settings</h1>
+      <h1 id="settings-title">Settings</h1>
     </div>
     <button id="back-button" class="icon-button" type="button" aria-label="Return to dashboard">
       <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -23,136 +23,70 @@
   </header>
 
   <main class="settings-layout">
-    <nav class="settings-nav" aria-label="Settings sections">
-      <button class="settings-tab is-active" type="button" data-panel="connections-panel" aria-current="page">
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 12h8"></path>
-          <path d="M12 8v8"></path>
-          <circle cx="12" cy="12" r="9"></circle>
-        </svg>
-        <span>Connections</span>
-      </button>
-      <button class="settings-tab" type="button" data-panel="updates-panel">
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 3v12"></path>
-          <path d="m7 10 5 5 5-5"></path>
-          <path d="M5 21h14"></path>
-        </svg>
-        <span>Updates</span>
-      </button>
-    </nav>
-
-    <section id="connections-panel" class="settings-card" data-settings-panel aria-labelledby="connections-title">
-      <div class="card-heading">
-        <div>
-          <div class="settings-kicker">CONNECTIONS</div>
-          <h2 id="connections-title">Services and refresh</h2>
-        </div>
-        <div class="security-badge">Encrypted locally</div>
-      </div>
-
-      <form id="connections-form" novalidate>
-        <div class="field-group refresh-group">
-          <label for="refresh-minutes">Refresh time</label>
-          <div class="number-control">
-            <input id="refresh-minutes" name="refreshMinutes" type="number" min="1" max="1440" step="1" inputmode="numeric" required>
-            <span>min</span>
-          </div>
-          <p>Controls automatic Calendar and Tasks refreshes.</p>
-        </div>
-
-        <div class="service-section">
-          <div class="service-heading">
-            <div>
-              <span class="service-dot anthropic-dot"></span>
-              <h3>Anthropic</h3>
-            </div>
-            <span id="anthropic-status" class="connection-status">Not tested</span>
-          </div>
-          <div class="field-group">
-            <label for="anthropic-api-key">API key</label>
+    <form id="connections-form" class="settings-panel" novalidate>
+      <div id="settings-fields" class="settings-fields">
+        <div id="settings-field-anthropicApiKey" class="settings-row" data-setting-field="anthropicApiKey">
+          <label id="settings-label-anthropicApiKey" for="anthropic-api-key">Anthropic API Key</label>
+          <div class="row-content">
             <div class="secret-control">
               <input id="anthropic-api-key" name="anthropicApiKey" type="password" autocomplete="off" spellcheck="false">
               <button class="reveal-button" type="button" data-target="anthropic-api-key">Show</button>
             </div>
+            <span id="anthropic-status" class="connection-status">Not tested</span>
           </div>
         </div>
 
-        <div class="service-section">
-          <div class="service-heading">
-            <div>
-              <span class="service-dot composio-dot"></span>
-              <h3>Composio MCP</h3>
-            </div>
-            <span id="composio-status" class="connection-status">Not tested</span>
-          </div>
-          <div class="field-group">
-            <label for="composio-mcp-token">MCP token</label>
+        <div id="settings-field-composioMcpToken" class="settings-row" data-setting-field="composioMcpToken">
+          <label id="settings-label-composioMcpToken" for="composio-mcp-token">Composio MCP Token</label>
+          <div class="row-content">
             <div class="secret-control">
               <input id="composio-mcp-token" name="composioMcpToken" type="password" autocomplete="off" spellcheck="false">
               <button class="reveal-button" type="button" data-target="composio-mcp-token">Show</button>
             </div>
+            <span id="composio-status" class="connection-status">Not tested</span>
           </div>
         </div>
 
-        <div id="form-message" class="form-message" role="status" aria-live="polite"></div>
-
-        <div class="form-actions">
-          <button id="test-button" class="secondary-button" type="button">Test connections</button>
-          <button id="save-button" class="primary-button" type="submit">Save changes</button>
+        <div id="settings-field-refreshMinutes" class="settings-row" data-setting-field="refreshMinutes">
+          <label id="settings-label-refreshMinutes" for="refresh-minutes">Refresh time</label>
+          <div class="row-content">
+            <div class="number-control">
+              <input id="refresh-minutes" name="refreshMinutes" type="number" min="1" max="1440" step="1" inputmode="numeric" value="15" required>
+              <span>min</span>
+            </div>
+            <span class="field-note">Calendar and Tasks</span>
+          </div>
         </div>
-      </form>
-    </section>
 
-    <section id="updates-panel" class="settings-card" data-settings-panel aria-labelledby="updates-title" hidden>
-      <div class="card-heading">
-        <div>
-          <div class="settings-kicker">UPDATES</div>
-          <h2 id="updates-title">Release channel</h2>
-        </div>
-        <div class="security-badge">Signed updates</div>
-      </div>
-
-      <div class="channel-options" role="radiogroup" aria-label="Update channel">
-        <button class="channel-option" type="button" data-channel="stable" role="radio" aria-checked="false">
-          <span class="channel-dot stable-dot"></span>
-          <span>
-            <strong>Stable</strong>
-            <small>Public releases with the highest reliability.</small>
-          </span>
-          <span class="channel-check">✓</span>
-        </button>
-        <button class="channel-option" type="button" data-channel="developer" role="radio" aria-checked="false">
-          <span class="channel-dot developer-dot"></span>
-          <span>
-            <strong>Developer</strong>
-            <small>Early alpha builds for testing before public release.</small>
-          </span>
-          <span class="channel-check">✓</span>
-        </button>
-      </div>
-
-      <div class="update-settings-summary">
-        <div>
-          <span>Installed version</span>
-          <strong id="settings-current-version">0.5.2_C</strong>
-        </div>
-        <div>
-          <span>Update status</span>
-          <strong id="settings-update-status">Ready to check</strong>
+        <div id="settings-field-updateChannel" class="settings-row" data-setting-field="updateChannel">
+          <label id="settings-label-updateChannel" for="update-channel">Update channel</label>
+          <div class="row-content">
+            <div class="channel-control">
+              <select id="update-channel" name="updateChannel">
+                <option value="stable">Stable</option>
+                <option value="developer">Developer</option>
+              </select>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m7 9 5 5 5-5"></path>
+              </svg>
+            </div>
+            <div class="update-meta">
+              <span id="settings-update-status">Ready to check</span>
+              <button id="settings-check-update" class="text-button" type="button">Check now</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="update-settings-actions">
-        <div>
-          Full App updates use Apple code signing. UI hot patches require an
-          additional Ed25519 signature and roll back if their health check fails.
-        </div>
-        <button id="settings-check-update" class="secondary-button" type="button">Check now</button>
+      <div id="form-message" class="form-message" role="status" aria-live="polite"></div>
+
+      <div class="form-actions">
+        <button id="test-button" class="secondary-button" type="button">Test connections</button>
+        <button id="save-button" class="primary-button" type="submit">Save</button>
       </div>
-    </section>
+    </form>
   </main>
 
-  <div class="version-tag">0.5.2_C</div>
+  <div class="version-tag">0.5.2_D</div>
 </body>
 </html>

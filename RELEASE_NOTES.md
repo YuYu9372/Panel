@@ -1,5 +1,53 @@
 # Release Notes
 
+## 0.5.2_D
+
+Minimal Settings UI and safe declarative Settings layout patches.
+
+**Manual installer:** `panel-0.5.2-D.dmg`
+
+**Automatic-update payload:** `panel-0.5.2-D.zip`
+
+### Changed
+
+- Updated the semantic App version to `0.5.2-alpha.4`, displayed as
+  `0.5.2_D` throughout Panel.
+- Replaced the Connections and Updates tabs with one compact Settings screen.
+- The screen follows the requested model: Anthropic API key, Composio MCP
+  token, 15-minute refresh setting, and the per-device update channel.
+- Reduced the interface to four rows, one Test connections action, one Save
+  action, and a small manual update check.
+
+### Added
+
+- Added the validated `config/settings-layout.json` format for the Settings
+  title, field labels, and field order.
+- Signed Ed25519 live patches can now carry `settingsLayout`. Every patch must
+  retain all four supported rows exactly once and cannot add values, secrets,
+  URLs, HTML, JavaScript, or unknown fields.
+- Added automated tests for missing fields, unknown fields, attempted secret
+  values, signed layout delivery, and atomic rollback with the other live
+  configuration.
+
+### Security
+
+- API keys and tokens remain encrypted with macOS `safeStorage` outside the App
+  bundle and are never included in the Settings layout JSON or a live patch.
+- Mask/reveal, Test connections, Save, fixed MCP URL, and update verification
+  remain immutable code and cannot be removed by a layout patch.
+- Full Settings code or behavior changes still require a higher signed App
+  release and restart. The live patch remains declarative data only.
+
+### Verified
+
+- 45 Node security and behavior tests plus 9 Python tests pass.
+- The local browser preview confirms four rows, no Settings tabs, no horizontal
+  overflow, the 15-minute default, and working mask/reveal behavior.
+- The DMG, ZIP, App signature, packaged configuration, and absence of bundled
+  credentials are verified before installation.
+
+---
+
 ## 0.5.2_C
 
 Developer bootstrap for signed live configuration and revised status behavior.

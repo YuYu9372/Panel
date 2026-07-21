@@ -140,7 +140,7 @@ Panel/
 - [x] Load every CPU, GPU, RAM, Temperature, and Wi-Fi color range from validated JSON.
 - [x] Add an English operations manual to `docs` and every successful `dist` build.
 
-### 0.5.2_C <- Currently
+### 0.5.2_C
 - [x] Use semantic version `0.5.2-alpha.3` and display `0.5.2_C`.
 - [x] Update all status color boundaries through the validated JSON file.
 - [x] Refresh Calendar and Tasks every 30 minutes from 00:00 until 06:00 local time.
@@ -148,7 +148,19 @@ Panel/
 - [x] Allow signed declarative live patches to update status colors and the refresh policy.
 - [x] Reject arbitrary code, invalid ranges, disabled manual refresh, replay, and cross-channel patches.
 - [x] Build Developer DMG, ZIP, block maps, and `alpha-mac.yml` release metadata.
-- [ ] Install the final C bootstrap once before publishing its first live patch.
+- [x] Install the final C bootstrap once before publishing its first live patch.
+- [ ] Create the public artifact-only `Panel-Updates` repository and publish the first Developer release.
+- [ ] Replace the testing certificate with Developer ID Application signing and notarization before public Stable distribution.
+
+### 0.5.2_D <- Currently
+- [x] Use semantic version `0.5.2-alpha.4` and display `0.5.2_D`.
+- [x] Replace the tabbed Settings screen with one compact four-row layout.
+- [x] Keep encrypted Anthropic and Composio credentials, mask/reveal, connection testing, and Save.
+- [x] Keep refresh minutes and Stable/Developer channel selection on the same screen.
+- [x] Add a signed declarative `settingsLayout` field for the title, labels, and field order.
+- [x] Require all four fields exactly once and reject values, scripts, unknown fields, and missing security controls.
+- [x] Build and verify the Developer DMG, ZIP, block maps, and `alpha-mac.yml` metadata.
+- [x] Install D in `/Applications` and verify the packaged Settings screen and dashboard.
 - [ ] Create the public artifact-only `Panel-Updates` repository and publish the first Developer release.
 - [ ] Replace the testing certificate with Developer ID Application signing and notarization before public Stable distribution.
 

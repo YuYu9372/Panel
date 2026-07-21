@@ -1,3 +1,19 @@
+const DEFAULT_SETTINGS_LAYOUT = Object.freeze({
+  title: 'Settings',
+  fieldOrder: [
+    'anthropicApiKey',
+    'composioMcpToken',
+    'refreshMinutes',
+    'updateChannel',
+  ],
+  labels: {
+    anthropicApiKey: 'Anthropic API Key',
+    composioMcpToken: 'Composio MCP Token',
+    refreshMinutes: 'Refresh time',
+    updateChannel: 'Update channel',
+  },
+});
+
 const fields = {
   anthropicApiKey: document.getElementById('anthropic-api-key'),
   composioMcpToken: document.getElementById('composio-mcp-token'),
@@ -5,15 +21,52 @@ const fields = {
 
 const form = document.getElementById('connections-form');
 const refreshMinutes = document.getElementById('refresh-minutes');
+const updateChannel = document.getElementById('update-channel');
 const formMessage = document.getElementById('form-message');
 const testButton = document.getElementById('test-button');
 const saveButton = document.getElementById('save-button');
 const checkUpdateButton = document.getElementById('settings-check-update');
-const channelButtons = [...document.querySelectorAll('.channel-option')];
 
 function applyTheme() {
   const hour = new Date().getHours();
   document.documentElement.dataset.theme = hour >= 18 || hour < 5 ? 'dark' : 'light';
+}
+
+function layoutOrDefault(candidate) {
+  if (!candidate || typeof candidate !== 'object') return DEFAULT_SETTINGS_LAYOUT;
+  const allowedFields = DEFAULT_SETTINGS_LAYOUT.fieldOrder;
+  const order = Array.isArray(candidate.fieldOrder)
+    && candidate.fieldOrder.length === allowedFields.length
+    && new Set(candidate.fieldOrder).size === allowedFields.length
+    && candidate.fieldOrder.every((field) => allowedFields.includes(field))
+    ? candidate.fieldOrder
+    : allowedFields;
+  const labels = { ...DEFAULT_SETTINGS_LAYOUT.labels };
+  if (candidate.labels && typeof candidate.labels === 'object') {
+    allowedFields.forEach((field) => {
+      if (typeof candidate.labels[field] === 'string' && candidate.labels[field]) {
+        labels[field] = candidate.labels[field];
+      }
+    });
+  }
+  return {
+    title: typeof candidate.title === 'string' && candidate.title
+      ? candidate.title
+      : DEFAULT_SETTINGS_LAYOUT.title,
+    fieldOrder: order,
+    labels,
+  };
+}
+
+function applySettingsLayout(candidate) {
+  const layout = layoutOrDefault(candidate);
+  document.getElementById('settings-title').textContent = layout.title;
+  document.title = `Panel ${layout.title}`;
+  const container = document.getElementById('settings-fields');
+  layout.fieldOrder.forEach((field) => {
+    document.getElementById(`settings-label-${field}`).textContent = layout.labels[field];
+    container.appendChild(document.getElementById(`settings-field-${field}`));
+  });
 }
 
 function setBusy(busy) {
@@ -24,9 +77,7 @@ function setBusy(busy) {
 
 function setUpdateBusy(busy) {
   checkUpdateButton.disabled = busy;
-  channelButtons.forEach((button) => {
-    button.disabled = busy;
-  });
+  updateChannel.disabled = busy;
 }
 
 function setMessage(message, state = '') {
@@ -56,21 +107,14 @@ function applyStatus(status) {
   fields.composioMcpToken.placeholder = status.hasComposioMcpToken
     ? 'Saved — enter a new token to replace it'
     : 'Enter Composio MCP token';
-  channelButtons.forEach((button) => {
-    const active = button.dataset.channel === status.updateChannel;
-    button.classList.toggle('is-active', active);
-    button.setAttribute('aria-checked', String(active));
-  });
+  updateChannel.value = status.updateChannel;
 }
 
 function renderUpdateState(state) {
-  document.getElementById('settings-current-version').textContent = state.currentDisplayVersion;
   document.getElementById('settings-update-status').textContent = state.message || 'Ready to check';
-  channelButtons.forEach((button) => {
-    const active = button.dataset.channel === state.channel;
-    button.classList.toggle('is-active', active);
-    button.setAttribute('aria-checked', String(active));
-  });
+  updateChannel.value = state.channel;
+  const patch = state.uiPatch && state.uiPatch.patch;
+  applySettingsLayout(patch && patch.settingsLayout);
 }
 
 async function loadStatus() {
@@ -86,32 +130,17 @@ async function loadStatus() {
   }
 }
 
-document.querySelectorAll('.settings-tab').forEach((tab) => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.settings-tab').forEach((candidate) => {
-      const active = candidate === tab;
-      candidate.classList.toggle('is-active', active);
-      if (active) candidate.setAttribute('aria-current', 'page');
-      else candidate.removeAttribute('aria-current');
-    });
-    document.querySelectorAll('[data-settings-panel]').forEach((panel) => {
-      panel.hidden = panel.id !== tab.dataset.panel;
-    });
-  });
-});
-
-channelButtons.forEach((button) => {
-  button.addEventListener('click', async () => {
-    setUpdateBusy(true);
-    try {
-      const state = await window.panelApp.setUpdateChannel(button.dataset.channel);
-      renderUpdateState(state);
-    } catch {
-      document.getElementById('settings-update-status').textContent = 'The channel could not be changed.';
-    } finally {
-      setUpdateBusy(false);
-    }
-  });
+updateChannel.addEventListener('change', async () => {
+  const previous = updateChannel.value === 'developer' ? 'stable' : 'developer';
+  setUpdateBusy(true);
+  try {
+    renderUpdateState(await window.panelApp.setUpdateChannel(updateChannel.value));
+  } catch {
+    updateChannel.value = previous;
+    document.getElementById('settings-update-status').textContent = 'The channel could not be changed.';
+  } finally {
+    setUpdateBusy(false);
+  }
 });
 
 checkUpdateButton.addEventListener('click', async () => {
@@ -194,5 +223,8 @@ form.addEventListener('submit', async (event) => {
 });
 
 applyTheme();
-window.panelApp.onUpdateState((state) => renderUpdateState(state));
-loadStatus();
+applySettingsLayout();
+if (window.panelApp) {
+  window.panelApp.onUpdateState((state) => renderUpdateState(state));
+  loadStatus();
+}

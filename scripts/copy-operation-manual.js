@@ -17,6 +17,10 @@ const copies = [
     name: 'refresh-policy.json',
   },
   {
+    source: path.resolve(__dirname, '..', 'config', 'settings-layout.json'),
+    name: 'settings-layout.json',
+  },
+  {
     source: path.resolve(__dirname, '..', 'patches', 'developer-live-patch.example.json'),
     name: 'developer-live-patch.example.json',
   },

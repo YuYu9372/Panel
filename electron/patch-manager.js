@@ -132,6 +132,7 @@ class PatchManager extends EventEmitter {
       if (signed.ui) patch.ui = signed.ui;
       if (signed.statusColors) patch.statusColors = signed.statusColors;
       if (signed.refreshPolicy) patch.refreshPolicy = signed.refreshPolicy;
+      if (signed.settingsLayout) patch.settingsLayout = signed.settingsLayout;
       return patch;
     } catch {
       return null;

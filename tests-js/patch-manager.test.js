@@ -18,6 +18,10 @@ const refreshPolicy = JSON.parse(fs.readFileSync(
   path.join(__dirname, '..', 'config', 'refresh-policy.json'),
   'utf8',
 ));
+const settingsLayout = JSON.parse(fs.readFileSync(
+  path.join(__dirname, '..', 'config', 'settings-layout.json'),
+  'utf8',
+));
 
 function envelope(sequence, patchId = `patch-${sequence}`, content = {}) {
   const signed = {
@@ -119,10 +123,12 @@ test('validated live configuration is exposed and rolls back atomically', async 
       ui: undefined,
       statusColors,
       refreshPolicy,
+      settingsLayout,
     })));
     const checked = await manager.check('developer');
     assert.deepEqual(checked.patch.statusColors, statusColors);
     assert.deepEqual(checked.patch.refreshPolicy, refreshPolicy);
+    assert.deepEqual(checked.patch.settingsLayout, settingsLayout);
     assert.equal(manager.reportFailure('config-patch-2', 'developer'), true);
     assert.equal(manager.snapshot('developer').patch.patchId, 'patch-1');
   });

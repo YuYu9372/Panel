@@ -9,9 +9,10 @@ recovery.
 | Purpose | Location |
 | --- | --- |
 | Source repository | `/Users/yu/Dev_code/Panel` |
-| Current build output | `dist/0.5.2/Beta_C` |
+| Current build output | `dist/0.5.2/Beta_D` |
 | Editable status color JSON | `config/status-colors.json` |
 | Editable refresh policy | `config/refresh-policy.json` |
+| Editable Settings layout | `config/settings-layout.json` |
 | Developer live-patch example | `patches/developer-live-patch.example.json` |
 | Installed App | `/Applications/Panel.app` |
 | Encrypted per-user settings | `~/Library/Application Support/Panel/secure-settings/settings.json` |
@@ -111,6 +112,35 @@ At 06:00 Panel returns to the Settings interval. Clicking the "Updated … ago"
 label forces an immediate refresh but does not move the next automatic
 boundary. The complete policy may be changed later by a signed live patch.
 
+### Settings layout JSON
+
+`config/settings-layout.json` controls only the title, labels, and order of the
+four existing Settings rows. Every supported row must appear exactly once:
+
+```json
+{
+  "schemaVersion": 1,
+  "title": "Settings",
+  "fieldOrder": [
+    "anthropicApiKey",
+    "composioMcpToken",
+    "refreshMinutes",
+    "updateChannel"
+  ],
+  "labels": {
+    "anthropicApiKey": "Anthropic API Key",
+    "composioMcpToken": "Composio MCP Token",
+    "refreshMinutes": "Refresh time",
+    "updateChannel": "Update channel"
+  }
+}
+```
+
+This file is a layout definition, not a settings-value file. Never put an API
+key or token in it. D and later builds can receive it through a correctly
+signed live patch. Mask/reveal, Test connections, Save, update verification,
+and the fixed MCP URL are immutable and stay outside the patch format.
+
 ## 5. Run checks before every build
 
 ```bash
@@ -167,6 +197,7 @@ The command builds:
 - A copy of this operations manual in `dist` and the current output directory
 - A copy of `status-colors.json` in `dist` and the current output directory
 - A copy of `refresh-policy.json` in `dist` and the current output directory
+- A copy of `settings-layout.json` in `dist` and the current output directory
 - A copy of `developer-live-patch.example.json` for the later signing exercise
 
 Do not move only the DMG when publishing an automatic update. The ZIP, channel
@@ -177,11 +208,11 @@ metadata, and matching block maps belong to the same release.
 Replace the paths when the version changes:
 
 ```bash
-hdiutil verify dist/0.5.2/Beta_C/panel-0.5.2-C.dmg
-unzip -tq dist/0.5.2/Beta_C/panel-0.5.2-C.zip
-codesign --verify --deep --strict --verbose=2 dist/0.5.2/Beta_C/mac-arm64/Panel.app
-shasum -a 256 dist/0.5.2/Beta_C/panel-0.5.2-C.dmg
-shasum -a 256 dist/0.5.2/Beta_C/panel-0.5.2-C.zip
+hdiutil verify dist/0.5.2/Beta_D/panel-0.5.2-D.dmg
+unzip -tq dist/0.5.2/Beta_D/panel-0.5.2-D.zip
+codesign --verify --deep --strict --verbose=2 dist/0.5.2/Beta_D/mac-arm64/Panel.app
+shasum -a 256 dist/0.5.2/Beta_D/panel-0.5.2-D.dmg
+shasum -a 256 dist/0.5.2/Beta_D/panel-0.5.2-D.zip
 ```
 
 For a public release, the App must use a Developer ID Application certificate
@@ -194,7 +225,7 @@ Quit Panel first. Keep a recoverable backup of the installed App:
 
 ```bash
 mv /Applications/Panel.app /Users/yu/.Trash/Panel-before-new-build.app
-ditto dist/0.5.2/Beta_C/mac-arm64/Panel.app /Applications/Panel.app
+ditto dist/0.5.2/Beta_D/mac-arm64/Panel.app /Applications/Panel.app
 codesign --verify --deep --strict /Applications/Panel.app
 open /Applications/Panel.app
 ```
@@ -208,7 +239,7 @@ newer version, so test it before depending on it.
 
 ## 10. Stable and Developer channels
 
-Each Mac chooses its own channel in **Settings → Updates**:
+Each Mac chooses its own channel using the **Update channel** row in Settings:
 
 - Stable uses the `latest` update channel and Stable live-patch key.
 - Developer uses the `alpha` update channel and Developer live-patch key.
@@ -245,12 +276,13 @@ Stable release checklist:
 ## 12. Publish a signed live patch
 
 Use this path for the complete validated status-color JSON, the validated
-Calendar and Tasks refresh policy, update-card text, and allowlisted visual
-tokens. It cannot contain HTML, arbitrary JavaScript, API endpoints, preload
-code, Python, credentials, or a setting that disables manual refresh.
+Calendar and Tasks refresh policy, the validated Settings layout, update-card
+text, and allowlisted visual tokens. It cannot contain HTML, arbitrary
+JavaScript, API endpoints, preload code, Python, credentials, field values, or
+a setting that disables manual refresh.
 
-1. Install the C bootstrap before publishing a configuration patch. B rejects
-   the new fields by design.
+1. Install D before publishing `settingsLayout`. C accepts status and refresh
+   configuration but rejects Settings layout by design.
 2. Copy `patches/developer-live-patch.example.json` to a new draft.
 3. Increase `sequence`. Never reuse a sequence, including after rollback.
 4. Give the patch a new `patchId`.
@@ -319,6 +351,7 @@ Check these items:
 - [ ] Calendar and Tasks load and manual refresh works.
 - [ ] The 00:00 and 06:00 refresh-policy transitions pass boundary tests.
 - [ ] Status color JSON validation and all metric boundary tests pass.
+- [ ] Settings layout keeps all four required rows and contains no field values.
 - [ ] Live-patch signature, expiry, sequence, rollback, and field allowlist tests pass.
 - [ ] Developer update is tested before Stable release.
 - [ ] Public build is notarized.

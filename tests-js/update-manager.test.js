@@ -39,7 +39,7 @@ function createManager(enabled = true) {
       this.channel = channel;
     },
   };
-  const app = { getVersion: () => '0.5.2-alpha.3' };
+  const app = { getVersion: () => '0.5.2-alpha.4' };
   return {
     manager: new UpdateManager({ app, updater, settingsStore: settings, enabled }),
     updater,
@@ -50,6 +50,7 @@ function createManager(enabled = true) {
 test('alpha version is displayed with the Panel milestone suffix', () => {
   assert.equal(displayVersion('0.5.2-alpha.2'), '0.5.2_B');
   assert.equal(displayVersion('0.5.2-alpha.3'), '0.5.2_C');
+  assert.equal(displayVersion('0.5.2-alpha.4'), '0.5.2_D');
   assert.equal(displayVersion('0.5.2'), '0.5.2');
 });
 

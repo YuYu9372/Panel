@@ -31,6 +31,7 @@ const allowed = new Set([
   'ui',
   'statusColors',
   'refreshPolicy',
+  'settingsLayout',
 ]);
 if (Object.keys(draft).some((field) => !allowed.has(field))) {
   fail('Patch draft contains unsupported fields.');
@@ -53,6 +54,7 @@ const signed = {
 if (draft.ui !== undefined) signed.ui = draft.ui;
 if (draft.statusColors !== undefined) signed.statusColors = draft.statusColors;
 if (draft.refreshPolicy !== undefined) signed.refreshPolicy = draft.refreshPolicy;
+if (draft.settingsLayout !== undefined) signed.settingsLayout = draft.settingsLayout;
 const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
 const envelope = signPatchPayload(signed, privateKey, keyId);
 verifyPatchEnvelope(envelope, {

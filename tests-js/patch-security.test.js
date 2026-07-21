@@ -20,6 +20,10 @@ const refreshPolicy = JSON.parse(fs.readFileSync(
   path.join(__dirname, '..', 'config', 'refresh-policy.json'),
   'utf8',
 ));
+const settingsLayout = JSON.parse(fs.readFileSync(
+  path.join(__dirname, '..', 'config', 'settings-layout.json'),
+  'utf8',
+));
 
 function payload(overrides = {}) {
   return {
@@ -80,6 +84,30 @@ test('signed status colors and refresh policy are accepted without UI code', () 
   const verified = verify(signPatchPayload(configPayload, privateKey, keyId));
   assert.deepEqual(verified.statusColors, statusColors);
   assert.deepEqual(verified.refreshPolicy, refreshPolicy);
+});
+
+test('signed Settings layout is accepted without allowing form values or code', () => {
+  const layoutPayload = payload({
+    ui: undefined,
+    settingsLayout,
+  });
+  delete layoutPayload.ui;
+  const verified = verify(signPatchPayload(layoutPayload, privateKey, keyId));
+  assert.deepEqual(verified.settingsLayout, settingsLayout);
+
+  const missingField = structuredClone(settingsLayout);
+  missingField.fieldOrder.pop();
+  assert.throws(
+    () => verify(signPatchPayload(payload({ settingsLayout: missingField }), privateKey, keyId)),
+    /every supported field exactly once/,
+  );
+
+  const unsafe = structuredClone(settingsLayout);
+  unsafe.script = 'run()';
+  assert.throws(
+    () => verify(signPatchPayload(payload({ settingsLayout: unsafe }), privateKey, keyId)),
+    /unsupported fields/,
+  );
 });
 
 test('tampered thresholds and unsafe refresh policy are rejected', () => {

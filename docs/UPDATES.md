@@ -5,12 +5,17 @@ Panel uses two deliberately separate update paths.
 | Path | Can change | Verification | Recovery |
 | --- | --- | --- | --- |
 | Full App update | Electron, Python, dashboard logic, preload, and all UI | electron-updater SHA-512 metadata plus the macOS application signature | Install only after verification; publish a higher fixed version to recover a bad release |
-| Live patch | Complete validated status-color and refresh-policy JSON plus update-card text and allowlisted visual tokens | Independent Ed25519 signature, HTTPS, channel, sequence, expiry, App-version range, and strict field validation | Atomic activation, renderer health confirmation, previous-patch rollback |
+| Live patch | Complete validated status-color, refresh-policy, and Settings-layout JSON plus update-card text and allowlisted visual tokens | Independent Ed25519 signature, HTTPS, channel, sequence, expiry, App-version range, and strict field validation | Atomic activation, renderer health confirmation, previous-patch rollback |
 
 Live patches cannot contain HTML, arbitrary JavaScript, API endpoints, preload
 code, Python, credentials, or changes that disable manual Calendar and Tasks
 refresh. This restriction is intentional. A full App update is required when
 behavior or security-sensitive code changes.
+
+In 0.5.2_D and later, `settingsLayout` may change only the Settings title, the
+four field labels, and the order of the four mandatory fields. It cannot remove
+mask/reveal, Test connections, Save, or update verification, and it cannot
+carry field values. Secrets always remain in the encrypted per-user store.
 
 ## Channels
 
@@ -70,9 +75,9 @@ The App contains only the corresponding public keys. Move
 Keep the Developer key separate so frequent test signing cannot compromise the
 Stable channel.
 
-Install 0.5.2_C or later before publishing a configuration patch. B supports
-only the earlier update-card fields and safely rejects the new configuration
-fields.
+Install 0.5.2_D or later before publishing a patch that contains
+`settingsLayout`. C accepts status colors and refresh policy but safely rejects
+the new Settings layout field. B supports only the earlier update-card fields.
 
 1. Copy `patches/developer-live-patch.example.json` and edit the draft.
 2. Increase `sequence`. A used sequence is never accepted again, even after a
@@ -92,9 +97,10 @@ fields.
    approved public patches. The fixed files work independently of whether the
    newest full-App release is Stable or a Developer prerelease.
 6. Panel verifies the patch before an atomic write. The immutable renderer
-   applies allowlisted values immediately, reschedules Calendar and Tasks, and
-   confirms health. If it crashes or reports a failure before confirmation,
-   the next launch restores the previous patch.
+   applies allowlisted values immediately, reschedules Calendar and Tasks,
+   updates an open Settings screen using existing controls, and confirms
+   health. If it crashes or reports a failure before confirmation, the next
+   launch restores the previous patch.
 
 ## Incident response
 
