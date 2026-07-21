@@ -12,6 +12,14 @@ const copies = [
     source: path.resolve(__dirname, '..', 'config', 'status-colors.json'),
     name: 'status-colors.json',
   },
+  {
+    source: path.resolve(__dirname, '..', 'config', 'refresh-policy.json'),
+    name: 'refresh-policy.json',
+  },
+  {
+    source: path.resolve(__dirname, '..', 'patches', 'developer-live-patch.example.json'),
+    name: 'developer-live-patch.example.json',
+  },
 ];
 
 for (const copy of copies) {

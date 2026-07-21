@@ -1,7 +1,7 @@
 # Panel Operations Manual
 
 This manual covers routine development, status color changes, testing, packaging,
-installation, Stable and Developer releases, restricted UI hot patches, and
+installation, Stable and Developer releases, signed live patches, and
 recovery.
 
 ## 1. Important locations
@@ -11,9 +11,11 @@ recovery.
 | Source repository | `/Users/yu/Dev_code/Panel` |
 | Current build output | `dist/0.5.2/Beta_C` |
 | Editable status color JSON | `config/status-colors.json` |
+| Editable refresh policy | `config/refresh-policy.json` |
+| Developer live-patch example | `patches/developer-live-patch.example.json` |
 | Installed App | `/Applications/Panel.app` |
 | Encrypted per-user settings | `~/Library/Application Support/Panel/secure-settings/settings.json` |
-| UI patch state | `~/Library/Application Support/Panel/ui-patches/state.json` |
+| Live-patch state | `~/Library/Application Support/Panel/ui-patches/state.json` |
 | Private patch signing keys | `~/Library/Application Support/Panel Developer/update-signing` |
 | Public update repository | `YuYu9372/Panel-Updates` |
 
@@ -50,8 +52,8 @@ color and slash setting.
 
 Edit only the source JSON. Do not edit a JSON file inside
 `/Applications/Panel.app`, because changing an installed bundle invalidates its
-signature. Run `npm test` after an edit, then run `npm run dist` and install the
-new build. This behavior cannot be changed by a restricted UI hot patch.
+signature. Run `npm test` after an edit. C and later builds can also receive
+this complete validated JSON through a correctly signed live patch.
 
 ### JSON lesson
 
@@ -98,7 +100,18 @@ number. `null` means that the final range has no upper limit. The validator
 requires ordered, continuous ranges and falls back to safe built-in values if
 the file is missing or invalid.
 
-## 4. Run checks before every build
+## 4. Calendar and Tasks refresh policy
+
+`config/refresh-policy.json` keeps manual refresh enabled, uses the Settings
+interval during the day, and changes Calendar and Tasks to a clock-aligned
+30-minute interval from 00:00 until 06:00 in the Mac's local timezone.
+
+Automatic refreshes occur at 00:00, 00:30, and every half hour through 05:30.
+At 06:00 Panel returns to the Settings interval. Clicking the "Updated … ago"
+label forces an immediate refresh but does not move the next automatic
+boundary. The complete policy may be changed later by a signed live patch.
+
+## 5. Run checks before every build
 
 ```bash
 cd /Users/yu/Dev_code/Panel
@@ -118,7 +131,7 @@ Expected results:
 Do not stage `.env`, private PEM files, generated signed patches, or personal IDE
 state.
 
-## 5. Update the version
+## 6. Update the version
 
 Before a new release, keep these locations consistent:
 
@@ -138,7 +151,7 @@ Use semantic versions for the App bundle:
 Never reuse a version that has already been published. Recovery from a bad
 release requires a higher version.
 
-## 6. Build DMG and automatic-update files
+## 7. Build DMG and automatic-update files
 
 ```bash
 cd /Users/yu/Dev_code/Panel
@@ -153,11 +166,13 @@ The command builds:
 - Channel metadata such as `alpha-mac.yml` or `latest-mac.yml`
 - A copy of this operations manual in `dist` and the current output directory
 - A copy of `status-colors.json` in `dist` and the current output directory
+- A copy of `refresh-policy.json` in `dist` and the current output directory
+- A copy of `developer-live-patch.example.json` for the later signing exercise
 
 Do not move only the DMG when publishing an automatic update. The ZIP, channel
 metadata, and matching block maps belong to the same release.
 
-## 7. Verify a build
+## 8. Verify a build
 
 Replace the paths when the version changes:
 
@@ -173,7 +188,7 @@ For a public release, the App must use a Developer ID Application certificate
 and Apple notarization. An Apple Development signature is only for local or
 developer testing.
 
-## 8. Install a local build safely
+## 9. Install a local build safely
 
 Quit Panel first. Keep a recoverable backup of the installed App:
 
@@ -191,17 +206,17 @@ To roll back, quit Panel, move the current App aside, and restore the backup
 from Trash. A rollback may not be compatible with settings created by a much
 newer version, so test it before depending on it.
 
-## 9. Stable and Developer channels
+## 10. Stable and Developer channels
 
 Each Mac chooses its own channel in **Settings → Updates**:
 
-- Stable uses the `latest` update channel and Stable UI patch key.
-- Developer uses the `alpha` update channel and Developer UI patch key.
+- Stable uses the `latest` update channel and Stable live-patch key.
+- Developer uses the `alpha` update channel and Developer live-patch key.
 
 Use Developer on the test Mac. Use Stable on the public Mac. Channel changes do
 not permit version downgrades.
 
-## 10. Publish a full App update
+## 11. Publish a full App update
 
 The source repository can remain private. Publish only release artifacts from
 the public `YuYu9372/Panel-Updates` repository. Never put a GitHub private-access
@@ -227,43 +242,46 @@ Stable release checklist:
 5. Confirm the public Mac sees the update while the Developer Mac remains able
    to receive later alpha builds.
 
-## 11. Publish a restricted UI hot patch
+## 12. Publish a signed live patch
 
-Use this path only for update-card text and allowlisted visual tokens. It cannot
-change HTML, JavaScript behavior, API endpoints, preload code, Python, Wi-Fi
-thresholds, or credentials.
+Use this path for the complete validated status-color JSON, the validated
+Calendar and Tasks refresh policy, update-card text, and allowlisted visual
+tokens. It cannot contain HTML, arbitrary JavaScript, API endpoints, preload
+code, Python, credentials, or a setting that disables manual refresh.
 
-1. Copy `patches/developer-ui-patch.example.json` to a new draft.
-2. Increase `sequence`. Never reuse a sequence, including after rollback.
-3. Give the patch a new `patchId`.
-4. Keep `appVersionRange` narrow and set `lifetimeDays` from 1 to 30.
-5. Sign it with the matching private key:
+1. Install the C bootstrap before publishing a configuration patch. B rejects
+   the new fields by design.
+2. Copy `patches/developer-live-patch.example.json` to a new draft.
+3. Increase `sequence`. Never reuse a sequence, including after rollback.
+4. Give the patch a new `patchId`.
+5. Keep `appVersionRange` narrow and set `lifetimeDays` from 1 to 30.
+6. Sign it with the matching private key:
 
    ```bash
    PANEL_PATCH_SIGNING_KEY='/Users/yu/Library/Application Support/Panel Developer/update-signing/developer-private.pem' \
    PANEL_PATCH_KEY_ID='panel-developer-2026-01' \
-   npm run sign:patch -- patches/developer-ui-patch.example.json dist/developer-ui-patch.json
+   npm run sign:patch -- patches/developer-live-patch.example.json dist/developer-live-patch.json
    ```
 
-6. Put the signed file at
-   `Panel-Updates/patches/developer-ui-patch.json`.
-7. Test it on the Developer Mac and confirm the patch is applied and health is
+7. Put only the signed output at
+   `Panel-Updates/patches/developer-live-patch.json`.
+8. Test it on the Developer Mac and confirm the patch is applied and health is
    confirmed.
-8. Use `stable-ui-patch.json` and the offline Stable key only for an approved
+9. Use `stable-live-patch.json` and the offline Stable key only for an approved
    public patch.
 
 Move the Stable private key to encrypted offline storage before public
 distribution. The App and repository must contain only public keys.
 
-## 12. Recovery and incident response
+## 13. Recovery and incident response
 
-### Bad UI patch
+### Bad live patch
 
 - Remove the manifest from the public update repository.
 - Panel automatically rolls back an unconfirmed or failed patch.
 - Increase the sequence before publishing a corrected patch.
 
-### Exposed UI patch private key
+### Exposed live-patch private key
 
 - Remove the affected manifest.
 - Build a higher full App version with a replacement public key.
@@ -285,9 +303,9 @@ Check these items:
 3. The selected channel matches the release metadata.
 4. DMG, ZIP, block maps, and metadata came from the same build.
 5. The App is correctly signed and notarized.
-6. The UI patch filename and channel-specific signature are correct.
+6. The live-patch filename and channel-specific signature are correct.
 
-## 13. Final release checklist
+## 14. Final release checklist
 
 - [ ] Version strings agree everywhere.
 - [ ] README and release notes are current.
@@ -299,7 +317,9 @@ Check these items:
 - [ ] RAM and temperature return numeric values on the target Mac.
 - [ ] Weather and clock graphics render.
 - [ ] Calendar and Tasks load and manual refresh works.
+- [ ] The 00:00 and 06:00 refresh-policy transitions pass boundary tests.
 - [ ] Status color JSON validation and all metric boundary tests pass.
+- [ ] Live-patch signature, expiry, sequence, rollback, and field allowlist tests pass.
 - [ ] Developer update is tested before Stable release.
 - [ ] Public build is notarized.
 - [ ] Git changes are reviewed and committed.

@@ -143,7 +143,12 @@ Panel/
 ### 0.5.2_C <- Currently
 - [x] Use semantic version `0.5.2-alpha.3` and display `0.5.2_C`.
 - [x] Update all status color boundaries through the validated JSON file.
+- [x] Refresh Calendar and Tasks every 30 minutes from 00:00 until 06:00 local time.
+- [x] Keep the Settings interval during the day and preserve click-to-refresh.
+- [x] Allow signed declarative live patches to update status colors and the refresh policy.
+- [x] Reject arbitrary code, invalid ranges, disabled manual refresh, replay, and cross-channel patches.
 - [x] Build Developer DMG, ZIP, block maps, and `alpha-mac.yml` release metadata.
+- [ ] Install the final C bootstrap once before publishing its first live patch.
 - [ ] Create the public artifact-only `Panel-Updates` repository and publish the first Developer release.
 - [ ] Replace the testing certificate with Developer ID Application signing and notarization before public Stable distribution.
 
@@ -152,7 +157,7 @@ Panel/
 ## Notes
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
 - Greeting line: Anthropic API (`claude-haiku-4-5`); the packaged app reads its key from encrypted per-user Settings and falls back to a local phrase without it. Only remaining AI/token use.
-- Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) through Panel's fixed MCP URL. The packaged app reads the token from encrypted per-user Settings. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Cached for the configured interval; click the updated label to bypass the cache.
+- Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) through Panel's fixed MCP URL. The packaged app reads the token from encrypted per-user Settings. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Automatic refresh uses 30 minutes from 00:00 until 06:00 local time and the configured Settings interval otherwise; click the updated label to bypass the cache without moving the automatic boundary.
 - Layout: top bar (greeting + wifi indicator), fixed 2 × 2 dashboard grid (clock, weather,
   calendar, tasks), and a full-width system history dock at the bottom.
 - Connectivity: `/api/net` measures internet reachability via a raw TCP connect (no DNS, no LLM). Widget polls every 5 s; latency ≈ ping. Offline overlay is debounced (2 fails) so brief blips don't flash it.
@@ -166,4 +171,4 @@ Panel/
   Editable ranges live in `config/status-colors.json` and are validated before use.
 - Style: soft floating cards on a cream canvas, system fonts, inline SVG icons.
 - Theme: `widgets/theme.js` sets `data-theme` on `<html>` by hour (dark 18:00–05:00); CSS overrides live in a `:root[data-theme='dark']` block. `widgets/boot-theme.js` sets it before first paint without requiring inline script execution.
-- Updates: full releases use electron-updater, macOS code signing, DMG + ZIP, and Stable/Developer channels. Update-interface hot patches use independent Ed25519 keys, declarative allowlisted fields, anti-replay sequence numbers, expiry, atomic activation, and rollback. Operational steps are in `docs/UPDATES.md`.
+- Updates: full releases use electron-updater, macOS code signing, DMG + ZIP, and Stable/Developer channels. Live patches use independent Ed25519 keys, declarative allowlisted UI/config fields, anti-replay sequence numbers, expiry, atomic activation, and rollback. Operational steps are in `docs/UPDATES.md`.

@@ -2,7 +2,7 @@
 
 ## 0.5.2_C
 
-Developer update publishing trial with revised status color thresholds.
+Developer bootstrap for signed live configuration and revised status behavior.
 
 **Manual installer:** `panel-0.5.2-C.dmg`
 
@@ -22,6 +22,20 @@ Developer update publishing trial with revised status color thresholds.
   to below 95°C, and purple from 95°C upward.
 - Wi-Fi is green below 25 ms, yellow from 25 to below 35 ms, red from 35 to
   below 45 ms, and purple from 45 ms upward.
+- Calendar and Tasks use the Settings refresh interval during the day and a
+  clock-aligned 30-minute interval from 00:00 until 06:00 local time.
+- Clicking either "Updated … ago" label still forces an immediate refresh and
+  does not move the next automatic boundary.
+
+### Added
+
+- Signed Ed25519 live patches may now carry the complete validated status-color
+  JSON and refresh policy without allowing arbitrary HTML, JavaScript, Python,
+  API endpoints, credentials, or preload changes.
+- Live configuration activation updates the dashboard immediately, confirms
+  health, writes atomically, blocks sequence replay, and rolls back on failure.
+- Added `patches/developer-live-patch.example.json` containing the requested
+  thresholds and night schedule for the later Developer patch trial.
 
 ### Publishing
 
@@ -33,9 +47,9 @@ Developer update publishing trial with revised status color thresholds.
 
 ### Verified
 
-- 32 Node security and behavior tests plus 9 Python tests pass.
+- 41 Node security and behavior tests plus 9 Python tests pass.
 - The JSON, built-in fallback, boundary tests, and packaged App use identical
-  color rules.
+  color and refresh rules.
 - The DMG, ZIP, App signature, update metadata, and absence of packaged API
   credentials are verified before release.
 

@@ -10,7 +10,7 @@ async function readLimitedText(response) {
   if (!response.body || typeof response.body.getReader !== 'function') {
     const text = await response.text();
     if (Buffer.byteLength(text, 'utf8') > MAX_MANIFEST_BYTES) {
-      throw new Error('UI patch manifest is too large.');
+      throw new Error('Live patch manifest is too large.');
     }
     return text;
   }
@@ -23,7 +23,7 @@ async function readLimitedText(response) {
     total += value.byteLength;
     if (total > MAX_MANIFEST_BYTES) {
       await reader.cancel();
-      throw new Error('UI patch manifest is too large.');
+      throw new Error('Live patch manifest is too large.');
     }
     chunks.push(Buffer.from(value));
   }
@@ -75,7 +75,7 @@ class PatchManager extends EventEmitter {
       if (state.schemaVersion !== 1
           || !state.channelSequences
           || typeof state.channelSequences !== 'object') {
-        throw new Error('Unsupported UI patch state.');
+        throw new Error('Unsupported live patch state.');
       }
       for (const channel of ['stable', 'developer']) {
         if (!Number.isSafeInteger(state.channelSequences[channel])
@@ -94,7 +94,7 @@ class PatchManager extends EventEmitter {
       return state;
     } catch {
       this.runtimeStatus = 'error';
-      this.runtimeMessage = 'Saved UI patch was rejected.';
+      this.runtimeMessage = 'Saved live patch was rejected.';
       return this.defaultState();
     }
   }
@@ -128,7 +128,11 @@ class PatchManager extends EventEmitter {
     if (!this.state.active || this.state.active.signed.channel !== channel) return null;
     try {
       const signed = this.verifyStoredEnvelope(this.state.active);
-      return { patchId: signed.patchId, sequence: signed.sequence, ui: signed.ui };
+      const patch = { patchId: signed.patchId, sequence: signed.sequence };
+      if (signed.ui) patch.ui = signed.ui;
+      if (signed.statusColors) patch.statusColors = signed.statusColors;
+      if (signed.refreshPolicy) patch.refreshPolicy = signed.refreshPolicy;
+      return patch;
     } catch {
       return null;
     }
@@ -150,26 +154,26 @@ class PatchManager extends EventEmitter {
     const trustedKey = this.trust[channel];
     if (!trustedKey || !this.manifestBaseUrl) {
       this.runtimeStatus = 'unconfigured';
-      this.runtimeMessage = 'UI patch feed is not configured.';
+      this.runtimeMessage = 'Live patch feed is not configured.';
       this.publish(channel);
       return this.snapshot(channel);
     }
     this.runtimeStatus = 'checking';
-    this.runtimeMessage = 'Checking signed UI patches…';
+    this.runtimeMessage = 'Checking signed live patches…';
     this.publish(channel);
     try {
-      const manifestUrl = new URL(`${channel}-ui-patch.json`, this.manifestBaseUrl);
+      const manifestUrl = new URL(`${channel}-live-patch.json`, this.manifestBaseUrl);
       const localDevelopmentFeed = this.allowHttp
         && ['127.0.0.1', 'localhost', '::1'].includes(manifestUrl.hostname);
       if (manifestUrl.protocol !== 'https:' && !localDevelopmentFeed) {
-        throw new Error('UI patch feed must use HTTPS.');
+        throw new Error('Live patch feed must use HTTPS.');
       }
       const response = await this.fetcher(manifestUrl.href, {
         method: 'GET',
         redirect: 'follow',
         signal: AbortSignal.timeout(15000),
       });
-      if (!response.ok) throw new Error(`UI patch feed returned ${response.status}.`);
+      if (!response.ok) throw new Error(`Live patch feed returned ${response.status}.`);
       const text = await readLimitedText(response);
       const envelope = JSON.parse(text);
       const signed = verifyPatchEnvelope(envelope, {
@@ -181,7 +185,7 @@ class PatchManager extends EventEmitter {
       const currentSequence = this.state.channelSequences[channel] || 0;
       if (signed.sequence <= currentSequence) {
         this.runtimeStatus = 'idle';
-        this.runtimeMessage = 'UI is up to date.';
+        this.runtimeMessage = 'Live configuration is up to date.';
         this.publish(channel);
         return this.snapshot(channel);
       }
@@ -191,12 +195,12 @@ class PatchManager extends EventEmitter {
       this.state.channelSequences[channel] = signed.sequence;
       this.writeState();
       this.runtimeStatus = 'applied';
-      this.runtimeMessage = 'Signed UI patch applied.';
+      this.runtimeMessage = 'Signed live patch applied.';
       this.publish(channel);
       return this.snapshot(channel);
     } catch {
       this.runtimeStatus = 'error';
-      this.runtimeMessage = 'Signed UI patch check failed.';
+      this.runtimeMessage = 'Signed live patch check failed.';
       this.publish(channel);
       return this.snapshot(channel);
     }
@@ -209,7 +213,7 @@ class PatchManager extends EventEmitter {
     this.state.previous = null;
     this.writeState();
     this.runtimeStatus = 'idle';
-    this.runtimeMessage = 'UI patch health check passed.';
+    this.runtimeMessage = 'Live patch health check passed.';
     this.publish(channel);
     return true;
   }
@@ -224,7 +228,7 @@ class PatchManager extends EventEmitter {
     this.state.pendingPatchId = null;
     this.writeState();
     this.runtimeStatus = 'rolled-back';
-    this.runtimeMessage = 'UI patch failed its health check and was rolled back.';
+    this.runtimeMessage = 'Live patch failed its health check and was rolled back.';
     this.publish(channel);
     return true;
   }

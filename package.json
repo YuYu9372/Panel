@@ -29,6 +29,8 @@
     },
     "files": [
       "electron/**/*",
+      "widgets/refresh-policy.js",
+      "widgets/status-tiers.js",
       "package.json"
     ],
     "extraResources": [

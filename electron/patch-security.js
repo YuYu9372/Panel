@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 const semver = require('semver');
+const { validateRefreshPolicy } = require('../widgets/refresh-policy');
+const { validateStatusTierConfig } = require('../widgets/status-tiers');
 
 const ALLOWED_CHANNELS = new Set(['stable', 'developer']);
 const MAX_PATCH_LIFETIME_MS = 31 * 24 * 60 * 60 * 1000;
@@ -117,6 +119,8 @@ function validateSignedPayload(signed, options) {
     'expiresAt',
     'appVersionRange',
     'ui',
+    'statusColors',
+    'refreshPolicy',
   ]);
   ensureExactKeys(signed, allowed, 'Signed patch');
   if (signed.schemaVersion !== 1) throw new Error('Unsupported patch schema.');
@@ -145,10 +149,19 @@ function validateSignedPayload(signed, options) {
   if (expiresAt <= issuedAt || expiresAt - issuedAt > MAX_PATCH_LIFETIME_MS) {
     throw new Error('Patch lifetime is not valid.');
   }
-  return {
-    ...signed,
-    ui: validateUiPatch(signed.ui),
-  };
+  const patchFields = ['ui', 'statusColors', 'refreshPolicy'];
+  if (!patchFields.some((field) => signed[field] !== undefined)) {
+    throw new Error('Patch has no supported content.');
+  }
+  const validated = { ...signed };
+  if (signed.ui !== undefined) validated.ui = validateUiPatch(signed.ui);
+  if (signed.statusColors !== undefined) {
+    validated.statusColors = validateStatusTierConfig(signed.statusColors);
+  }
+  if (signed.refreshPolicy !== undefined) {
+    validated.refreshPolicy = validateRefreshPolicy(signed.refreshPolicy);
+  }
+  return validated;
 }
 
 function verifyPatchEnvelope(envelope, options) {

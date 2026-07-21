@@ -88,49 +88,51 @@ const updateWidget = {
   applyPatch(patch) {
     this.resetPatchStyle();
     if (!patch) {
+      applyLiveConfigPatch(null);
       this.currentPatchId = '';
       return;
     }
-    const ui = patch.ui || {};
-    for (const field of Object.keys(this.ui)) {
-      if (ui[field]) this.ui[field] = ui[field];
-    }
-    const properties = {
-      accent: '--update-light-accent',
-      accentSoft: '--update-light-accent-soft',
-      surface: '--update-light-surface',
-      text: '--update-light-text',
-      muted: '--update-light-muted',
-      darkAccent: '--update-dark-accent',
-      darkAccentSoft: '--update-dark-accent-soft',
-      darkSurface: '--update-dark-surface',
-      darkText: '--update-dark-text',
-      darkMuted: '--update-dark-muted',
-    };
-    for (const [field, property] of Object.entries(properties)) {
-      if (ui[field]) this.popover.style.setProperty(property, ui[field]);
-    }
-    if (ui.radius) this.popover.style.setProperty('--update-radius', `${ui.radius}px`);
-    if (ui.width) this.popover.style.setProperty('--update-width', `${ui.width}px`);
-    if (ui.density) this.popover.dataset.density = ui.density;
-    this.currentPatchId = patch.patchId;
-    requestAnimationFrame(() => {
-      try {
-        const style = getComputedStyle(this.popover);
-        if (!style.getPropertyValue('--update-radius')) throw new Error('Patch style was not applied.');
-        window.panelApp.confirmUiPatch(patch.patchId);
-      } catch {
-        this.resetPatchStyle();
-        this.currentPatchId = '';
-        window.panelApp.reportUiPatchFailure(patch.patchId);
+    try {
+      applyLiveConfigPatch(patch);
+      const ui = patch.ui || {};
+      for (const field of Object.keys(this.ui)) {
+        if (ui[field]) this.ui[field] = ui[field];
       }
-    });
+      const properties = {
+        accent: '--update-light-accent',
+        accentSoft: '--update-light-accent-soft',
+        surface: '--update-light-surface',
+        text: '--update-light-text',
+        muted: '--update-light-muted',
+        darkAccent: '--update-dark-accent',
+        darkAccentSoft: '--update-dark-accent-soft',
+        darkSurface: '--update-dark-surface',
+        darkText: '--update-dark-text',
+        darkMuted: '--update-dark-muted',
+      };
+      for (const [field, property] of Object.entries(properties)) {
+        if (ui[field]) this.popover.style.setProperty(property, ui[field]);
+      }
+      if (ui.radius) this.popover.style.setProperty('--update-radius', `${ui.radius}px`);
+      if (ui.width) this.popover.style.setProperty('--update-width', `${ui.width}px`);
+      if (ui.density) this.popover.dataset.density = ui.density;
+      this.currentPatchId = patch.patchId;
+      requestAnimationFrame(() => {
+        window.panelApp.confirmUiPatch(patch.patchId);
+      });
+    } catch {
+      this.resetPatchStyle();
+      applyLiveConfigPatch(null);
+      this.currentPatchId = '';
+      window.panelApp.reportUiPatchFailure(patch.patchId);
+    }
   },
 
   render(state) {
     this.state = state;
     const patch = state.uiPatch && state.uiPatch.patch;
-    if ((patch && patch.patchId) !== this.currentPatchId) this.applyPatch(patch || null);
+    const patchId = patch ? patch.patchId : '';
+    if (patchId !== this.currentPatchId) this.applyPatch(patch || null);
     const visibleStatuses = new Set(['available', 'downloading', 'downloaded']);
     const visible = visibleStatuses.has(state.status);
     this.el.hidden = !visible;

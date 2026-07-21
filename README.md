@@ -29,18 +29,22 @@ setting.
 The **Updates** tab selects Stable or Developer releases on each Mac. When a
 verified update exists, a download icon appears to the left of Wi-Fi and opens
 the update details card. See [docs/UPDATES.md](docs/UPDATES.md) for the signed
-full-update and restricted UI hot-patch workflow.
+full-update and declarative live-patch workflow.
 
 The English [operations manual](docs/OPERATIONS.md) covers routine development,
-status color changes, testing, builds, installation, releases, hot patches, and
+status color changes, testing, builds, installation, releases, live patches, and
 recovery. CPU, GPU, RAM, Temperature, and Wi-Fi tiers are defined in the
-validated `config/status-colors.json` file. Every successful `npm run dist`
-copies the manual and JSON into `dist` and the current version's build folder.
+validated `config/status-colors.json` file. Day/night refresh behavior is in
+`config/refresh-policy.json`. Every successful `npm run dist` copies the manual,
+both JSON files, and a Developer patch example into `dist` and the current
+version's build folder.
 
 The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the fixed Composio MCP service directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
 
 Calendar and Tasks refresh at the interval selected in Settings (15 minutes by
-default). Click either widget's "Updated … ago" text to refresh it immediately.
+default), except from 00:00 through 05:59 local time when they refresh every 30
+minutes on clock-aligned boundaries. Click either widget's "Updated … ago" text
+to refresh it immediately without changing the automatic schedule.
 For browser-only development, `.env.example` documents the two optional
 credentials. Everything degrades gracefully when a key is missing.
 
@@ -58,8 +62,12 @@ Current: **0.5.2_C**
   `alpha-mac.yml` metadata.
 - Updated every CPU, GPU, RAM, Temperature, and Wi-Fi range through the
   validated `config/status-colors.json` file.
+- Added a clock-aligned Calendar and Tasks scheduler that uses 30-minute
+  refreshes from 00:00 until 06:00 and the Settings interval at other times.
+- Extended signed Ed25519 live patches to accept only validated status colors,
+  the refresh policy, and the existing allowlisted update-card design tokens.
 - Retained per-device Stable/Developer channels, signed full-App updates,
-  restricted Ed25519 UI patches, and credential-free artifacts.
+  atomic patch activation and rollback, and credential-free artifacts.
 
 ### 0.4.2
 

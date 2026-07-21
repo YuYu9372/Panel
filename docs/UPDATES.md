@@ -1,14 +1,15 @@
-# Panel Updates and UI Hot Patches
+# Panel Updates and Signed Live Patches
 
 Panel uses two deliberately separate update paths.
 
 | Path | Can change | Verification | Recovery |
 | --- | --- | --- | --- |
 | Full App update | Electron, Python, dashboard logic, preload, and all UI | electron-updater SHA-512 metadata plus the macOS application signature | Install only after verification; publish a higher fixed version to recover a bad release |
-| UI hot patch | Update-card text and allowlisted visual tokens only | Independent Ed25519 signature, HTTPS, channel, sequence, expiry, and App-version range | Atomic activation, renderer health confirmation, previous-patch rollback |
+| Live patch | Complete validated status-color and refresh-policy JSON plus update-card text and allowlisted visual tokens | Independent Ed25519 signature, HTTPS, channel, sequence, expiry, App-version range, and strict field validation | Atomic activation, renderer health confirmation, previous-patch rollback |
 
-UI hot patches cannot contain HTML, JavaScript, API endpoints, preload code, or
-Python. This restriction is intentional. A full App update is required when
+Live patches cannot contain HTML, arbitrary JavaScript, API endpoints, preload
+code, Python, credentials, or changes that disable manual Calendar and Tasks
+refresh. This restriction is intentional. A full App update is required when
 behavior or security-sensitive code changes.
 
 ## Channels
@@ -29,7 +30,7 @@ contains no GitHub token and must never receive a private-repository PAT.
 
 The repository does not exist yet, so the update client reports a safe check
 failure until it is created and the first release is published. Compromising
-the repository would not be enough to forge a UI patch because the separate
+the repository would not be enough to forge a live patch because the separate
 Ed25519 signature is still required. Full App updates are protected by the
 macOS application signature.
 
@@ -58,7 +59,7 @@ generates `latest-mac.yml` or channel-specific metadata. See the
 [electron-builder auto-update guide](https://www.electron.build/docs/features/auto-update/)
 and [channel guide](https://www.electron.build/docs/tutorials/release-using-channels/).
 
-## UI hot-patch release
+## Live-patch release
 
 The private keys created for this project are outside the repository under:
 
@@ -69,7 +70,11 @@ The App contains only the corresponding public keys. Move
 Keep the Developer key separate so frequent test signing cannot compromise the
 Stable channel.
 
-1. Copy `patches/developer-ui-patch.example.json` and edit the draft.
+Install 0.5.2_C or later before publishing a configuration patch. B supports
+only the earlier update-card fields and safely rejects the new configuration
+fields.
+
+1. Copy `patches/developer-live-patch.example.json` and edit the draft.
 2. Increase `sequence`. A used sequence is never accepted again, even after a
    rollback.
 3. Keep `appVersionRange` narrow and set `lifetimeDays` from 1 to 30.
@@ -78,20 +83,22 @@ Stable channel.
    ```bash
    PANEL_PATCH_SIGNING_KEY='/Users/your-name/Library/Application Support/Panel Developer/update-signing/developer-private.pem' \
    PANEL_PATCH_KEY_ID='panel-developer-2026-01' \
-   npm run sign:patch -- patches/developer-ui-patch.example.json dist/developer-ui-patch.json
+   npm run sign:patch -- patches/developer-live-patch.example.json dist/developer-live-patch.json
    ```
 
-5. Commit it as `patches/developer-ui-patch.json` in the public artifact
-   repository. Use the Stable key and `patches/stable-ui-patch.json` only for
+5. Commit only the signed output as `patches/developer-live-patch.json` in the
+   public artifact repository. Use the Stable key and
+   `patches/stable-live-patch.json` only for
    approved public patches. The fixed files work independently of whether the
    newest full-App release is Stable or a Developer prerelease.
 6. Panel verifies the patch before an atomic write. The immutable renderer
-   applies allowlisted values and confirms health. If it crashes or reports a
-   failure before confirmation, the next launch restores the previous patch.
+   applies allowlisted values immediately, reschedules Calendar and Tasks, and
+   confirms health. If it crashes or reports a failure before confirmation,
+   the next launch restores the previous patch.
 
 ## Incident response
 
-- A bad unsigned or modified patch is rejected without changing the active UI.
+- A bad unsigned or modified patch is rejected without changing the active configuration.
 - A signed patch that fails health validation rolls back automatically and its
   sequence remains blocked.
 - If a private patch key is exposed, remove the manifest, ship a full signed App

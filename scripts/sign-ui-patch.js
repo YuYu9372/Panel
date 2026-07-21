@@ -29,6 +29,8 @@ const allowed = new Set([
   'appVersionRange',
   'lifetimeDays',
   'ui',
+  'statusColors',
+  'refreshPolicy',
 ]);
 if (Object.keys(draft).some((field) => !allowed.has(field))) {
   fail('Patch draft contains unsupported fields.');
@@ -47,8 +49,10 @@ const signed = {
   issuedAt: issuedAt.toISOString(),
   expiresAt: expiresAt.toISOString(),
   appVersionRange: draft.appVersionRange,
-  ui: draft.ui,
 };
+if (draft.ui !== undefined) signed.ui = draft.ui;
+if (draft.statusColors !== undefined) signed.statusColors = draft.statusColors;
+if (draft.refreshPolicy !== undefined) signed.refreshPolicy = draft.refreshPolicy;
 const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
 const envelope = signPatchPayload(signed, privateKey, keyId);
 verifyPatchEnvelope(envelope, {

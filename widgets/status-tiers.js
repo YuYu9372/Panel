@@ -39,7 +39,8 @@ const DEFAULT_STATUS_TIER_CONFIG = Object.freeze({
   unavailable: Object.freeze({ color: 'gray' }),
 });
 
-let statusTierConfig = DEFAULT_STATUS_TIER_CONFIG;
+let bundledStatusTierConfig = DEFAULT_STATUS_TIER_CONFIG;
+let statusTierConfig = bundledStatusTierConfig;
 
 function ensureObject(value, label) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -125,11 +126,23 @@ async function loadStatusTierConfig(fetcher = fetch) {
   try {
     const response = await fetcher('/config/status-colors.json', { cache: 'no-store' });
     if (!response.ok) throw new Error(`Status color config returned ${response.status}.`);
-    statusTierConfig = validateStatusTierConfig(await response.json());
+    bundledStatusTierConfig = validateStatusTierConfig(await response.json());
   } catch {
-    statusTierConfig = DEFAULT_STATUS_TIER_CONFIG;
+    bundledStatusTierConfig = DEFAULT_STATUS_TIER_CONFIG;
   }
+  statusTierConfig = bundledStatusTierConfig;
   return statusTierConfig;
+}
+
+function applyStatusTierConfig(value) {
+  statusTierConfig = value
+    ? validateStatusTierConfig(value)
+    : bundledStatusTierConfig;
+  return statusTierConfig;
+}
+
+function getBundledStatusTierConfig() {
+  return bundledStatusTierConfig;
 }
 
 function statusTierFor(metric, value, config = statusTierConfig) {
@@ -153,6 +166,8 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     DEFAULT_STATUS_TIER_CONFIG,
     STATUS_METRICS,
+    applyStatusTierConfig,
+    getBundledStatusTierConfig,
     loadStatusTierConfig,
     statusTierFor,
     validateStatusTierConfig,
