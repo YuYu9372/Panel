@@ -5,7 +5,7 @@ const widgets = [
   weatherWidget,
   calendarWidget,
   tasksWidget,
-  deviceStatusWidget,
+  statusGridWidget,
   connectivityWidget,
 ];
 
