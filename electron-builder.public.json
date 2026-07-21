@@ -1,7 +1,7 @@
 {
   "appId": "com.sirius.panel",
   "productName": "Panel",
-  "artifactName": "panel-1.0.0-Public-beta.${ext}",
+  "artifactName": "panel-0.5.0-Beta-B-Public.${ext}",
   "directories": {
     "output": "dist"
   },
