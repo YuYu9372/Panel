@@ -4,7 +4,7 @@
 
 Native RAM and temperature readings for Apple Silicon Macs.
 
-**Private download:** `panel-05.1.dmg` (includes the configured APIs)
+**Private download:** `panel-0.5.1-C-dev.dmg` (includes the configured APIs)
 
 **Public download:** `panel-0.5.1-C-public.dmg` (contains no API credentials)
 

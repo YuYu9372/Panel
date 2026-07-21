@@ -18,7 +18,7 @@
   "build": {
     "appId": "com.sirius.panel",
     "productName": "Panel",
-    "artifactName": "panel-05.1.${ext}",
+    "artifactName": "panel-0.5.1-C-dev.${ext}",
     "directories": {
       "output": "dist"
     },

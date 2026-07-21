@@ -14,13 +14,13 @@ Package Panel into either full-screen `.dmg`:
 
 ```bash
 npm install             # once, pulls Electron + electron-builder
-npm run dist            # private: dist/panel-05.1.dmg, includes .env
+npm run dist            # private: dist/panel-0.5.1-C-dev.dmg, includes .env
 npm run dist:public     # public: dist/panel-0.5.1-C-public.dmg, no API credentials
 ```
 
 Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it's missing). During development, `npm start` runs the same window without packaging.
 
-> The private build bundles your `.env` inside the app, so keep `panel-05.1.dmg`
+> The private build bundles your `.env` inside the app, so keep `panel-0.5.1-C-dev.dmg`
 > to yourself. The public build includes `.env.example` with blank credentials.
 
 The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the Composio MCP directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
