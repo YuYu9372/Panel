@@ -1,7 +1,8 @@
 const calendarWidget = {
   el: null,
-  interval: 600000,
+  interval: 900000,
   lastUpdated: 0,
+  updating: false,
 
   init() {
     this.el = document.getElementById('calendar');
@@ -10,7 +11,7 @@ const calendarWidget = {
         <div>
           <div class="widget-kicker">SCHEDULE</div>
           <h2>Calendar</h2>
-          <div class="widget-updated"></div>
+          <button class="widget-updated" type="button" aria-label="Refresh calendar"></button>
         </div>
         <svg class="cal-glyph" viewBox="0 0 24 24" aria-hidden="true" fill="none"
              stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
@@ -20,6 +21,7 @@ const calendarWidget = {
       </div>
       <div class="cal-timeline"><div class="cal-empty">Loading…</div></div>
     `;
+    this.el.querySelector('.widget-updated').addEventListener('click', () => this.update(true));
     this.update();
   },
 
@@ -90,18 +92,27 @@ const calendarWidget = {
   refreshUpdated() {
     if (!this.el) return;
     const el = this.el.querySelector('.widget-updated');
-    if (el) el.textContent = this.lastUpdated ? `Updated ${timeAgo(this.lastUpdated)}` : '';
+    if (!el) return;
+    el.disabled = this.updating;
+    el.textContent = this.updating
+      ? 'Refreshing…'
+      : this.lastUpdated ? `Updated ${timeAgo(this.lastUpdated)}` : '';
   },
 
-  async update() {
+  async update(force = false) {
+    if (this.updating) return;
+    this.updating = true;
+    this.refreshUpdated();
     try {
-      const response = await fetch('/api/calendar');
+      const response = await fetch(force ? '/api/calendar?refresh=1' : '/api/calendar');
       const data = await response.json();
       this.render(data.events);
       if (data.events !== null) this.lastUpdated = Date.now();
     } catch {
       this.render(null);
+    } finally {
+      this.updating = false;
+      this.refreshUpdated();
     }
-    this.refreshUpdated();
   },
 };

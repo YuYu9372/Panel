@@ -10,18 +10,20 @@ Then open [http://localhost:8642](http://localhost:8642).
 
 ### Or run it as a Mac app
 
-Package Panel into a full-screen `.dmg`:
+Package Panel into either full-screen `.dmg`:
 
 ```bash
-npm install        # once, pulls Electron + electron-builder
-npm run dist       # builds dist/Panel-<version>.dmg
+npm install             # once, pulls Electron + electron-builder
+npm run dist            # private: dist/panel-0.5.1-C-dev.dmg, includes .env
+npm run dist:public     # public: dist/panel-0.5.1-C-public.dmg, no API credentials
 ```
 
 Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it's missing). During development, `npm start` runs the same window without packaging.
 
-> The build bundles your `.env` inside the app, so keep the `.dmg` to yourself.
+> The private build bundles your `.env` inside the app, so keep `panel-0.5.1-C-dev.dmg`
+> to yourself. The public build includes `.env.example` with blank credentials.
 
-The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the Composio MCP directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. Unsupported sensors are shown as unavailable.
+The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the Composio MCP directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
 
 Set `ANTHROPIC_API_KEY` (greeting) and `COMPOSIO_MCP_URL` / `COMPOSIO_MCP_TOKEN` (calendar + tasks) in `.env` — see [.env.example](.env.example). Everything degrades gracefully when a key is missing.
 
@@ -33,10 +35,13 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current: **1.0.0-beta**
+Current: **0.5.1-C**
 
-- Packaged as a full-screen macOS `.dmg` app (Electron wrapper launches `serve.py`, opens kiosk)
-- Clock now ticks aligned to the wall clock — no more 1–2 s lag or drift
+- Fixed RAM reporting when Panel launches through a Python installation without `psutil`.
+- Added native Apple Silicon CPU temperature reporting through the SMC.
+- Calendar and Tasks refresh every 15 minutes and can be refreshed immediately
+  by clicking their "Updated … ago" text.
+- Packaged as a full-screen macOS `.dmg` app with a six-hour system history dock.
 
 ### 0.4.2
 

@@ -1,7 +1,7 @@
 {
   "appId": "com.sirius.panel",
   "productName": "Panel",
-  "artifactName": "panel-0.5.0-Beta-B-Public.${ext}",
+  "artifactName": "panel-0.5.1-C-public.${ext}",
   "directories": {
     "output": "dist"
   },
@@ -11,6 +11,8 @@
   ],
   "extraResources": [
     { "from": "serve.py", "to": "panel/serve.py" },
+    { "from": "macos_sensors.py", "to": "panel/macos_sensors.py" },
+    { "from": "THIRD_PARTY_NOTICES.md", "to": "panel/THIRD_PARTY_NOTICES.md" },
     { "from": "index.html", "to": "panel/index.html" },
     { "from": "style.css", "to": "panel/style.css" },
     { "from": "app.js", "to": "panel/app.js" },

@@ -14,8 +14,10 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 from urllib.request import Request, urlopen
+
+from macos_sensors import read_apple_temperature
 
 try:
     import psutil
@@ -143,8 +145,8 @@ def get_greeting():
         return payload
 
 
-CALENDAR_CACHE_SECONDS = 600
-TASKS_CACHE_SECONDS = 300
+CALENDAR_CACHE_SECONDS = 900
+TASKS_CACHE_SECONDS = 900
 CALENDAR_WINDOW_DAYS = 7
 calendar_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
 tasks_cache = {'payload': None, 'expires_at': 0.0, 'fails': 0}
@@ -301,13 +303,13 @@ def fetch_tasks():
     return folders
 
 
-def get_calendar():
+def get_calendar(force=False):
     if not mcp_configured():
         return {'events': None}
     now = time.monotonic()
     with data_lock:
         cached = calendar_cache['payload']
-        if cached is not None and now < calendar_cache['expires_at']:
+        if not force and cached is not None and now < calendar_cache['expires_at']:
             return cached
         try:
             payload = {'events': fetch_calendar()}
@@ -323,13 +325,13 @@ def get_calendar():
         return payload
 
 
-def get_tasks():
+def get_tasks(force=False):
     if not mcp_configured():
         return {'folders': None}
     now = time.monotonic()
     with data_lock:
         cached = tasks_cache['payload']
-        if cached is not None and now < tasks_cache['expires_at']:
+        if not force and cached is not None and now < tasks_cache['expires_at']:
             return cached
         try:
             payload = {'folders': fetch_tasks()}
@@ -415,7 +417,59 @@ def read_cpu():
         return None
 
 
+def parse_macos_vm_stat(output, total):
+    page_size_match = re.search(r'page size of (\d+) bytes', output)
+    if not page_size_match or total <= 0:
+        return None
+
+    pages = {}
+    for line in output.splitlines():
+        match = re.match(r'([^:]+):\s+(\d+)\.?$', line.strip())
+        if match:
+            pages[match.group(1)] = int(match.group(2))
+
+    required = ('Pages free', 'Pages active', 'Pages inactive', 'Pages wired down')
+    if any(key not in pages for key in required):
+        return None
+
+    page_size = int(page_size_match.group(1))
+    free = pages['Pages free'] + pages.get('Pages speculative', 0)
+    available = min(total, (free + pages['Pages inactive']) * page_size)
+    used = min(total, (pages['Pages active'] + pages['Pages wired down']) * page_size)
+    return {
+        'value': clamp_percent((total - available) / total * 100),
+        'used_bytes': used,
+        'total_bytes': total,
+    }
+
+
+def read_macos_memory():
+    try:
+        total = int(subprocess.run(
+            ['/usr/sbin/sysctl', '-n', 'hw.memsize'],
+            capture_output=True,
+            check=True,
+            text=True,
+            timeout=1.5,
+        ).stdout.strip())
+        output = subprocess.run(
+            ['/usr/bin/vm_stat'],
+            capture_output=True,
+            check=True,
+            text=True,
+            timeout=1.5,
+        ).stdout
+        return parse_macos_vm_stat(output, total)
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+
+
 def read_memory():
+    if platform.system() == 'Darwin':
+        memory = read_macos_memory()
+        if memory is not None:
+            return memory
+
     if psutil:
         memory = psutil.virtual_memory()
         return {
@@ -516,6 +570,10 @@ def read_gpu():
 
 def read_temperature(gpu_temperature=None):
     readings = []
+
+    apple_temperature = read_apple_temperature()
+    if apple_temperature is not None:
+        readings.append(apple_temperature)
 
     if psutil and hasattr(psutil, 'sensors_temperatures'):
         try:
@@ -806,7 +864,9 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
         return True
 
     def do_GET(self):
-        path = unquote(urlparse(self.path).path)
+        request_url = urlparse(self.path)
+        path = unquote(request_url.path)
+        force_refresh = parse_qs(request_url.query).get('refresh') == ['1']
 
         if any(part.startswith('.') for part in path.split('/') if part):
             self.send_error(404)
@@ -828,11 +888,11 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path == '/api/calendar':
-            self.send_json(get_calendar())
+            self.send_json(get_calendar(force=force_refresh))
             return
 
         if path == '/api/tasks':
-            self.send_json(get_tasks())
+            self.send_json(get_tasks(force=force_refresh))
             return
 
         if path == '/api/net':

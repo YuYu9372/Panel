@@ -96,7 +96,7 @@ Panel/
 - [x] Fix: `serve.py` `IndentationError` in the greeting prompt that stopped the server from starting.
 - [x] `serve.py` honors `PORT` (fallback after `PANEL_PORT`) so it can run on an assigned port.
 
-### 0.5.0 Beta-B <- Currently
+### 0.5.0 Beta-B
 - [x] Bottom **system history dock**: 5 horizontal metric groups (CPU/GPU/RAM/TEMP/WIFI),
   each with 12 clock-aligned **30-min windows**. The first 11 blocks are frozen p95 values;
   block 12 is the current window's running average. Raw live values update every ~2 s.
@@ -106,12 +106,20 @@ Panel/
   (window), finalizes each half-hour, persists to `~/.panel/history.json` and restores on restart.
 - [x] Offline / no-reading blocks render gray; wifi icon + offline screen unchanged (offline screen mirrors the grid).
 
+### 0.5.1-C <- Currently
+- [x] Read macOS RAM from `vm_stat` and `sysctl`, independent of `psutil`.
+- [x] Read Apple Silicon CPU temperature directly from the SMC without sudo.
+- [x] Show 0.5.1_Beta_C in the dashboard while retaining bundle version 0.5.1.
+- [x] Keep the packaged signature valid by disabling Python bytecode writes inside the app bundle.
+- [x] Refresh Calendar and Tasks every 15 minutes, with click-to-refresh updated labels.
+- [x] Build separate private (`panel-05.1.dmg`) and credential-free public (`panel-0.5.1-C-public.dmg`) installers.
+
 ---
 
 ## Notes
 - Weather API: Open-Meteo (free, no key). Location hardcoded to Taipei for now.
 - Greeting line: Anthropic API (`claude-haiku-4-5`), key in `.env` as `ANTHROPIC_API_KEY`; falls back to a local phrase without it. Only remaining AI/token use.
-- Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) via `COMPOSIO_MCP_URL` / `COMPOSIO_MCP_TOKEN` in `.env`. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Cached 10 min / 5 min.
+- Calendar + Tasks: Composio MCP called directly (JSON-RPC over HTTP, no LLM) via `COMPOSIO_MCP_URL` / `COMPOSIO_MCP_TOKEN` in `.env`. Tools: `GOOGLECALENDAR_EVENTS_LIST_ALL_CALENDARS`, `GOOGLETASKS_LIST_ALL_TASKS`, `GOOGLETASKS_PATCH_TASK` (via `COMPOSIO_MULTI_EXECUTE_TOOL`). Cached 15 min; click the updated label to bypass the cache.
 - Layout: top bar (greeting + wifi indicator), fixed 2 × 2 dashboard grid (clock, weather,
   calendar, tasks), and a full-width system history dock at the bottom.
 - Connectivity: `/api/net` measures internet reachability via a raw TCP connect (no DNS, no LLM). Widget polls every 5 s; latency ≈ ping. Offline overlay is debounced (2 fails) so brief blips don't flash it.

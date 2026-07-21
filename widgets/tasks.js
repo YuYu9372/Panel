@@ -1,7 +1,8 @@
 const tasksWidget = {
   el: null,
-  interval: 300000,
+  interval: 900000,
   lastUpdated: 0,
+  updating: false,
 
   init() {
     this.el = document.getElementById('tasks');
@@ -10,7 +11,7 @@ const tasksWidget = {
         <div>
           <div class="widget-kicker">TO-DO</div>
           <h2>Tasks</h2>
-          <div class="widget-updated"></div>
+          <button class="widget-updated" type="button" aria-label="Refresh tasks"></button>
         </div>
         <svg class="tasks-glyph" viewBox="0 0 24 24" aria-hidden="true" fill="none"
              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -20,6 +21,7 @@ const tasksWidget = {
       </div>
       <div class="tasks-body"><div class="tasks-empty">Loading…</div></div>
     `;
+    this.el.querySelector('.widget-updated').addEventListener('click', () => this.update(true));
     this.update();
   },
 
@@ -114,18 +116,27 @@ const tasksWidget = {
   refreshUpdated() {
     if (!this.el) return;
     const el = this.el.querySelector('.widget-updated');
-    if (el) el.textContent = this.lastUpdated ? `Updated ${timeAgo(this.lastUpdated)}` : '';
+    if (!el) return;
+    el.disabled = this.updating;
+    el.textContent = this.updating
+      ? 'Refreshing…'
+      : this.lastUpdated ? `Updated ${timeAgo(this.lastUpdated)}` : '';
   },
 
-  async update() {
+  async update(force = false) {
+    if (this.updating) return;
+    this.updating = true;
+    this.refreshUpdated();
     try {
-      const response = await fetch('/api/tasks');
+      const response = await fetch(force ? '/api/tasks?refresh=1' : '/api/tasks');
       const data = await response.json();
       this.render(data.folders);
       if (data.folders !== null) this.lastUpdated = Date.now();
     } catch {
       this.render(null);
+    } finally {
+      this.updating = false;
+      this.refreshUpdated();
     }
-    this.refreshUpdated();
   },
 };
