@@ -1,6 +1,6 @@
 {
   "name": "panel",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Panel — personal dashboard, packaged as a macOS app.",
   "author": "Sirius",
   "license": "UNLICENSED",
@@ -27,6 +27,8 @@
     ],
     "extraResources": [
       { "from": "serve.py", "to": "panel/serve.py" },
+      { "from": "macos_sensors.py", "to": "panel/macos_sensors.py" },
+      { "from": "THIRD_PARTY_NOTICES.md", "to": "panel/THIRD_PARTY_NOTICES.md" },
       { "from": "index.html", "to": "panel/index.html" },
       { "from": "style.css", "to": "panel/style.css" },
       { "from": "app.js", "to": "panel/app.js" },

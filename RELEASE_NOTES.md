@@ -1,5 +1,30 @@
 # Release Notes
 
+## 0.5.1
+
+Native RAM and temperature readings for Apple Silicon Macs.
+
+### Fixed
+
+- **RAM no longer depends on the selected Python installation.** Panel now reads
+  macOS virtual-memory counters through `vm_stat` and `sysctl`, so the RAM row
+  works even when the Python selected by the packaged app has no `psutil`.
+- **Temperature now works on Apple Silicon.** Panel reads the available CPU
+  temperature sensors directly from Apple's read-only SMC interface and shows
+  their average in Celsius. It does not require sudo or a
+  separate monitoring app.
+- **Version metadata is consistent.** The app bundle, dashboard tag, package
+  metadata, and public disk-image name now report 0.5.1.
+
+### Verified
+
+- MacBook Pro with Apple M4 Pro and 24 GB RAM.
+- Both metrics return live numeric values when Panel uses Homebrew Python 3.14
+  without `psutil`.
+- Existing Linux and `psutil` fallbacks remain available on other systems.
+
+---
+
 ## 0.5.0 Beta-B (Public)
 
 Network status, a system history dock, and a proper offline screen.

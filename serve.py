@@ -17,6 +17,8 @@ from urllib.error import HTTPError
 from urllib.parse import unquote, urlparse
 from urllib.request import Request, urlopen
 
+from macos_sensors import read_apple_temperature
+
 try:
     import psutil
 except ImportError:
@@ -415,7 +417,59 @@ def read_cpu():
         return None
 
 
+def parse_macos_vm_stat(output, total):
+    page_size_match = re.search(r'page size of (\d+) bytes', output)
+    if not page_size_match or total <= 0:
+        return None
+
+    pages = {}
+    for line in output.splitlines():
+        match = re.match(r'([^:]+):\s+(\d+)\.?$', line.strip())
+        if match:
+            pages[match.group(1)] = int(match.group(2))
+
+    required = ('Pages free', 'Pages active', 'Pages inactive', 'Pages wired down')
+    if any(key not in pages for key in required):
+        return None
+
+    page_size = int(page_size_match.group(1))
+    free = pages['Pages free'] + pages.get('Pages speculative', 0)
+    available = min(total, (free + pages['Pages inactive']) * page_size)
+    used = min(total, (pages['Pages active'] + pages['Pages wired down']) * page_size)
+    return {
+        'value': clamp_percent((total - available) / total * 100),
+        'used_bytes': used,
+        'total_bytes': total,
+    }
+
+
+def read_macos_memory():
+    try:
+        total = int(subprocess.run(
+            ['/usr/sbin/sysctl', '-n', 'hw.memsize'],
+            capture_output=True,
+            check=True,
+            text=True,
+            timeout=1.5,
+        ).stdout.strip())
+        output = subprocess.run(
+            ['/usr/bin/vm_stat'],
+            capture_output=True,
+            check=True,
+            text=True,
+            timeout=1.5,
+        ).stdout
+        return parse_macos_vm_stat(output, total)
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+
+
 def read_memory():
+    if platform.system() == 'Darwin':
+        memory = read_macos_memory()
+        if memory is not None:
+            return memory
+
     if psutil:
         memory = psutil.virtual_memory()
         return {
@@ -516,6 +570,10 @@ def read_gpu():
 
 def read_temperature(gpu_temperature=None):
     readings = []
+
+    apple_temperature = read_apple_temperature()
+    if apple_temperature is not None:
+        readings.append(apple_temperature)
 
     if psutil and hasattr(psutil, 'sensors_temperatures'):
         try:

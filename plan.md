@@ -96,7 +96,7 @@ Panel/
 - [x] Fix: `serve.py` `IndentationError` in the greeting prompt that stopped the server from starting.
 - [x] `serve.py` honors `PORT` (fallback after `PANEL_PORT`) so it can run on an assigned port.
 
-### 0.5.0 Beta-B <- Currently
+### 0.5.0 Beta-B
 - [x] Bottom **system history dock**: 5 horizontal metric groups (CPU/GPU/RAM/TEMP/WIFI),
   each with 12 clock-aligned **30-min windows**. The first 11 blocks are frozen p95 values;
   block 12 is the current window's running average. Raw live values update every ~2 s.
@@ -105,6 +105,11 @@ Panel/
 - [x] `serve.py` background sampler + `/api/history`: samples every 2 s (live) / every 30 s
   (window), finalizes each half-hour, persists to `~/.panel/history.json` and restores on restart.
 - [x] Offline / no-reading blocks render gray; wifi icon + offline screen unchanged (offline screen mirrors the grid).
+
+### 0.5.1 <- Currently
+- [x] Read macOS RAM from `vm_stat` and `sysctl`, independent of `psutil`.
+- [x] Read Apple Silicon CPU temperature directly from the SMC without sudo.
+- [x] Align the app bundle, dashboard, package, and public artifact version at 0.5.1.
 
 ---
 
