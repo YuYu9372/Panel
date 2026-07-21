@@ -51,14 +51,21 @@ const statusGridWidget = {
     return `cell cell--${this.tierFor(key, block[key])}`;
   },
 
-  formatValue(key, latest) {
+  formatValue(key, latest, current) {
+    // Text is always the instant reading (feels live); the color follows the
+    // current block's running-average tier so the number never visually
+    // disagrees with the cell it sits next to.
+    const currentValue = current && current[key] != null ? current[key] : null;
+
     if (key === 'wifi') {
       if (!latest.online || latest.wifi == null) return { text: 'offline', tier: 'gray' };
-      return { text: `${Math.round(latest.wifi)}ms`, tier: this.tierFor('wifi', latest.wifi) };
+      const tierValue = currentValue != null ? currentValue : latest.wifi;
+      return { text: `${Math.round(latest.wifi)}ms`, tier: this.tierFor('wifi', tierValue) };
     }
     const value = latest[key];
     if (value == null) return { text: '—', tier: 'gray' };
-    return { text: `${Math.round(value)}${key === 'temp' ? '°' : '%'}`, tier: this.tierFor(key, value) };
+    const tierValue = currentValue != null ? currentValue : value;
+    return { text: `${Math.round(value)}${key === 'temp' ? '°' : '%'}`, tier: this.tierFor(key, tierValue) };
   },
 
   formatBlockValue(key, value) {
@@ -113,6 +120,7 @@ const statusGridWidget = {
   render(data) {
     const blocks = data.blocks || [];
     const latest = data.latest || {};
+    const current = blocks[this.blocks - 1];
     this.rows.forEach((row) => {
       const rowEl = this.el.querySelector(`[data-metric="${row.key}"]`);
       rowEl.querySelectorAll('.cell').forEach((cell, index) => {
@@ -124,7 +132,7 @@ const statusGridWidget = {
         cell.setAttribute('aria-label', label);
       });
       const valueEl = rowEl.querySelector('.row-value');
-      const { text, tier } = this.formatValue(row.key, latest);
+      const { text, tier } = this.formatValue(row.key, latest, current);
       valueEl.textContent = text;
       valueEl.dataset.tier = tier;
     });
