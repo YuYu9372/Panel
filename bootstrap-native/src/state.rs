@@ -303,7 +303,7 @@ mod tests {
                 runtime_revision: revision,
                 sequence,
                 channel: "developer".to_owned(),
-                baseline_range: ">=1.1.0-alpha.1, <1.2.0".to_owned(),
+                baseline_range: ">=1.1.0-alpha.1 <1.2.0".to_owned(),
                 bootstrap_api_version: 1,
                 runtime_api_version: 1,
                 issued_at: "2027-01-15T08:00:00Z".to_owned(),

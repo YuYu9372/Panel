@@ -8,14 +8,14 @@ model, and operator workflow for Panel.
 | Update tier | Status | Activation |
 | --- | --- | --- |
 | Full Version Update | Available | User approves, then Electron `quitAndInstall` |
-| Runtime Update | Rust foundation implemented; Panel integration pending | User approves, Updating screen, A/B switch, micro-restart |
+| Runtime Update | Package toolchain and Rust foundation implemented; Panel integration pending | User approves, Updating screen, A/B switch, micro-restart |
 | Standard Live Patch | Available | Automatic, immediate, health checked |
 
-The standalone `bootstrap-native` command now verifies signed packages and manages
-A/B stage, activate, confirm, and rollback state. A Full Version Update must still
-embed its trusted public keys and connect downloading, the Updating screen, process
-launching, health supervision, and automatic recovery before Runtime Update is
-available to users.
+The Runtime tools now prepare an explicit file manifest, sign it with an offline
+Ed25519 key, build a deterministic ZIP, verify it, and manage A/B stage, activate,
+confirm, and rollback state. A Full Version Update must still embed its trusted
+public keys and connect downloading, the Updating screen, process launching, health
+supervision, and automatic recovery before Runtime Update is available to users.
 
 ## Design principles
 
@@ -97,7 +97,7 @@ an in-memory code replacement.
 
 ### Package model
 
-The future build command will produce an immutable package such as:
+The build commands produce an immutable package such as:
 
 ```text
 panel-runtime-r3.zip
@@ -112,23 +112,24 @@ The signed manifest must contain the runtime revision, channel, Baseline range,
 Bootstrap and Runtime API versions, sequence, issue and expiry times, and the
 SHA-256 digest and size of every file.
 
-### Target operator workflow
+### Operator workflow
 
 1. Modify HTML, CSS, JavaScript, Python, or other runtime source normally.
 2. Increase `runtimeRevision` and the anti-replay sequence.
 3. Run the complete test and dependency audit suite.
-4. Build a deterministic Runtime ZIP and manifest.
-5. Sign the manifest with the matching offline Ed25519 channel key.
-6. Upload the package and signed manifest without modifying an existing revision.
-7. Commit and push the public metadata.
-8. Panel shows a Runtime Update card; it does not install automatically.
-9. After approval, the immutable Bootstrap displays the Updating screen with
+4. Run `npm run prepare:runtime` to hash the explicit source allowlist.
+5. Run `npm run sign:runtime` with the matching offline Ed25519 channel key.
+6. Run `npm run pack:runtime` to recheck the sources and create the deterministic
+   Runtime ZIP.
+7. Upload the package and signed manifest without modifying an existing revision.
+8. Commit and push the public metadata.
+9. Panel shows a Runtime Update card; it does not install automatically.
+10. After approval, the immutable Bootstrap displays the Updating screen with
    download, verification, staging, switching, restart, and health-check progress.
-10. The Bootstrap activates the pending A/B slot only after health confirmation and
+11. The Bootstrap activates the pending A/B slot only after health confirmation and
     restores the previous slot after failure.
 
-The package verifier and A/B state operations are available as a development CLI.
-Package building, signing, publishing, and Panel integration remain design work.
+Package publishing and Panel integration remain design work.
 
 ## Tier 3: Standard Live Patch
 

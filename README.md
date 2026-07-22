@@ -59,6 +59,11 @@ boundaries and the operator workflow for each tier.
 The shorter [technical manual](technical-manual/README.md) provides simple,
 step-by-step instructions for choosing and publishing each update type.
 
+The `1.1.0` development branch includes the standalone Runtime package toolchain:
+`npm run prepare:runtime`, `npm run sign:runtime`, and `npm run pack:runtime`.
+Panel integration is still in development, so Runtime ZIPs are not offered to
+installed users yet.
+
 The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the fixed Composio MCP service directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
 
 Calendar and Tasks refresh at the interval selected in Settings (15 minutes by

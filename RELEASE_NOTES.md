@@ -12,14 +12,17 @@ yet a user-installable Runtime Update release.
   lifetime, path, size, SHA-256, and anti-replay checks.
 - Added local A/B slots with separate stage, activate, health-confirm, and
   rollback operations.
+- Added a deterministic Runtime package builder and an offline Ed25519 manifest
+  signer with explicit source allowlisting and private-key permission checks.
 - Added tests for successful A/B transitions, rollback, replay rejection,
-  incompatible Runtime APIs, path traversal, and undeclared archive files.
+  incompatible Runtime APIs, path traversal, undeclared archive files, package
+  determinism, cross-language signatures, credential exclusion, and symlinks.
 - Added an English Runtime operator guide and a short Rust basics guide.
 
 The Electron download flow, Updating screen, embedded production public keys,
-Runtime package builder, signing workflow, process supervisor, and automatic
-health recovery remain future work. Production code changes must continue to use
-a Full Version Update until those pieces are complete.
+process supervisor, and automatic health recovery remain future work. Production
+code changes must continue to use a Full Version Update until those pieces are
+complete.
 
 ## Panel 1.0.1
 

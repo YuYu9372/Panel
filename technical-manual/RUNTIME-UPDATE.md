@@ -2,14 +2,15 @@
 
 ## Current status
 
-The standalone Rust foundation is implemented on the `1.1.0` development
-branch. It can verify a signed Runtime ZIP, stage it in an inactive A/B slot,
-activate it, confirm health, or roll it back.
+The standalone Runtime toolchain is implemented on the `1.1.0` development
+branch. It can prepare a file manifest, sign it with an offline Ed25519 key,
+create a deterministic ZIP, verify the package, stage it in an inactive A/B
+slot, activate it, confirm health, or roll it back.
 
-Panel does not download or launch this Runtime yet. The Updating screen, package
-builder, offline signing workflow, Electron launcher integration, process health
-supervisor, and automatic recovery still need to be connected. Use a Full Version
-Update for production program-code changes until that integration is complete.
+Panel does not download or launch this Runtime yet. The Updating screen, Electron
+launcher integration, process health supervisor, and automatic recovery still
+need to be connected. Use a Full Version Update for production program-code
+changes until that integration is complete.
 
 ## Purpose
 
@@ -21,7 +22,55 @@ Runtime Update will allow these files to update without a normal DMG installatio
 - images, fonts, and feature assets
 - compatible Electron main and preload code
 
-## Foundation CLI
+## Create a Developer Runtime package
+
+Start with `runtime/developer-runtime.example.json`. Increase both
+`runtimeRevision` and `sequence` for every new package. Never reuse either value,
+including after rollback.
+
+Create a separate Runtime signing key outside the repository once:
+
+```bash
+KEY_DIR="$HOME/Library/Application Support/Panel Developer/runtime-signing"
+mkdir -p "$KEY_DIR"
+openssl genpkey -algorithm Ed25519 -out "$KEY_DIR/developer-private.pem"
+openssl pkey -in "$KEY_DIR/developer-private.pem" -pubout \
+  -out "$KEY_DIR/developer-public.pem"
+chmod 600 "$KEY_DIR/developer-private.pem"
+```
+
+Prepare the unsigned manifest:
+
+```bash
+npm run prepare:runtime -- \
+  runtime/developer-runtime.example.json \
+  runtime-output/r1/manifest.draft.json
+```
+
+Sign it. The private key is read from its external location and is never copied
+into the output:
+
+```bash
+PANEL_RUNTIME_SIGNING_KEY="$HOME/Library/Application Support/Panel Developer/runtime-signing/developer-private.pem" \
+PANEL_RUNTIME_KEY_ID='panel-runtime-developer-2026-01' \
+npm run sign:runtime -- \
+  runtime-output/r1/manifest.draft.json \
+  runtime-output/r1/manifest.signed.json
+```
+
+Create the deterministic ZIP:
+
+```bash
+npm run pack:runtime -- \
+  runtime/developer-runtime.example.json \
+  runtime-output/r1/manifest.signed.json \
+  runtime-output/r1/panel-runtime-r1.zip
+```
+
+Each command refuses to overwrite an existing output. Use a new output directory
+for the next revision. `runtime-output` is ignored by Git.
+
+## Verify and exercise the Rust foundation
 
 Build it:
 
@@ -34,8 +83,8 @@ Use a separate test root while developing:
 ```bash
 BOOTSTRAP='bootstrap-native/target/release/panel-bootstrap'
 ROOT='/tmp/panel-runtime-test'
-PACKAGE='/path/to/panel-runtime-r1.zip'
-PUBLIC_KEY='/path/to/developer-public.pem'
+PACKAGE='runtime-output/r1/panel-runtime-r1.zip'
+PUBLIC_KEY="$HOME/Library/Application Support/Panel Developer/runtime-signing/developer-public.pem"
 
 "$BOOTSTRAP" --root "$ROOT" verify "$PACKAGE" \
   --public-key "$PUBLIC_KEY" \
@@ -66,8 +115,19 @@ check:
 ```
 
 The public key is a command argument only while this component is standalone.
-Panel integration must supply a public key embedded by a trusted Full Version
+Panel integration must supply this public key through a trusted Full Version
 Update. It must never accept an arbitrary downloaded public key.
+
+## Package safety rules
+
+- The config contains an explicit source-to-target allowlist.
+- `.env`, npm/Python credential files, private-key formats, symlinks, empty files,
+  traversal paths, duplicate targets, and undeclared files are rejected.
+- The packer recalculates every size and SHA-256 digest after signing.
+- ZIP entries have a fixed timestamp, permissions, and sorted order.
+- The signer requires owner-only private-key permissions and performs a signature
+  self-check before writing output.
+- The Rust verifier independently checks the signature and every packaged byte.
 
 ## Complete workflow target
 

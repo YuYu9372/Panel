@@ -178,7 +178,12 @@ fn validate_manifest(
     }
     let version =
         Version::parse(&context.app_version).map_err(|_| ManifestError::Invalid("appVersion"))?;
-    let range = VersionReq::parse(&manifest.baseline_range)
+    let normalized_range = manifest
+        .baseline_range
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(", ");
+    let range = VersionReq::parse(&normalized_range)
         .map_err(|_| ManifestError::Invalid("baselineRange"))?;
     if !range.matches(&version) {
         return Err(ManifestError::Invalid("baselineRange"));

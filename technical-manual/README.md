@@ -5,7 +5,7 @@ Panel has three update methods. Choose the method by what you changed.
 | What changed? | Method | Ready now? |
 | --- | --- | --- |
 | Anything, including Electron and security code | Full Version Update | Yes |
-| HTML, CSS, JavaScript, Python, and feature code | Runtime Update | Foundation only |
+| HTML, CSS, JavaScript, Python, and feature code | Runtime Update | Tools ready; App integration pending |
 | Colors, labels, layout, refresh rules, and safe settings | Standard Live Patch | Yes |
 
 ## Simple decision
