@@ -5,6 +5,7 @@ const path = require('node:path');
 const { validateRefreshPolicy } = require('../widgets/refresh-policy');
 const { validateStatusTierConfig } = require('../widgets/status-tiers');
 const { validateSettingsLayout } = require('../electron/settings-layout');
+const semver = require('semver');
 
 function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8'));
@@ -18,7 +19,9 @@ test('Developer live-patch example contains the exact bundled 1.0.1 configuratio
   assert.deepEqual(validateStatusTierConfig(draft.statusColors), statusColors);
   assert.deepEqual(validateRefreshPolicy(draft.refreshPolicy), refreshPolicy);
   assert.deepEqual(validateSettingsLayout(draft.settingsLayout), settingsLayout);
-  assert.equal(draft.appVersionRange, '>=1.0.1 <1.0.2');
+  assert.equal(draft.appVersionRange, '>=1.0.1-alpha.1 <1.0.2');
+  assert.equal(semver.satisfies('1.0.1-alpha.1', draft.appVersionRange), true);
+  assert.equal(semver.satisfies('1.0.1', draft.appVersionRange), true);
   assert.equal(draft.patchNumber, 1);
   assert.equal(draft.channel, 'developer');
 });
@@ -33,7 +36,7 @@ test('release metadata identifies the developer 1.0.1 build and artifact', () =>
     gitTag: '1.0.1',
     artifact: 'panel.dmg',
     public: false,
-    livePatchCompatibility: '>=1.0.1 <1.0.2',
+    livePatchCompatibility: '>=1.0.1-alpha.1 <1.0.2',
   });
   assert.equal(packageJson.version, '1.0.1-alpha.1');
   assert.equal(packageJson.build.artifactName, 'panel.${ext}');

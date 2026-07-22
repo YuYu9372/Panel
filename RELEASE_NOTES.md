@@ -13,7 +13,7 @@ RAW editing mode.
 
 **Manual installer:** `panel.dmg`
 
-**DMG SHA-256:** `d61c2b5896871023b624095c72238aadbabad18337886e063fcd01f1599e216c`
+**DMG SHA-256:** `a8b85c82ff94cb04d6f9dcada986218de281615af0611f1a120f5347dde72458`
 
 ### Settings
 
@@ -34,7 +34,7 @@ RAW editing mode.
   files, or unrelated system variables.
 - Existing mask/reveal controls, connection tests, secure storage, signed full
   updates, and restricted Ed25519 Live Patches remain available.
-- Live Patch compatibility is restricted to `>=1.0.1 <1.0.2`.
+- Live Patch compatibility is restricted to `>=1.0.1-alpha.1 <1.0.2`.
 - 55 Node security and behavior tests and 9 Python tests pass.
 
 The DMG, ZIP, App signature structure, update metadata, packaged RAW resources,

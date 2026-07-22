@@ -59,7 +59,7 @@ Developer test `1.0.1` uses:
   "gitTag": "1.0.1",
   "artifact": "panel.dmg",
   "public": false,
-  "livePatchCompatibility": ">=1.0.1 <1.0.2"
+  "livePatchCompatibility": ">=1.0.1-alpha.1 <1.0.2"
 }
 ```
 
