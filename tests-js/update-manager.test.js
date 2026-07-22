@@ -39,7 +39,7 @@ function createManager(enabled = true) {
       this.channel = channel;
     },
   };
-  const app = { getVersion: () => '0.5.2-alpha.4' };
+  const app = { getVersion: () => '1.0.0' };
   return {
     manager: new UpdateManager({ app, updater, settingsStore: settings, enabled }),
     updater,
@@ -52,6 +52,7 @@ test('alpha version is displayed with the Panel milestone suffix', () => {
   assert.equal(displayVersion('0.5.2-alpha.3'), '0.5.2_C');
   assert.equal(displayVersion('0.5.2-alpha.4'), '0.5.2_D');
   assert.equal(displayVersion('0.5.2'), '0.5.2');
+  assert.equal(displayVersion('1.0.0'), '1.0.0');
 });
 
 test('release notes are converted to short plain-text entries', () => {

@@ -9,6 +9,7 @@ const widgets = [
   connectivityWidget,
   updateWidget,
   settingsWidget,
+  versionWidget,
 ];
 
 let configuredRefreshMinutes = 15;

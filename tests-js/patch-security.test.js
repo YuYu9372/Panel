@@ -29,6 +29,7 @@ function payload(overrides = {}) {
   return {
     schemaVersion: 1,
     patchId: 'developer-patch-1',
+    patchNumber: 1,
     channel: 'developer',
     sequence: 1,
     issuedAt: '2026-07-21T23:55:00.000Z',
@@ -61,11 +62,23 @@ test('canonical JSON is independent of object key order', () => {
 test('valid Ed25519 patch is accepted and sanitized', () => {
   const verified = verify(signPatchPayload(payload(), privateKey, keyId));
   assert.equal(verified.patchId, 'developer-patch-1');
+  assert.equal(verified.patchNumber, 1);
   assert.deepEqual(verified.ui, {
     availableTitle: 'Test update ready',
     accent: '#d1843f',
     radius: 18,
   });
+});
+
+test('patch number must be a signed positive integer', () => {
+  assert.throws(
+    () => verify(signPatchPayload(payload({ patchNumber: 0 }), privateKey, keyId)),
+    /Patch number/,
+  );
+  assert.throws(
+    () => verify(signPatchPayload(payload({ patchNumber: '2' }), privateKey, keyId)),
+    /Patch number/,
+  );
 });
 
 test('tampering after signing is rejected', () => {

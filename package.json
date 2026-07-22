@@ -1,6 +1,6 @@
 {
   "name": "panel",
-  "version": "0.5.2",
+  "version": "1.0.0",
   "description": "Panel — personal dashboard, packaged as a macOS app.",
   "author": "Sirius",
   "license": "UNLICENSED",
@@ -21,11 +21,11 @@
   "build": {
     "appId": "com.sirius.panel",
     "productName": "Panel",
-    "artifactName": "Panel-0.5.2.${ext}",
+    "artifactName": "panel.${ext}",
     "generateUpdatesFilesForAllChannels": true,
     "electronUpdaterCompatibility": ">=2.16",
     "directories": {
-      "output": "dist/0.5.2/release"
+      "output": "dist/1.0.0/1.0.0+4.103R"
     },
     "files": [
       "electron/**/*",
@@ -105,7 +105,7 @@
       {
         "provider": "github",
         "owner": "YuYu9372",
-        "repo": "Panel-Updates",
+        "repo": "Panel",
         "releaseType": "draft",
         "channel": "latest"
       }

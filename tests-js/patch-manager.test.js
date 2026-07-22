@@ -27,6 +27,7 @@ function envelope(sequence, patchId = `patch-${sequence}`, content = {}) {
   const signed = {
     schemaVersion: 1,
     patchId,
+    patchNumber: sequence,
     channel: 'developer',
     sequence,
     issuedAt: '2026-07-21T23:55:00.000Z',
@@ -80,6 +81,7 @@ test('signed patch is atomically stored and confirmed healthy', async () => {
     const checked = await manager.check('developer');
     assert.equal(checked.status, 'applied');
     assert.equal(checked.patch.patchId, 'patch-1');
+    assert.equal(checked.patch.patchNumber, 1);
     assert.equal(requestedUrls[0], 'https://updates.example.test/developer-live-patch.json');
     assert.equal(fs.statSync(manager.file).mode & 0o777, 0o600);
     assert.equal(manager.confirm('patch-1', 'developer'), true);

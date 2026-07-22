@@ -14,7 +14,7 @@ Package Panel into credential-free manual and automatic-update artifacts:
 
 ```bash
 npm install             # once, pulls Electron + electron-builder
-npm run dist            # dist/0.5.2/release: DMG + automatic-update ZIP
+npm run dist            # dist/1.0.0/1.0.0+4.103R: DMG + update files
 ```
 
 Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it is missing). During development, `npm start` runs the same window without packaging.
@@ -30,6 +30,11 @@ The **Update channel** row selects Stable or Developer releases on each Mac.
 When a verified update exists, a download icon appears to the left of Wi-Fi and
 opens the update details card. See [docs/UPDATES.md](docs/UPDATES.md) for the
 signed full-update and declarative live-patch workflow.
+
+Full updates and Live Patch manifests are read from the public
+`YuYu9372/Panel` repository. The repository and every release artifact remain
+credential-free; API credentials are entered and encrypted separately on each
+Mac.
 
 The English [operations manual](docs/OPERATIONS.md) covers routine development,
 status color changes, testing, builds, installation, releases, live patches, and
@@ -51,18 +56,48 @@ credentials. Everything degrades gracefully when a key is missing.
 
 ## About
 
-A personal info dashboard, always on, shown fullscreen on a small screen.
+Panel is a full-screen personal dashboard for Apple Silicon Macs. Version
+`1.0.0` is the first public baseline and includes the complete current feature
+set; no earlier release is required.
+
+## Features
+
+- Full-screen 2 × 2 dashboard with Clock, Weather, Calendar, and Tasks.
+- Analog and digital clock, date, time-aware greeting, and automatic Light/Dark
+  theme switching.
+- Taipei weather, condition icon, temperature, and color-tiered UV index using
+  Open-Meteo without an API key.
+- Google Calendar timeline and Google Tasks folders with completion syncing
+  through Panel's fixed Composio MCP service.
+- Live CPU, GPU, RAM, temperature, Wi-Fi latency, device uptime, and twelve
+  clock-aligned history windows.
+- Network indicator and an offline clock screen that keeps local device status
+  available when the internet connection fails.
+- Configurable Calendar and Tasks refresh time, a 30-minute night schedule from
+  00:00 through 05:59, and click-to-refresh controls.
+- Minimal Settings screen with masked Anthropic and Composio credentials,
+  reveal controls, connection testing, encrypted macOS storage, and per-device
+  update channel selection.
+- Credential-free DMG: every Mac owner supplies and encrypts their own optional
+  API credentials after installation.
+- Signed full-App update support and restricted Ed25519 Live Patches for
+  validated UI text, design tokens, status colors, refresh policy, and Settings
+  layout.
+- Public version `1.0.0` in the lower-left corner. Triple-clicking it reveals
+  the detailed Build metadata and active Patch number.
 
 See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current release: **0.5.2** (App Core **0.5.2_D**)
+Current public version: **1.0.0**
 
-- Prepared the final `0.5.2` Stable release with `Panel-0.5.2.dmg`, ZIP,
-  block maps, and `latest-mac.yml` metadata.
-- Added `VERSION.json` to the mounted DMG, App resources, and release folder so
-  the App Core, artifact, Git tag, release, and public status remain auditable.
+- Release build: `1.0.0+4.103R`.
+- Public DMG: `dist/1.0.0/1.0.0+4.103R/panel.dmg`.
+- The lower-left corner displays only `1.0.0`. Triple-click it to inspect the
+  complete runtime `VERSION.json` metadata.
+- A signed Live Patch with `patchNumber: 2` changes the runtime build display
+  to `1.0.0+4.103Rp2` without modifying the signed App bundle.
 - Replaced the tabbed Settings UI with one compact screen for both encrypted
   connections, refresh time, and the per-device update channel.
 - Added a strictly validated `settingsLayout` live-patch field that may only
@@ -72,19 +107,16 @@ Current release: **0.5.2** (App Core **0.5.2_D**)
 - Retained per-device Stable/Developer channels, signed full-App updates,
   atomic patch activation and rollback, and credential-free artifacts.
 
-### 0.4.2
+The complete naming rules are in [docs/VERSIONING.md](docs/VERSIONING.md).
+Development history is in [plan.md](plan.md).
 
-- Time-based dark mode (dark 18:00–05:00, light otherwise; auto-switches while running)
-- Night owl 🦉 in the "Good Night" greeting during 00:00–04:00
-- Top bar: time-based greeting (AI line, local fallback) + wifi state
-- Bottom dock: device uptime, live system values, and 12-window status history
-- 2 × 2 grid: clock, weather, calendar, tasks
-- Weather: UV index with a color-tier background (blue / green / yellow / red by UV band)
-- Calendar: vertical timeline of upcoming Google Calendar events
-- Tasks: Google Tasks by folder, with checkboxes that complete and sync back
-- Calendar + tasks read the Composio MCP directly — no LLM, zero Anthropic tokens
+## macOS first launch
 
-Full version history in [plan.md](plan.md).
+This community DMG is not Apple-notarized. Gatekeeper may block the first
+launch. After copying Panel to Applications, try opening it once, then use
+**System Settings → Privacy & Security → Open Anyway** and confirm. Managed Macs
+may prohibit this override. The published SHA-256 checksum should be checked
+before allowing the App.
 
 ## Coworkers
 - YuYu9372

@@ -36,7 +36,7 @@
           <div class="update-version-route">
             <div>
               <span>Installed</span>
-              <strong id="update-current-version">0.5.2_D</strong>
+              <strong id="update-current-version">1.0.0</strong>
             </div>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14"></path>
@@ -88,7 +88,17 @@
     <div class="offline-tag">Offline</div>
   </div>
 
-  <div class="version-tag">0.5.2_D</div>
+  <button id="app-version" class="version-tag" type="button" aria-label="Panel version 1.0.0. Click three times for build details">1.0.0</button>
+
+  <dialog id="version-dialog" class="version-dialog" aria-labelledby="version-dialog-title">
+    <section class="version-dialog-card">
+      <header class="version-dialog-header">
+        <h2 id="version-dialog-title">Build information</h2>
+        <button id="version-dialog-close" class="version-dialog-close" type="button" aria-label="Close build information">×</button>
+      </header>
+      <pre id="version-json" class="version-json"></pre>
+    </section>
+  </dialog>
 
   <script src="widgets/util.js?v=1"></script>
   <script src="widgets/theme.js?v=1"></script>
@@ -103,6 +113,7 @@
   <script src="widgets/connectivity.js?v=4"></script>
   <script src="widgets/update.js?v=1"></script>
   <script src="widgets/settings.js?v=1"></script>
-  <script src="app.js?v=14"></script>
+  <script src="widgets/version.js?v=1"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

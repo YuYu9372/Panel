@@ -1,9 +1,9 @@
 const UPDATE_REPOSITORY = Object.freeze({
   owner: 'YuYu9372',
-  repo: 'Panel-Updates',
+  repo: 'Panel',
 });
 
-const PATCH_MANIFEST_BASE_URL = 'https://raw.githubusercontent.com/YuYu9372/Panel-Updates/main/patches/';
+const PATCH_MANIFEST_BASE_URL = 'https://raw.githubusercontent.com/YuYu9372/Panel/main/patches/';
 
 const PATCH_TRUST = Object.freeze({
   stable: Object.freeze({

@@ -967,7 +967,71 @@ button.widget-updated:focus-visible {
   color: #3d3a33;
   opacity: 0.35;
   font-variant-numeric: tabular-nums;
-  pointer-events: none;
+  appearance: none;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.version-dialog {
+  width: min(560px, calc(100vw - 40px));
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  color: #2f2b25;
+  background: transparent;
+}
+
+.version-dialog::backdrop {
+  background: rgba(18, 18, 20, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.version-dialog-card {
+  padding: 18px;
+  border: 1px solid rgba(72, 64, 53, 0.16);
+  border-radius: 14px;
+  background: #f7f3ea;
+  box-shadow: 0 24px 70px rgba(23, 20, 17, 0.3);
+}
+
+.version-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.version-dialog-header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.version-dialog-close {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  color: inherit;
+  background: rgba(61, 56, 48, 0.08);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.version-json {
+  max-height: min(55vh, 440px);
+  margin: 0;
+  padding: 14px;
+  overflow: auto;
+  border-radius: 10px;
+  color: #25221d;
+  background: rgba(52, 47, 40, 0.07);
+  font: 0.78rem/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- calendar: bottom left ---------- */
@@ -1363,6 +1427,16 @@ button.widget-updated:focus-visible {
 :root[data-theme='dark'] .offline-clock { color: #f0ebdf; }
 :root[data-theme='dark'] .offline-tag { color: #e5786b; }
 :root[data-theme='dark'] .version-tag { color: #e6e4de; }
+:root[data-theme='dark'] .version-dialog-card {
+  color: #e6e4de;
+  border-color: rgba(255, 255, 255, 0.1);
+  background: #202126;
+}
+:root[data-theme='dark'] .version-dialog-close { background: rgba(255, 255, 255, 0.08); }
+:root[data-theme='dark'] .version-json {
+  color: #e6e4de;
+  background: rgba(255, 255, 255, 0.06);
+}
 
 :root[data-theme='dark'] #clock {
   background: linear-gradient(150deg, #362a17 0%, #29200f 58%, #221a0d 100%);

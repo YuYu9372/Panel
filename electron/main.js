@@ -18,6 +18,7 @@ const { testConnections } = require('./connections');
 const { PatchManager } = require('./patch-manager');
 const { UpdateManager } = require('./update-manager');
 const { PATCH_MANIFEST_BASE_URL, PATCH_TRUST } = require('./update-trust');
+const { loadVersionInfo, runtimeVersionInfo } = require('./version-info');
 
 const HOST = '127.0.0.1';
 const PORT = 8642;
@@ -31,6 +32,7 @@ let win = null;
 let settingsStore = null;
 let updateManager = null;
 let patchManager = null;
+let versionInfo = null;
 const updateTimers = [];
 
 function panelDir() {
@@ -224,9 +226,12 @@ async function showSettings() {
 
 function combinedUpdateState() {
   const fullUpdate = updateManager.snapshot();
+  const uiPatch = patchManager.snapshot(fullUpdate.channel);
+  const patchNumber = uiPatch.patch && uiPatch.patch.patchNumber;
   return {
     ...fullUpdate,
-    uiPatch: patchManager.snapshot(fullUpdate.channel),
+    version: runtimeVersionInfo(versionInfo, patchNumber),
+    uiPatch,
   };
 }
 
@@ -246,6 +251,13 @@ async function checkAllUpdates() {
 }
 
 function createUpdateServices() {
+  const versionFile = app.isPackaged
+    ? path.join(process.resourcesPath, 'VERSION.json')
+    : path.join(__dirname, '..', 'VERSION.json');
+  versionInfo = loadVersionInfo(versionFile);
+  if (versionInfo.appVersion !== app.getVersion()) {
+    throw new Error('App version does not match VERSION.json.');
+  }
   updateManager = new UpdateManager({
     app,
     updater: autoUpdater,
@@ -370,7 +382,12 @@ app.whenReady().then(async () => {
     safeStorage,
     userDataPath: app.getPath('userData'),
   });
-  createUpdateServices();
+  try {
+    createUpdateServices();
+  } catch (error) {
+    fail('Panel version metadata is invalid', String(error));
+    return;
+  }
   registerIpc();
   createWindow();
   await showDashboard();

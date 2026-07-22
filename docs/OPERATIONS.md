@@ -9,7 +9,7 @@ recovery.
 | Purpose | Location |
 | --- | --- |
 | Source repository | `/Users/yu/Dev_code/Panel` |
-| Current build output | `dist/0.5.2/release` |
+| Current build output | `dist/1.0.0/1.0.0+4.103R` |
 | Editable status color JSON | `config/status-colors.json` |
 | Editable refresh policy | `config/refresh-policy.json` |
 | Editable Settings layout | `config/settings-layout.json` |
@@ -18,7 +18,7 @@ recovery.
 | Encrypted per-user settings | `~/Library/Application Support/Panel/secure-settings/settings.json` |
 | Live-patch state | `~/Library/Application Support/Panel/ui-patches/state.json` |
 | Private patch signing keys | `~/Library/Application Support/Panel Developer/update-signing` |
-| Public update repository | `YuYu9372/Panel-Updates` |
+| Public update repository | `YuYu9372/Panel` |
 
 API keys and tokens belong only in Panel Settings. Never add them to source,
 DMG files, ZIP files, Git commits, release notes, screenshots, or patch files.
@@ -161,22 +161,28 @@ Expected results:
 Do not stage `.env`, private PEM files, generated signed patches, or personal IDE
 state.
 
-## 6. Update the version
+## 6. Update the version and Build
 
-Before a new release, keep these locations consistent:
+Before a new release or source commit, keep these locations consistent:
 
 1. `package.json` version
 2. `package.json` artifact name and output directory
-3. `index.html` visible version
-4. `electron/settings.html` visible version
-5. `README.md`
-6. `RELEASE_NOTES.md`
-7. `plan.md`
+3. `VERSION.json` App version, Build, channel, tag, artifact, and compatibility
+4. `index.html` visible public version
+5. `electron/settings.html` visible public version
+6. `README.md`
+7. `RELEASE_NOTES.md`
+8. `plan.md`
 
-Use semantic versions for the App bundle:
+The public App version uses semantic versioning. The detailed Build uses:
 
-- Developer: `0.5.3-alpha.1`
-- Stable: `0.5.3`
+```text
+{appVersion}+{betaGen}.{buildNum}{channel}{patchNum}
+```
+
+Release, Beta, and devbeta use `R`, `B`, and `D`. Increase `buildNum` once for
+every source commit. `patchNum` is absent in the signed base build and appears
+as `pN` only while a signed Patch is active. See `docs/VERSIONING.md`.
 
 Never reuse a version that has already been published. Recovery from a bad
 release requires a higher version.
@@ -199,6 +205,7 @@ The command builds:
 - A copy of `refresh-policy.json` in `dist` and the current output directory
 - A copy of `settings-layout.json` in `dist` and the current output directory
 - A copy of `developer-live-patch.example.json` for the later signing exercise
+- A copy of `VERSION.json` in the mounted DMG, App resources, and output folder
 
 Do not move only the DMG when publishing an automatic update. The ZIP, channel
 metadata, and matching block maps belong to the same release.
@@ -208,11 +215,11 @@ metadata, and matching block maps belong to the same release.
 Replace the paths when the version changes:
 
 ```bash
-hdiutil verify dist/0.5.2/release/Panel-0.5.2.dmg
-unzip -tq dist/0.5.2/release/Panel-0.5.2.zip
-codesign --verify --deep --strict --verbose=2 dist/0.5.2/release/mac-arm64/Panel.app
-shasum -a 256 dist/0.5.2/release/Panel-0.5.2.dmg
-shasum -a 256 dist/0.5.2/release/Panel-0.5.2.zip
+hdiutil verify 'dist/1.0.0/1.0.0+4.103R/panel.dmg'
+unzip -tq 'dist/1.0.0/1.0.0+4.103R/panel.zip'
+codesign --verify --deep --strict --verbose=2 'dist/1.0.0/1.0.0+4.103R/mac-arm64/Panel.app'
+shasum -a 256 'dist/1.0.0/1.0.0+4.103R/panel.dmg'
+shasum -a 256 'dist/1.0.0/1.0.0+4.103R/panel.zip'
 ```
 
 For a public release, the App must use a Developer ID Application certificate
@@ -225,7 +232,7 @@ Quit Panel first. Keep a recoverable backup of the installed App:
 
 ```bash
 mv /Applications/Panel.app /Users/yu/.Trash/Panel-before-new-build.app
-ditto dist/0.5.2/release/mac-arm64/Panel.app /Applications/Panel.app
+ditto 'dist/1.0.0/1.0.0+4.103R/mac-arm64/Panel.app' /Applications/Panel.app
 codesign --verify --deep --strict /Applications/Panel.app
 open /Applications/Panel.app
 ```
@@ -249,8 +256,8 @@ not permit version downgrades.
 
 ## 11. Publish a full App update
 
-The source repository can remain private. Publish only release artifacts from
-the public `YuYu9372/Panel-Updates` repository. Never put a GitHub private-access
+The `YuYu9372/Panel` repository must be public before unauthenticated clients
+can fetch releases and Live Patch manifests. Never put a GitHub private-access
 token inside Panel.
 
 Developer release checklist:
@@ -296,7 +303,7 @@ a setting that disables manual refresh.
    ```
 
 7. Put only the signed output at
-   `Panel-Updates/patches/developer-live-patch.json`.
+   `Panel/patches/developer-live-patch.json` on the `main` branch.
 8. Test it on the Developer Mac and confirm the patch is applied and health is
    confirmed.
 9. Use `stable-live-patch.json` and the offline Stable key only for an approved
@@ -330,7 +337,7 @@ distribution. The App and repository must contain only public keys.
 
 Check these items:
 
-1. `Panel-Updates` exists and is public.
+1. `Panel` is public.
 2. The release is published rather than left as a draft.
 3. The selected channel matches the release metadata.
 4. DMG, ZIP, block maps, and metadata came from the same build.

@@ -1,7 +1,9 @@
 {
-  "appCore": "0.5.2_D",
-  "dmg": "Panel-0.5.2.dmg",
-  "gitTag": "0.5.2",
-  "release": "0.5.2",
-  "forPublic": true
+  "appVersion": "1.0.0",
+  "channel": "Release",
+  "build": "1.0.0+4.103R",
+  "gitTag": "1.0.0",
+  "artifact": "panel.dmg",
+  "public": true,
+  "livePatchCompatibility": ">=1.0.0 <1.0.1"
 }
