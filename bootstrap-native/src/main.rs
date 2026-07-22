@@ -7,6 +7,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use clap::{Parser, Subcommand};
 use manifest::VerificationContext;
+use serde_json::json;
 use state::RuntimeStore;
 
 #[derive(Parser)]
@@ -82,24 +83,40 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         Command::Stage { package, context } => {
             let staged = store.stage(&package, &context.into_context())?;
             println!(
-                "Staged Runtime r{} in slot {}.",
-                staged.revision, staged.slot
+                "{}",
+                serde_json::to_string_pretty(&json!({
+                    "status": "staged",
+                    "runtimeRevision": staged.revision,
+                    "slot": staged.slot,
+                }))?
             );
         }
         Command::Activate => {
             let active = store.activate()?;
-            println!("Activated slot {active}; health confirmation is required.");
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&json!({
+                    "status": "awaitingHealth",
+                    "activeSlot": active,
+                }))?
+            );
         }
         Command::Confirm => {
             store.confirm()?;
-            println!("Runtime health confirmed.");
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&json!({ "status": "healthy" }))?
+            );
         }
         Command::Rollback => {
             let active = store.rollback()?;
-            match active {
-                Some(slot) => println!("Rolled back to slot {slot}."),
-                None => println!("Rolled back to the bundled Runtime."),
-            }
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&json!({
+                    "status": "rolledBack",
+                    "activeSlot": active,
+                }))?
+            );
         }
     }
     Ok(())

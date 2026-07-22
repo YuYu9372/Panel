@@ -8,8 +8,10 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac && node scripts/copy-operation-manual.js",
+    "build:bootstrap": "cargo build --release --manifest-path bootstrap-native/Cargo.toml",
+    "dist": "npm run build:bootstrap && electron-builder --mac && node scripts/copy-operation-manual.js",
     "sign:patch": "node scripts/sign-ui-patch.js",
+    "generate:runtime-key": "node scripts/generate-runtime-key.js",
     "prepare:runtime": "python3 scripts/runtime-package.py prepare",
     "sign:runtime": "node scripts/sign-runtime-manifest.js",
     "pack:runtime": "python3 scripts/runtime-package.py pack",
@@ -73,6 +75,14 @@
       {
         "from": "VERSION.json",
         "to": "VERSION.json"
+      },
+      {
+        "from": "bootstrap-native/target/release/panel-bootstrap",
+        "to": "bootstrap/panel-bootstrap"
+      },
+      {
+        "from": "runtime-trust",
+        "to": "runtime-trust"
       }
     ],
     "mac": {

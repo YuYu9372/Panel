@@ -33,10 +33,9 @@ Create a separate Runtime signing key outside the repository once:
 ```bash
 KEY_DIR="$HOME/Library/Application Support/Panel Developer/runtime-signing"
 mkdir -p "$KEY_DIR"
-openssl genpkey -algorithm Ed25519 -out "$KEY_DIR/developer-private.pem"
-openssl pkey -in "$KEY_DIR/developer-private.pem" -pubout \
-  -out "$KEY_DIR/developer-public.pem"
-chmod 600 "$KEY_DIR/developer-private.pem"
+npm run generate:runtime-key -- \
+  "$KEY_DIR/developer-private.pem" \
+  runtime-trust/developer-public.pem
 ```
 
 Prepare the unsigned manifest:
@@ -128,6 +127,9 @@ Update. It must never accept an arbitrary downloaded public key.
 - The signer requires owner-only private-key permissions and performs a signature
   self-check before writing output.
 - The Rust verifier independently checks the signature and every packaged byte.
+- Electron invokes the Rust Bootstrap with an argument array, a credential-free
+  environment, a fixed channel key ID, and fixed API versions. Shell execution is
+  disabled.
 
 ## Complete workflow target
 

@@ -14,6 +14,8 @@ yet a user-installable Runtime Update release.
   rollback operations.
 - Added a deterministic Runtime package builder and an offline Ed25519 manifest
   signer with explicit source allowlisting and private-key permission checks.
+- Added a shell-free Electron-to-Rust command boundary and packaged the native
+  Bootstrap with a channel-specific Developer public key.
 - Added tests for successful A/B transitions, rollback, replay rejection,
   incompatible Runtime APIs, path traversal, undeclared archive files, package
   determinism, cross-language signatures, credential exclusion, and symlinks.
