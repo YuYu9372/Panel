@@ -18,7 +18,11 @@ const { testConnections } = require('./connections');
 const { PatchManager } = require('./patch-manager');
 const { UpdateManager } = require('./update-manager');
 const { PATCH_MANIFEST_BASE_URL, PATCH_TRUST } = require('./update-trust');
-const { loadVersionInfo, runtimeVersionInfo } = require('./version-info');
+const {
+  loadVersionInfo,
+  matchesPackageVersion,
+  runtimeVersionInfo,
+} = require('./version-info');
 
 const HOST = '127.0.0.1';
 const PORT = 8642;
@@ -255,7 +259,7 @@ function createUpdateServices() {
     ? path.join(process.resourcesPath, 'VERSION.json')
     : path.join(__dirname, '..', 'VERSION.json');
   versionInfo = loadVersionInfo(versionFile);
-  if (versionInfo.appVersion !== app.getVersion()) {
+  if (!matchesPackageVersion(versionInfo, app.getVersion())) {
     throw new Error('App version does not match VERSION.json.');
   }
   updateManager = new UpdateManager({

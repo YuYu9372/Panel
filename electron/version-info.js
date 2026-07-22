@@ -53,6 +53,20 @@ function loadVersionInfo(file) {
   return validateVersionInfo(JSON.parse(fs.readFileSync(file, 'utf8')));
 }
 
+function expectedPackageVersion(versionInfo) {
+  const match = new RegExp(
+    `^${escapePattern(versionInfo.appVersion)}\\+([1-9]\\d*)\\.([1-9]\\d*)[RBD]$`,
+  ).exec(versionInfo.build);
+  if (!match) throw new Error('Build identifier is not valid.');
+  if (versionInfo.channel === 'Release') return versionInfo.appVersion;
+  const prerelease = versionInfo.channel === 'devbeta' ? 'alpha' : 'beta';
+  return `${versionInfo.appVersion}-${prerelease}.${match[1]}`;
+}
+
+function matchesPackageVersion(versionInfo, packageVersion) {
+  return expectedPackageVersion(versionInfo) === packageVersion;
+}
+
 function runtimeVersionInfo(versionInfo, patchNumber) {
   const patched = Number.isSafeInteger(patchNumber) && patchNumber > 0;
   return {
@@ -63,7 +77,9 @@ function runtimeVersionInfo(versionInfo, patchNumber) {
 
 module.exports = {
   CHANNEL_CODES,
+  expectedPackageVersion,
   loadVersionInfo,
+  matchesPackageVersion,
   runtimeVersionInfo,
   validateVersionInfo,
 };

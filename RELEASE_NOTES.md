@@ -13,7 +13,7 @@ RAW editing mode.
 
 **Manual installer:** `panel.dmg`
 
-**DMG SHA-256:** `a8b85c82ff94cb04d6f9dcada986218de281615af0611f1a120f5347dde72458`
+**DMG SHA-256:** `543bc9fa1aca6a1b8e6909748f9d12ec20d962743bde4241059ad8f4727bb15c`
 
 ### Settings
 

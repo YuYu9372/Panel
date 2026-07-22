@@ -3,6 +3,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const {
+  expectedPackageVersion,
+  matchesPackageVersion,
   runtimeVersionInfo,
   validateVersionInfo,
 } = require('../electron/version-info');
@@ -22,6 +24,13 @@ test('runtime metadata adds only a validated positive patch number', () => {
   assert.equal(runtimeVersionInfo(versionInfo, 2).build, '1.0.1+1.1Dp2');
   assert.equal(runtimeVersionInfo(versionInfo, 0).build, '1.0.1+1.1D');
   assert.equal(runtimeVersionInfo(versionInfo, '2').build, '1.0.1+1.1D');
+});
+
+test('developer metadata matches only its corresponding packaged prerelease', () => {
+  assert.equal(expectedPackageVersion(versionInfo), '1.0.1-alpha.1');
+  assert.equal(matchesPackageVersion(versionInfo, '1.0.1-alpha.1'), true);
+  assert.equal(matchesPackageVersion(versionInfo, '1.0.1'), false);
+  assert.equal(matchesPackageVersion(versionInfo, '1.0.1-alpha.2'), false);
 });
 
 test('metadata rejects mismatched channels, artifacts, and compatibility', () => {
