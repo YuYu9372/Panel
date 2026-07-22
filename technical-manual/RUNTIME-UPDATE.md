@@ -66,6 +66,25 @@ npm run pack:runtime -- \
   runtime-output/r1/panel-runtime-r1.zip
 ```
 
+After creating the matching GitHub release URL, sign the small update feed. The
+feed binds that URL to the exact ZIP digest, size, revision, sequence, channel,
+Baseline, and API versions:
+
+```bash
+PANEL_RUNTIME_SIGNING_KEY="$HOME/Library/Application Support/Panel Developer/runtime-signing/developer-private.pem" \
+PANEL_RUNTIME_KEY_ID='panel-runtime-developer-2026-01' \
+npm run sign:runtime-feed -- \
+  runtime-output/r1/manifest.signed.json \
+  runtime-output/r1/panel-runtime-r1.zip \
+  runtime/developer-feed.example.json \
+  runtime-output/r1/developer-feed.json
+```
+
+Upload `panel-runtime-r1.zip` to the exact GitHub release URL signed in the feed.
+After verifying the uploaded package, publish the signed feed as
+`runtime/developer-feed.json`. Never modify an existing Runtime release or reuse
+its revision and sequence.
+
 Each command refuses to overwrite an existing output. Use a new output directory
 for the next revision. `runtime-output` is ignored by Git.
 
@@ -88,7 +107,7 @@ PUBLIC_KEY="$HOME/Library/Application Support/Panel Developer/runtime-signing/de
 "$BOOTSTRAP" --root "$ROOT" verify "$PACKAGE" \
   --public-key "$PUBLIC_KEY" \
   --key-id panel-developer-2026-01 \
-  --app-version 1.1.0 \
+  --app-version 1.1.0-alpha.1 \
   --channel developer \
   --bootstrap-api 1 \
   --runtime-api 1
@@ -96,7 +115,7 @@ PUBLIC_KEY="$HOME/Library/Application Support/Panel Developer/runtime-signing/de
 "$BOOTSTRAP" --root "$ROOT" stage "$PACKAGE" \
   --public-key "$PUBLIC_KEY" \
   --key-id panel-developer-2026-01 \
-  --app-version 1.1.0 \
+  --app-version 1.1.0-alpha.1 \
   --channel developer \
   --bootstrap-api 1 \
   --runtime-api 1
@@ -130,6 +149,8 @@ Update. It must never accept an arbitrary downloaded public key.
 - Electron invokes the Rust Bootstrap with an argument array, a credential-free
   environment, a fixed channel key ID, and fixed API versions. Shell execution is
   disabled.
+- The separately signed feed restricts package URLs to this repository's GitHub
+  Releases and binds the download to its exact size and SHA-256 digest.
 
 ## Complete workflow target
 

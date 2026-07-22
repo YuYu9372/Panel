@@ -4,6 +4,7 @@ const path = require('node:path');
 const {
   BOOTSTRAP_API_VERSION,
   RUNTIME_API_VERSION,
+  RUNTIME_FEED_URLS,
   RUNTIME_TRUST,
   createRuntimeBootstrap,
   runtimePaths,
@@ -22,6 +23,7 @@ test('Runtime trust maps each channel to a distinct fixed key', () => {
   assert.equal(RUNTIME_API_VERSION, 1);
   assert.notEqual(RUNTIME_TRUST.stable.keyId, RUNTIME_TRUST.developer.keyId);
   assert.notEqual(RUNTIME_TRUST.stable.publicKeyFile, RUNTIME_TRUST.developer.publicKeyFile);
+  assert.match(RUNTIME_FEED_URLS.developer, /YuYu9372\/Panel\/main\/runtime\/developer-feed\.json$/);
 });
 
 test('Runtime paths stay inside fixed App and user-data locations', () => {

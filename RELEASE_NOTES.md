@@ -16,6 +16,8 @@ yet a user-installable Runtime Update release.
   signer with explicit source allowlisting and private-key permission checks.
 - Added a shell-free Electron-to-Rust command boundary and packaged the native
   Bootstrap with a channel-specific Developer public key.
+- Added a signed Runtime feed contract that restricts downloads to Panel's GitHub
+  Releases and binds every URL to its exact digest, size, identity, and compatibility.
 - Added tests for successful A/B transitions, rollback, replay rejection,
   incompatible Runtime APIs, path traversal, undeclared archive files, package
   determinism, cross-language signatures, credential exclusion, and symlinks.

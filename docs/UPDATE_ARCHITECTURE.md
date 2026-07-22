@@ -121,12 +121,14 @@ SHA-256 digest and size of every file.
 5. Run `npm run sign:runtime` with the matching offline Ed25519 channel key.
 6. Run `npm run pack:runtime` to recheck the sources and create the deterministic
    Runtime ZIP.
-7. Upload the package and signed manifest without modifying an existing revision.
-8. Commit and push the public metadata.
-9. Panel shows a Runtime Update card; it does not install automatically.
-10. After approval, the immutable Bootstrap displays the Updating screen with
+7. Run `npm run sign:runtime-feed` to bind the GitHub Release URL to the exact ZIP
+   digest, size, revision, sequence, channel, Baseline, and API versions.
+8. Upload the package and signed manifest without modifying an existing revision.
+9. Commit and push the signed channel feed.
+10. Panel shows a Runtime Update card; it does not install automatically.
+11. After approval, the immutable Bootstrap displays the Updating screen with
    download, verification, staging, switching, restart, and health-check progress.
-11. The Bootstrap activates the pending A/B slot only after health confirmation and
+12. The Bootstrap activates the pending A/B slot only after health confirmation and
     restores the previous slot after failure.
 
 Package publishing and Panel integration remain design work.

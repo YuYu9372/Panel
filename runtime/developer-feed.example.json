@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "lifetimeDays": 7,
+  "packageUrl": "https://github.com/YuYu9372/Panel/releases/download/runtime-1.1.0-r1/panel-runtime-r1.zip",
+  "releaseNotes": [
+    "First Developer Runtime package for the 1.1.0 Baseline.",
+    "Adds the signed Runtime package and A/B activation foundation."
+  ]
+}

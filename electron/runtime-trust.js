@@ -4,6 +4,11 @@ const { RuntimeBootstrap } = require('./runtime-bootstrap');
 
 const BOOTSTRAP_API_VERSION = 1;
 const RUNTIME_API_VERSION = 1;
+const RUNTIME_FEED_BASE_URL = 'https://raw.githubusercontent.com/YuYu9372/Panel/main/runtime';
+const RUNTIME_FEED_URLS = Object.freeze({
+  stable: `${RUNTIME_FEED_BASE_URL}/stable-feed.json`,
+  developer: `${RUNTIME_FEED_BASE_URL}/developer-feed.json`,
+});
 const RUNTIME_TRUST = Object.freeze({
   stable: Object.freeze({
     keyId: 'panel-runtime-stable-2026-01',
@@ -57,6 +62,7 @@ function createRuntimeBootstrap({
 module.exports = {
   BOOTSTRAP_API_VERSION,
   RUNTIME_API_VERSION,
+  RUNTIME_FEED_URLS,
   RUNTIME_TRUST,
   createRuntimeBootstrap,
   runtimePaths,

@@ -14,6 +14,7 @@
     "generate:runtime-key": "node scripts/generate-runtime-key.js",
     "prepare:runtime": "python3 scripts/runtime-package.py prepare",
     "sign:runtime": "node scripts/sign-runtime-manifest.js",
+    "sign:runtime-feed": "node scripts/sign-runtime-feed.js",
     "pack:runtime": "python3 scripts/runtime-package.py pack",
     "test:node": "node --test tests-js/*.test.js",
     "test:python": "python3 -m unittest discover -s tests -v",
