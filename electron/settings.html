@@ -6,6 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Panel Settings</title>
   <link rel="stylesheet" href="settings.css">
+  <script src="raw-settings.js" defer></script>
   <script src="settings.js" defer></script>
 </head>
 <body>
@@ -14,12 +15,15 @@
       <div class="settings-kicker">PANEL</div>
       <h1 id="settings-title">Settings</h1>
     </div>
-    <button id="back-button" class="icon-button" type="button" aria-label="Return to dashboard">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5"></path>
-        <path d="m11 18-6-6 6-6"></path>
-      </svg>
-    </button>
+    <div class="settings-topbar-actions">
+      <button id="raw-mode-button" class="raw-mode-button" type="button" title="Double-click to switch Settings mode">RAW</button>
+      <button id="back-button" class="icon-button" type="button" aria-label="Return to dashboard">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"></path>
+          <path d="m11 18-6-6 6-6"></path>
+        </svg>
+      </button>
+    </div>
   </header>
 
   <main class="settings-layout">
@@ -78,6 +82,12 @@
         </div>
       </div>
 
+      <section id="raw-settings" class="raw-settings" hidden>
+        <label for="raw-env">Panel environment</label>
+        <textarea id="raw-env" name="rawEnv" rows="10" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+        <p id="raw-secret-note">Saved credentials stay encrypted and are not displayed. Leave their values empty to keep them, or enter replacements.</p>
+      </section>
+
       <div id="form-message" class="form-message" role="status" aria-live="polite"></div>
 
       <div class="form-actions">
@@ -87,6 +97,6 @@
     </form>
   </main>
 
-  <div id="settings-app-version" class="version-tag">1.0.0</div>
+  <div id="settings-app-version" class="version-tag">1.0.1</div>
 </body>
 </html>

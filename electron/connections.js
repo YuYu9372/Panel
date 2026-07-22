@@ -59,7 +59,7 @@ async function testComposio(fetcher, mcpToken) {
         params: {
           protocolVersion: '2025-06-18',
           capabilities: {},
-          clientInfo: { name: 'panel-settings', version: '1.0.0' },
+          clientInfo: { name: 'panel-settings', version: '1.0.1' },
         },
       }),
       redirect: 'error',

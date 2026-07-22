@@ -49,17 +49,17 @@ Changing the bundled file after signing would invalidate the macOS signature.
 
 ## VERSION.json
 
-Release `1.0.0` uses:
+Release `1.0.1` uses:
 
 ```json
 {
-  "appVersion": "1.0.0",
+  "appVersion": "1.0.1",
   "channel": "Release",
-  "build": "1.0.0+4.103R",
-  "gitTag": "1.0.0",
+  "build": "1.0.1+1.104R",
+  "gitTag": "1.0.1",
   "artifact": "panel.dmg",
   "public": true,
-  "livePatchCompatibility": ">=1.0.0 <1.0.1"
+  "livePatchCompatibility": ">=1.0.1 <1.0.2"
 }
 ```
 
@@ -75,8 +75,8 @@ version or opening the public App bundle.
 Use the public App version for the branch and tag:
 
 ```text
-branch: 1.0.0
-tag:    1.0.0
+branch: 1.0.1
+tag:    1.0.1
 ```
 
 Do not create a branch for every Build. Before each source commit, increase

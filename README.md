@@ -14,7 +14,7 @@ Package Panel into credential-free manual and automatic-update artifacts:
 
 ```bash
 npm install             # once, pulls Electron + electron-builder
-npm run dist            # dist/1.0.0/1.0.0+4.103R: DMG + update files
+npm run dist            # dist/1.0.1/1.0.1+1.104R: DMG + update files
 ```
 
 Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it is missing). During development, `npm start` runs the same window without packaging.
@@ -25,6 +25,13 @@ key and Composio MCP token for that Mac. Credentials are encrypted with macOS
 `safeStorage`, stay outside the signed app bundle, and are never returned to the
 dashboard renderer. The Composio MCP URL is fixed by Panel and is not a user
 setting.
+
+Settings uses a flat, compact form. Double-click **RAW** to edit the same
+allowlisted settings as `.env`-style `KEY=value` text, and double-click
+**FORM** to return. RAW mode never displays saved secret values: blank secret
+fields preserve the encrypted values already on that Mac, while a newly entered
+value replaces the corresponding secret. It does not expose `process.env` or
+any unrelated system environment variables.
 
 The **Update channel** row selects Stable or Developer releases on each Mac.
 When a verified update exists, a download icon appears to the left of Wi-Fi and
@@ -57,8 +64,8 @@ credentials. Everything degrades gracefully when a key is missing.
 ## About
 
 Panel is a full-screen personal dashboard for Apple Silicon Macs. Version
-`1.0.0` is the first public baseline and includes the complete current feature
-set; no earlier release is required.
+`1.0.1` adds a simpler Settings experience and a security-restricted RAW editor
+to the complete public baseline; no earlier release is required.
 
 ## Features
 
@@ -75,31 +82,33 @@ set; no earlier release is required.
   available when the internet connection fails.
 - Configurable Calendar and Tasks refresh time, a 30-minute night schedule from
   00:00 through 05:59, and click-to-refresh controls.
-- Minimal Settings screen with masked Anthropic and Composio credentials,
-  reveal controls, connection testing, encrypted macOS storage, and per-device
-  update channel selection.
+- Flat, minimal Settings screen with masked Anthropic and Composio credentials,
+  reveal controls, connection testing, encrypted macOS storage, per-device
+  update channel selection, and a double-click RAW editor.
 - Credential-free DMG: every Mac owner supplies and encrypts their own optional
   API credentials after installation.
 - Signed full-App update support and restricted Ed25519 Live Patches for
   validated UI text, design tokens, status colors, refresh policy, and Settings
   layout.
-- Public version `1.0.0` in the lower-left corner. Triple-clicking it reveals
+- Public version `1.0.1` in the lower-left corner. Triple-clicking it reveals
   the detailed Build metadata and active Patch number.
 
 See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current public version: **1.0.0**
+Current public version: **1.0.1**
 
-- Release build: `1.0.0+4.103R`.
-- Public DMG: `dist/1.0.0/1.0.0+4.103R/panel.dmg`.
-- The lower-left corner displays only `1.0.0`. Triple-click it to inspect the
+- Release build: `1.0.1+1.104R`.
+- Public DMG: `dist/1.0.1/1.0.1+1.104R/panel.dmg`.
+- The lower-left corner displays only `1.0.1`. Triple-click it to inspect the
   complete runtime `VERSION.json` metadata.
 - A signed Live Patch with `patchNumber: 2` changes the runtime build display
-  to `1.0.0+4.103Rp2` without modifying the signed App bundle.
-- Replaced the tabbed Settings UI with one compact screen for both encrypted
-  connections, refresh time, and the per-device update channel.
+  to `1.0.1+1.104Rp2` without modifying the signed App bundle.
+- Simplified Settings into a flat form and added a double-click RAW/FORM switch
+  for its five allowlisted `.env`-style fields.
+- Kept saved secret values out of RAW output; blank secrets preserve encrypted
+  values and entered secrets replace them.
 - Added a strictly validated `settingsLayout` live-patch field that may only
   change the title, four labels, and the order of the four mandatory rows.
 - Kept Test connections, Save, mask/reveal, fixed MCP URL, and encrypted secret

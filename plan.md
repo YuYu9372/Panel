@@ -164,13 +164,22 @@ Panel/
 - [x] Superseded by publishing updates from the public `Panel` repository.
 - [ ] Replace the testing certificate with Developer ID Application signing and notarization before public Stable distribution.
 
-### 1.0.0 <- Currently
+### 1.0.0
 - [x] Use public App version `1.0.0` and release Build `1.0.0+4.103R`.
 - [x] Use `panel.dmg` in `dist/1.0.0/1.0.0+4.103R`.
 - [x] Add validated `VERSION.json` metadata to the App, DMG, and release folder.
 - [x] Show only `1.0.0` in the lower-left corner and reveal Build JSON after three clicks.
 - [x] Add signed Patch numbers and runtime `pN` Build suffixes.
 - [x] Move the full-update and Live Patch feeds to `YuYu9372/Panel`.
+- [ ] Sign with Developer ID Application and notarize before public distribution.
+
+### 1.0.1 <- Currently
+- [x] Use public App version `1.0.1` and release Build `1.0.1+1.104R`.
+- [x] Simplify Settings into a flat, low-decoration interface.
+- [x] Add a double-click RAW/FORM switch for allowlisted Panel settings.
+- [x] Keep saved credentials encrypted and hidden from RAW output.
+- [x] Validate RAW keys, values, update channel, and the fixed MCP URL.
+- [x] Add RAW security and behavior tests.
 - [ ] Sign with Developer ID Application and notarize before public distribution.
 
 ---

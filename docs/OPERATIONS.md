@@ -9,7 +9,7 @@ recovery.
 | Purpose | Location |
 | --- | --- |
 | Source repository | `/Users/yu/Dev_code/Panel` |
-| Current build output | `dist/1.0.0/1.0.0+4.103R` |
+| Current build output | `dist/1.0.1/1.0.1+1.104R` |
 | Editable status color JSON | `config/status-colors.json` |
 | Editable refresh policy | `config/refresh-policy.json` |
 | Editable Settings layout | `config/settings-layout.json` |
@@ -141,6 +141,26 @@ key or token in it. D and later builds can receive it through a correctly
 signed live patch. Mask/reveal, Test connections, Save, update verification,
 and the fixed MCP URL are immutable and stay outside the patch format.
 
+### RAW Settings editor
+
+Double-click **RAW** in Settings to edit these allowlisted fields as
+`.env`-style `KEY=value` text:
+
+```text
+PANEL_REFRESH_MINUTES=15
+PANEL_UPDATE_CHANNEL=stable
+ANTHROPIC_API_KEY=
+COMPOSIO_MCP_URL=https://connect.composio.dev/mcp
+COMPOSIO_MCP_TOKEN=
+```
+
+Double-click **FORM** to return to the regular fields. Saved credentials are
+intentionally emitted as blank values: leaving them blank preserves the
+encrypted values already stored on the Mac, and entering a new value replaces
+the saved credential. RAW mode never reads the complete process environment or
+a local `.env` file. It rejects unknown keys, duplicate keys, unsupported
+values, and changes to the fixed MCP URL.
+
 ## 5. Run checks before every build
 
 ```bash
@@ -215,11 +235,11 @@ metadata, and matching block maps belong to the same release.
 Replace the paths when the version changes:
 
 ```bash
-hdiutil verify 'dist/1.0.0/1.0.0+4.103R/panel.dmg'
-unzip -tq 'dist/1.0.0/1.0.0+4.103R/panel.zip'
-codesign --verify --deep --strict --verbose=2 'dist/1.0.0/1.0.0+4.103R/mac-arm64/Panel.app'
-shasum -a 256 'dist/1.0.0/1.0.0+4.103R/panel.dmg'
-shasum -a 256 'dist/1.0.0/1.0.0+4.103R/panel.zip'
+hdiutil verify 'dist/1.0.1/1.0.1+1.104R/panel.dmg'
+unzip -tq 'dist/1.0.1/1.0.1+1.104R/panel.zip'
+codesign --verify --deep --strict --verbose=2 'dist/1.0.1/1.0.1+1.104R/mac-arm64/Panel.app'
+shasum -a 256 'dist/1.0.1/1.0.1+1.104R/panel.dmg'
+shasum -a 256 'dist/1.0.1/1.0.1+1.104R/panel.zip'
 ```
 
 For a public release, the App must use a Developer ID Application certificate
@@ -232,7 +252,7 @@ Quit Panel first. Keep a recoverable backup of the installed App:
 
 ```bash
 mv /Applications/Panel.app /Users/yu/.Trash/Panel-before-new-build.app
-ditto 'dist/1.0.0/1.0.0+4.103R/mac-arm64/Panel.app' /Applications/Panel.app
+ditto 'dist/1.0.1/1.0.1+1.104R/mac-arm64/Panel.app' /Applications/Panel.app
 codesign --verify --deep --strict /Applications/Panel.app
 open /Applications/Panel.app
 ```
