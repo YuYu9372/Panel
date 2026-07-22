@@ -8,12 +8,14 @@ model, and operator workflow for Panel.
 | Update tier | Status | Activation |
 | --- | --- | --- |
 | Full Version Update | Available | User approves, then Electron `quitAndInstall` |
-| Runtime Update | Planned for a future Baseline | User approves, Updating screen, A/B switch, micro-restart |
+| Runtime Update | Rust foundation implemented; Panel integration pending | User approves, Updating screen, A/B switch, micro-restart |
 | Standard Live Patch | Available | Automatic, immediate, health checked |
 
-Runtime Update commands do not exist yet. A Full Version Update must first add the
-immutable Bootstrap, signed runtime-package format, A/B slots, Updating screen,
-health protocol, and rollback supervisor.
+The standalone `bootstrap-native` command now verifies signed packages and manages
+A/B stage, activate, confirm, and rollback state. A Full Version Update must still
+embed its trusted public keys and connect downloading, the Updating screen, process
+launching, health supervision, and automatic recovery before Runtime Update is
+available to users.
 
 ## Design principles
 
@@ -110,7 +112,7 @@ The signed manifest must contain the runtime revision, channel, Baseline range,
 Bootstrap and Runtime API versions, sequence, issue and expiry times, and the
 SHA-256 digest and size of every file.
 
-### Planned operator workflow
+### Target operator workflow
 
 1. Modify HTML, CSS, JavaScript, Python, or other runtime source normally.
 2. Increase `runtimeRevision` and the anti-replay sequence.
@@ -125,7 +127,8 @@ SHA-256 digest and size of every file.
 10. The Bootstrap activates the pending A/B slot only after health confirmation and
     restores the previous slot after failure.
 
-This workflow is a design contract, not a currently available command sequence.
+The package verifier and A/B state operations are available as a development CLI.
+Package building, signing, publishing, and Panel integration remain design work.
 
 ## Tier 3: Standard Live Patch
 

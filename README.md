@@ -53,7 +53,7 @@ manual, all three JSON files, and a Developer patch example into `dist` and the
 current version's build folder.
 
 The [three-tier update architecture](docs/UPDATE_ARCHITECTURE.md) records the
-agreed Full Version Update, planned Runtime Update, and Standard Live Patch
+agreed Full Version Update, Runtime Update foundation, and Standard Live Patch
 boundaries and the operator workflow for each tier.
 
 The shorter [technical manual](technical-manual/README.md) provides simple,

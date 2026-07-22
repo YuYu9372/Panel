@@ -1,5 +1,26 @@
 # Release Notes
 
+## Panel 1.1.0 Development
+
+This development branch begins the trusted Runtime Update foundation. It is not
+yet a user-installable Runtime Update release.
+
+### Runtime foundation
+
+- Added a standalone Rust CLI for verifying Ed25519-signed Runtime ZIP packages.
+- Added strict key ID, channel, Baseline range, Bootstrap API, Runtime API,
+  lifetime, path, size, SHA-256, and anti-replay checks.
+- Added local A/B slots with separate stage, activate, health-confirm, and
+  rollback operations.
+- Added tests for successful A/B transitions, rollback, replay rejection,
+  incompatible Runtime APIs, path traversal, and undeclared archive files.
+- Added an English Runtime operator guide and a short Rust basics guide.
+
+The Electron download flow, Updating screen, embedded production public keys,
+Runtime package builder, signing workflow, process supervisor, and automatic
+health recovery remain future work. Production code changes must continue to use
+a Full Version Update until those pieces are complete.
+
 ## Panel 1.0.1
 
 Panel 1.0.1 is a developer-test build that simplifies Settings and adds a safe
