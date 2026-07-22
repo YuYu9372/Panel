@@ -12,7 +12,7 @@ code, Python, credentials, or changes that disable manual Calendar and Tasks
 refresh. This restriction is intentional. A full App update is required when
 behavior or security-sensitive code changes.
 
-In 0.5.2_D and later, `settingsLayout` may change only the Settings title, the
+In version 1.0.0 and later, `settingsLayout` may change only the Settings title, the
 four field labels, and the order of the four mandatory fields. It cannot remove
 mask/reveal, Test connections, Save, or update verification, and it cannot
 carry field values. Secrets always remain in the encrypted per-user store.
@@ -29,15 +29,13 @@ Use Stable on a public device and Developer on the test device.
 
 ## Artifact repository
 
-The source repository may remain private. Update artifacts should be published
-from a separate public repository named `YuYu9372/Panel-Updates`. The client
+The source and update repository is `YuYu9372/Panel`. It must be public before
+unauthenticated clients can fetch releases and raw Patch manifests. The client
 contains no GitHub token and must never receive a private-repository PAT.
 
-The repository does not exist yet, so the update client reports a safe check
-failure until it is created and the first release is published. Compromising
-the repository would not be enough to forge a live patch because the separate
-Ed25519 signature is still required. Full App updates are protected by the
-macOS application signature.
+Compromising the repository would not be enough to forge a Live Patch because
+the separate Ed25519 signature is still required. Full App updates are
+protected by the macOS application signature.
 
 ## Full App release
 
@@ -55,7 +53,7 @@ macOS application signature.
    before a public release. An Apple Development certificate is suitable only
    for local testing.
 7. Upload the generated DMG, ZIP, channel metadata, and block maps to the
-   matching GitHub release in `Panel-Updates`.
+   matching GitHub release in `Panel`.
 8. Install the release on the Developer device first. Promote a separately
    built Stable release only after validation.
 
@@ -75,14 +73,15 @@ The App contains only the corresponding public keys. Move
 Keep the Developer key separate so frequent test signing cannot compromise the
 Stable channel.
 
-Install 0.5.2_D or later before publishing a patch that contains
+Install release 1.0.0 or later before publishing a Patch that contains
 `settingsLayout`. C accepts status colors and refresh policy but safely rejects
 the new Settings layout field. B supports only the earlier update-card fields.
 
 1. Copy `patches/developer-live-patch.example.json` and edit the draft.
 2. Increase `sequence`. A used sequence is never accepted again, even after a
    rollback.
-3. Keep `appVersionRange` narrow and set `lifetimeDays` from 1 to 30.
+3. Keep `appVersionRange` narrow, increase `patchNumber`, and set
+   `lifetimeDays` from 1 to 30.
 4. Sign the draft:
 
    ```bash

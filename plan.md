@@ -149,20 +149,29 @@ Panel/
 - [x] Reject arbitrary code, invalid ranges, disabled manual refresh, replay, and cross-channel patches.
 - [x] Build Developer DMG, ZIP, block maps, and `alpha-mac.yml` release metadata.
 - [x] Install the final C bootstrap once before publishing its first live patch.
-- [ ] Create the public artifact-only `Panel-Updates` repository and publish the first Developer release.
+- [x] Superseded by publishing updates from the public `Panel` repository.
 - [ ] Replace the testing certificate with Developer ID Application signing and notarization before public Stable distribution.
 
-### 0.5.2_D <- Currently
-- [x] Use semantic version `0.5.2-alpha.4` and display `0.5.2_D`.
+### 0.5.2_D <- Released as 0.5.2
+- [x] Use semantic release version `0.5.2` and display App Core `0.5.2_D`.
 - [x] Replace the tabbed Settings screen with one compact four-row layout.
 - [x] Keep encrypted Anthropic and Composio credentials, mask/reveal, connection testing, and Save.
 - [x] Keep refresh minutes and Stable/Developer channel selection on the same screen.
 - [x] Add a signed declarative `settingsLayout` field for the title, labels, and field order.
 - [x] Require all four fields exactly once and reject values, scripts, unknown fields, and missing security controls.
-- [x] Build and verify the Developer DMG, ZIP, block maps, and `alpha-mac.yml` metadata.
+- [x] Build and verify the Stable DMG, ZIP, block maps, and `latest-mac.yml` metadata.
 - [x] Install D in `/Applications` and verify the packaged Settings screen and dashboard.
-- [ ] Create the public artifact-only `Panel-Updates` repository and publish the first Developer release.
+- [x] Superseded by publishing updates from the public `Panel` repository.
 - [ ] Replace the testing certificate with Developer ID Application signing and notarization before public Stable distribution.
+
+### 1.0.0 <- Currently
+- [x] Use public App version `1.0.0` and release Build `1.0.0+4.103R`.
+- [x] Use `panel.dmg` in `dist/1.0.0/1.0.0+4.103R`.
+- [x] Add validated `VERSION.json` metadata to the App, DMG, and release folder.
+- [x] Show only `1.0.0` in the lower-left corner and reveal Build JSON after three clicks.
+- [x] Add signed Patch numbers and runtime `pN` Build suffixes.
+- [x] Move the full-update and Live Patch feeds to `YuYu9372/Panel`.
+- [ ] Sign with Developer ID Application and notarize before public distribution.
 
 ---
 

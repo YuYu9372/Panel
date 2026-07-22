@@ -10,7 +10,7 @@ function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8'));
 }
 
-test('Developer live-patch example contains the exact bundled D configuration', () => {
+test('Developer live-patch example contains the exact bundled 1.0.0 configuration', () => {
   const draft = readJson('patches/developer-live-patch.example.json');
   const statusColors = readJson('config/status-colors.json');
   const refreshPolicy = readJson('config/refresh-policy.json');
@@ -18,6 +18,25 @@ test('Developer live-patch example contains the exact bundled D configuration', 
   assert.deepEqual(validateStatusTierConfig(draft.statusColors), statusColors);
   assert.deepEqual(validateRefreshPolicy(draft.refreshPolicy), refreshPolicy);
   assert.deepEqual(validateSettingsLayout(draft.settingsLayout), settingsLayout);
-  assert.equal(draft.appVersionRange, '>=0.5.2-alpha.4 <0.5.3');
+  assert.equal(draft.appVersionRange, '>=1.0.0 <1.0.1');
+  assert.equal(draft.patchNumber, 1);
   assert.equal(draft.channel, 'developer');
+});
+
+test('release metadata identifies the public 1.0.0 build and artifact', () => {
+  const version = readJson('VERSION.json');
+  const packageJson = readJson('package.json');
+  assert.deepEqual(version, {
+    appVersion: '1.0.0',
+    channel: 'Release',
+    build: '1.0.0+4.103R',
+    gitTag: '1.0.0',
+    artifact: 'panel.dmg',
+    public: true,
+    livePatchCompatibility: '>=1.0.0 <1.0.1',
+  });
+  assert.equal(packageJson.version, version.appVersion);
+  assert.equal(packageJson.build.artifactName, 'panel.${ext}');
+  assert.equal(packageJson.build.directories.output, 'dist/1.0.0/1.0.0+4.103R');
+  assert.equal(packageJson.build.publish[0].repo, 'Panel');
 });

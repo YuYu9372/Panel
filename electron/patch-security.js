@@ -114,6 +114,7 @@ function validateSignedPayload(signed, options) {
   const allowed = new Set([
     'schemaVersion',
     'patchId',
+    'patchNumber',
     'channel',
     'sequence',
     'issuedAt',
@@ -128,6 +129,12 @@ function validateSignedPayload(signed, options) {
   if (signed.schemaVersion !== 1) throw new Error('Unsupported patch schema.');
   if (typeof signed.patchId !== 'string' || !/^[a-z0-9][a-z0-9._-]{2,63}$/.test(signed.patchId)) {
     throw new Error('Patch ID is not valid.');
+  }
+  if (signed.patchNumber !== undefined
+      && (!Number.isSafeInteger(signed.patchNumber)
+        || signed.patchNumber < 1
+        || signed.patchNumber > 999999)) {
+    throw new Error('Patch number is not valid.');
   }
   if (!ALLOWED_CHANNELS.has(signed.channel) || signed.channel !== options.channel) {
     throw new Error('Patch channel does not match this device.');

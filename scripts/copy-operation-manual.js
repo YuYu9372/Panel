@@ -24,6 +24,10 @@ const copies = [
     source: path.resolve(__dirname, '..', 'patches', 'developer-live-patch.example.json'),
     name: 'developer-live-patch.example.json',
   },
+  {
+    source: path.resolve(__dirname, '..', 'VERSION.json'),
+    name: 'VERSION.json',
+  },
 ];
 
 for (const copy of copies) {

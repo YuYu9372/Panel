@@ -129,6 +129,7 @@ class PatchManager extends EventEmitter {
     try {
       const signed = this.verifyStoredEnvelope(this.state.active);
       const patch = { patchId: signed.patchId, sequence: signed.sequence };
+      if (signed.patchNumber !== undefined) patch.patchNumber = signed.patchNumber;
       if (signed.ui) patch.ui = signed.ui;
       if (signed.statusColors) patch.statusColors = signed.statusColors;
       if (signed.refreshPolicy) patch.refreshPolicy = signed.refreshPolicy;

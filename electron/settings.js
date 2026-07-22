@@ -112,6 +112,9 @@ function applyStatus(status) {
 
 function renderUpdateState(state) {
   document.getElementById('settings-update-status').textContent = state.message || 'Ready to check';
+  if (state.version && state.version.appVersion) {
+    document.getElementById('settings-app-version').textContent = state.version.appVersion;
+  }
   updateChannel.value = state.channel;
   const patch = state.uiPatch && state.uiPatch.patch;
   applySettingsLayout(patch && patch.settingsLayout);

@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
-  "patchId": "developer-config-d-1",
+  "patchId": "developer-config-1-0-0-1",
+  "patchNumber": 1,
   "channel": "developer",
   "sequence": 3,
-  "appVersionRange": ">=0.5.2-alpha.4 <0.5.3",
+  "appVersionRange": ">=1.0.0 <1.0.1",
   "lifetimeDays": 7,
   "statusColors": {
     "schemaVersion": 1,

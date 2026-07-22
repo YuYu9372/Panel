@@ -24,6 +24,7 @@ const draft = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
 const allowed = new Set([
   'schemaVersion',
   'patchId',
+  'patchNumber',
   'channel',
   'sequence',
   'appVersionRange',
@@ -45,12 +46,14 @@ const expiresAt = new Date(issuedAt.getTime() + lifetimeDays * 24 * 60 * 60 * 10
 const signed = {
   schemaVersion: draft.schemaVersion,
   patchId: draft.patchId,
+  patchNumber: draft.patchNumber,
   channel: draft.channel,
   sequence: draft.sequence,
   issuedAt: issuedAt.toISOString(),
   expiresAt: expiresAt.toISOString(),
   appVersionRange: draft.appVersionRange,
 };
+if (signed.patchNumber === undefined) delete signed.patchNumber;
 if (draft.ui !== undefined) signed.ui = draft.ui;
 if (draft.statusColors !== undefined) signed.statusColors = draft.statusColors;
 if (draft.refreshPolicy !== undefined) signed.refreshPolicy = draft.refreshPolicy;
