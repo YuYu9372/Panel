@@ -11,22 +11,30 @@ function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8'));
 }
 
-test('Developer live-patch example contains the exact bundled 1.0.1 configuration', () => {
+test('Developer live-patch example contains validated 1.0.1 configuration', () => {
   const draft = readJson('patches/developer-live-patch.example.json');
   const statusColors = readJson('config/status-colors.json');
   const refreshPolicy = readJson('config/refresh-policy.json');
   const settingsLayout = readJson('config/settings-layout.json');
   assert.deepEqual(validateStatusTierConfig(draft.statusColors), statusColors);
   assert.deepEqual(validateRefreshPolicy(draft.refreshPolicy), refreshPolicy);
-  assert.deepEqual(validateSettingsLayout(draft.settingsLayout), settingsLayout);
+  const patchedLayout = validateSettingsLayout(draft.settingsLayout);
+  assert.notDeepEqual(patchedLayout, settingsLayout);
+  assert.equal(patchedLayout.title, 'Panel Settings — Patch 3');
+  assert.deepEqual(patchedLayout.fieldOrder, [
+    'refreshMinutes',
+    'updateChannel',
+    'anthropicApiKey',
+    'composioMcpToken',
+  ]);
   assert.equal(
     draft.appVersionRange,
     '>=1.0.1-alpha.1 <1.0.1 || >=1.0.0 <2.0.0',
   );
   assert.equal(semver.satisfies('1.0.1-alpha.1', draft.appVersionRange), true);
   assert.equal(semver.satisfies('1.0.1', draft.appVersionRange), true);
-  assert.equal(draft.patchNumber, 2);
-  assert.equal(draft.sequence, 4);
+  assert.equal(draft.patchNumber, 3);
+  assert.equal(draft.sequence, 5);
   assert.equal(draft.channel, 'developer');
 });
 

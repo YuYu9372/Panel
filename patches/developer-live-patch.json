@@ -1,12 +1,12 @@
 {
   "signed": {
     "schemaVersion": 1,
-    "patchId": "developer-config-1-x-2",
-    "patchNumber": 2,
+    "patchId": "developer-settings-layout-1-x-3",
+    "patchNumber": 3,
     "channel": "developer",
-    "sequence": 4,
-    "issuedAt": "2026-07-22T02:43:56.537Z",
-    "expiresAt": "2026-07-29T02:43:56.537Z",
+    "sequence": 5,
+    "issuedAt": "2026-07-22T02:48:23.557Z",
+    "expiresAt": "2026-07-29T02:48:23.557Z",
     "appVersionRange": ">=1.0.1-alpha.1 <1.0.1 || >=1.0.0 <2.0.0",
     "statusColors": {
       "schemaVersion": 1,
@@ -158,18 +158,18 @@
     },
     "settingsLayout": {
       "schemaVersion": 1,
-      "title": "Settings",
+      "title": "Panel Settings — Patch 3",
       "fieldOrder": [
-        "anthropicApiKey",
-        "composioMcpToken",
         "refreshMinutes",
-        "updateChannel"
+        "updateChannel",
+        "anthropicApiKey",
+        "composioMcpToken"
       ],
       "labels": {
-        "anthropicApiKey": "Anthropic API Key",
-        "composioMcpToken": "Composio MCP Token",
-        "refreshMinutes": "Refresh time",
-        "updateChannel": "Update channel"
+        "anthropicApiKey": "Anthropic connection key",
+        "composioMcpToken": "Composio connection token",
+        "refreshMinutes": "Refresh interval",
+        "updateChannel": "Release channel"
       }
     }
   },
@@ -177,7 +177,7 @@
     {
       "keyId": "panel-developer-2026-01",
       "algorithm": "ed25519",
-      "signature": "MM5V1qP/OaXFi6F2lulm7CE9yuYkXQegAwymZWWHCsUYF7Fjyah67TDahyZqBfC7dc/ESOHHpt4cloXXTp85DQ=="
+      "signature": "b/pX92peup/bfoKudUronybHotIKFCmRVeFbh+e4hJd39fEBuNINQpzAuQnCI+yXG3aa3KMeijItw9GjBut+CQ=="
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "patchId": "developer-config-1-x-2",
-  "patchNumber": 2,
+  "patchId": "developer-settings-layout-1-x-3",
+  "patchNumber": 3,
   "channel": "developer",
-  "sequence": 4,
+  "sequence": 5,
   "appVersionRange": ">=1.0.1-alpha.1 <1.0.1 || >=1.0.0 <2.0.0",
   "lifetimeDays": 7,
   "statusColors": {
@@ -76,18 +76,18 @@
   },
   "settingsLayout": {
     "schemaVersion": 1,
-    "title": "Settings",
+    "title": "Panel Settings — Patch 3",
     "fieldOrder": [
-      "anthropicApiKey",
-      "composioMcpToken",
       "refreshMinutes",
-      "updateChannel"
+      "updateChannel",
+      "anthropicApiKey",
+      "composioMcpToken"
     ],
     "labels": {
-      "anthropicApiKey": "Anthropic API Key",
-      "composioMcpToken": "Composio MCP Token",
-      "refreshMinutes": "Refresh time",
-      "updateChannel": "Update channel"
+      "anthropicApiKey": "Anthropic connection key",
+      "composioMcpToken": "Composio connection token",
+      "refreshMinutes": "Refresh interval",
+      "updateChannel": "Release channel"
     }
   }
 }
