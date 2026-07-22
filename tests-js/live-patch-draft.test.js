@@ -19,10 +19,14 @@ test('Developer live-patch example contains the exact bundled 1.0.1 configuratio
   assert.deepEqual(validateStatusTierConfig(draft.statusColors), statusColors);
   assert.deepEqual(validateRefreshPolicy(draft.refreshPolicy), refreshPolicy);
   assert.deepEqual(validateSettingsLayout(draft.settingsLayout), settingsLayout);
-  assert.equal(draft.appVersionRange, '>=1.0.1-alpha.1 <1.0.2');
+  assert.equal(
+    draft.appVersionRange,
+    '>=1.0.1-alpha.1 <1.0.1 || >=1.0.0 <2.0.0',
+  );
   assert.equal(semver.satisfies('1.0.1-alpha.1', draft.appVersionRange), true);
   assert.equal(semver.satisfies('1.0.1', draft.appVersionRange), true);
-  assert.equal(draft.patchNumber, 1);
+  assert.equal(draft.patchNumber, 2);
+  assert.equal(draft.sequence, 4);
   assert.equal(draft.channel, 'developer');
 });
 

@@ -1,13 +1,13 @@
 {
   "signed": {
     "schemaVersion": 1,
-    "patchId": "developer-config-1-0-1-1",
-    "patchNumber": 1,
+    "patchId": "developer-config-1-x-2",
+    "patchNumber": 2,
     "channel": "developer",
-    "sequence": 3,
-    "issuedAt": "2026-07-22T02:35:06.492Z",
-    "expiresAt": "2026-07-29T02:35:06.492Z",
-    "appVersionRange": ">=1.0.1-alpha.1 <1.0.2",
+    "sequence": 4,
+    "issuedAt": "2026-07-22T02:43:56.537Z",
+    "expiresAt": "2026-07-29T02:43:56.537Z",
+    "appVersionRange": ">=1.0.1-alpha.1 <1.0.1 || >=1.0.0 <2.0.0",
     "statusColors": {
       "schemaVersion": 1,
       "metrics": {
@@ -177,7 +177,7 @@
     {
       "keyId": "panel-developer-2026-01",
       "algorithm": "ed25519",
-      "signature": "8ZsQ3SLNudS2vm5BHlImwZChChYO6BnIf1b4vJtPOJk0hCjR8MRcyhrcSiQeffbMrWqec8fuSR1oKy1D2vrJDw=="
+      "signature": "MM5V1qP/OaXFi6F2lulm7CE9yuYkXQegAwymZWWHCsUYF7Fjyah67TDahyZqBfC7dc/ESOHHpt4cloXXTp85DQ=="
     }
   ]
 }
