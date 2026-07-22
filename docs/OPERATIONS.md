@@ -9,7 +9,7 @@ recovery.
 | Purpose | Location |
 | --- | --- |
 | Source repository | `/Users/yu/Dev_code/Panel` |
-| Current build output | `dist/0.5.2/Beta_D` |
+| Current build output | `dist/0.5.2/release` |
 | Editable status color JSON | `config/status-colors.json` |
 | Editable refresh policy | `config/refresh-policy.json` |
 | Editable Settings layout | `config/settings-layout.json` |
@@ -208,11 +208,11 @@ metadata, and matching block maps belong to the same release.
 Replace the paths when the version changes:
 
 ```bash
-hdiutil verify dist/0.5.2/Beta_D/panel-0.5.2-D.dmg
-unzip -tq dist/0.5.2/Beta_D/panel-0.5.2-D.zip
-codesign --verify --deep --strict --verbose=2 dist/0.5.2/Beta_D/mac-arm64/Panel.app
-shasum -a 256 dist/0.5.2/Beta_D/panel-0.5.2-D.dmg
-shasum -a 256 dist/0.5.2/Beta_D/panel-0.5.2-D.zip
+hdiutil verify dist/0.5.2/release/Panel-0.5.2.dmg
+unzip -tq dist/0.5.2/release/Panel-0.5.2.zip
+codesign --verify --deep --strict --verbose=2 dist/0.5.2/release/mac-arm64/Panel.app
+shasum -a 256 dist/0.5.2/release/Panel-0.5.2.dmg
+shasum -a 256 dist/0.5.2/release/Panel-0.5.2.zip
 ```
 
 For a public release, the App must use a Developer ID Application certificate
@@ -225,7 +225,7 @@ Quit Panel first. Keep a recoverable backup of the installed App:
 
 ```bash
 mv /Applications/Panel.app /Users/yu/.Trash/Panel-before-new-build.app
-ditto dist/0.5.2/Beta_D/mac-arm64/Panel.app /Applications/Panel.app
+ditto dist/0.5.2/release/mac-arm64/Panel.app /Applications/Panel.app
 codesign --verify --deep --strict /Applications/Panel.app
 open /Applications/Panel.app
 ```

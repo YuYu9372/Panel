@@ -1,17 +1,18 @@
 # Release Notes
 
-## 0.5.2_D
+## 0.5.2
 
-Minimal Settings UI and safe declarative Settings layout patches.
+Public Stable release of App Core `0.5.2_D`, with minimal Settings UI and safe
+declarative Settings layout patches.
 
-**Manual installer:** `panel-0.5.2-D.dmg`
+**Manual installer:** `Panel-0.5.2.dmg`
 
-**Automatic-update payload:** `panel-0.5.2-D.zip`
+**Automatic-update payload:** `Panel-0.5.2.zip`
 
 ### Changed
 
-- Updated the semantic App version to `0.5.2-alpha.4`, displayed as
-  `0.5.2_D` throughout Panel.
+- Updated the semantic App and GitHub release version to `0.5.2`; the dashboard
+  identifies the implementation as App Core `0.5.2_D`.
 - Replaced the Connections and Updates tabs with one compact Settings screen.
 - The screen follows the requested model: Anthropic API key, Composio MCP
   token, 15-minute refresh setting, and the per-device update channel.
@@ -20,6 +21,10 @@ Minimal Settings UI and safe declarative Settings layout patches.
 
 ### Added
 
+- Added `VERSION.json` to the mounted DMG, packaged App resources, and release
+  folder with the App Core, DMG filename, Git tag, release, and public status.
+- Restricted compatible live patches to `>=0.5.2 <0.5.3` so configuration for
+  this core cannot cross into a future App release.
 - Added the validated `config/settings-layout.json` format for the Settings
   title, field labels, and field order.
 - Signed Ed25519 live patches can now carry `settingsLayout`. Every patch must
@@ -40,7 +45,7 @@ Minimal Settings UI and safe declarative Settings layout patches.
 
 ### Verified
 
-- 45 Node security and behavior tests plus 9 Python tests pass.
+- 46 Node security and behavior tests plus 9 Python tests pass.
 - The local browser preview confirms four rows, no Settings tabs, no horizontal
   overflow, the 15-minute default, and working mask/reveal behavior.
 - The DMG, ZIP, App signature, packaged configuration, and absence of bundled

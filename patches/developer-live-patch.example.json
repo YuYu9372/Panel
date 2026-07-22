@@ -3,7 +3,7 @@
   "patchId": "developer-config-d-1",
   "channel": "developer",
   "sequence": 3,
-  "appVersionRange": ">=0.5.2-alpha.4 <0.5.3",
+  "appVersionRange": ">=0.5.2 <0.5.3",
   "lifetimeDays": 7,
   "statusColors": {
     "schemaVersion": 1,

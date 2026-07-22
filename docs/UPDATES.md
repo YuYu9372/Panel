@@ -12,7 +12,7 @@ code, Python, credentials, or changes that disable manual Calendar and Tasks
 refresh. This restriction is intentional. A full App update is required when
 behavior or security-sensitive code changes.
 
-In 0.5.2_D and later, `settingsLayout` may change only the Settings title, the
+In App Core 0.5.2_D and later, `settingsLayout` may change only the Settings title, the
 four field labels, and the order of the four mandatory fields. It cannot remove
 mask/reveal, Test connections, Save, or update verification, and it cannot
 carry field values. Secrets always remain in the encrypted per-user store.
@@ -75,7 +75,7 @@ The App contains only the corresponding public keys. Move
 Keep the Developer key separate so frequent test signing cannot compromise the
 Stable channel.
 
-Install 0.5.2_D or later before publishing a patch that contains
+Install release 0.5.2 with App Core 0.5.2_D or later before publishing a patch that contains
 `settingsLayout`. C accepts status colors and refresh policy but safely rejects
 the new Settings layout field. B supports only the earlier update-card fields.
 

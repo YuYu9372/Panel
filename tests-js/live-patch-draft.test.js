@@ -18,6 +18,21 @@ test('Developer live-patch example contains the exact bundled D configuration', 
   assert.deepEqual(validateStatusTierConfig(draft.statusColors), statusColors);
   assert.deepEqual(validateRefreshPolicy(draft.refreshPolicy), refreshPolicy);
   assert.deepEqual(validateSettingsLayout(draft.settingsLayout), settingsLayout);
-  assert.equal(draft.appVersionRange, '>=0.5.2-alpha.4 <0.5.3');
+  assert.equal(draft.appVersionRange, '>=0.5.2 <0.5.3');
   assert.equal(draft.channel, 'developer');
+});
+
+test('release metadata identifies the public 0.5.2 core and artifact', () => {
+  const version = readJson('VERSION.json');
+  const packageJson = readJson('package.json');
+  assert.deepEqual(version, {
+    appCore: '0.5.2_D',
+    dmg: 'Panel-0.5.2.dmg',
+    gitTag: '0.5.2',
+    release: '0.5.2',
+    forPublic: true,
+  });
+  assert.equal(packageJson.version, version.release);
+  assert.equal(packageJson.build.artifactName, 'Panel-0.5.2.${ext}');
+  assert.equal(packageJson.build.directories.output, 'dist/0.5.2/release');
 });

@@ -14,7 +14,7 @@ Package Panel into credential-free manual and automatic-update artifacts:
 
 ```bash
 npm install             # once, pulls Electron + electron-builder
-npm run dist            # dist/0.5.2/Beta_D: DMG + automatic-update ZIP
+npm run dist            # dist/0.5.2/release: DMG + automatic-update ZIP
 ```
 
 Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it is missing). During development, `npm start` runs the same window without packaging.
@@ -57,10 +57,12 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current: **0.5.2_D**
+Current release: **0.5.2** (App Core **0.5.2_D**)
 
-- Prepared a `0.5.2-alpha.4` Developer update with DMG, ZIP, block maps, and
-  `alpha-mac.yml` metadata.
+- Prepared the final `0.5.2` Stable release with `Panel-0.5.2.dmg`, ZIP,
+  block maps, and `latest-mac.yml` metadata.
+- Added `VERSION.json` to the mounted DMG, App resources, and release folder so
+  the App Core, artifact, Git tag, release, and public status remain auditable.
 - Replaced the tabbed Settings UI with one compact screen for both encrypted
   connections, refresh time, and the per-device update channel.
 - Added a strictly validated `settingsLayout` live-patch field that may only
