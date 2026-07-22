@@ -2,7 +2,7 @@
   "signed": {
     "schemaVersion": 1,
     "patchId": "developer-settings-layout-1-x-3",
-    "patchNumber": 3,
+    "patchNumber": 4,
     "channel": "developer",
     "sequence": 5,
     "issuedAt": "2026-07-22T02:48:23.557Z",
@@ -158,7 +158,7 @@
     },
     "settingsLayout": {
       "schemaVersion": 1,
-      "title": "Panel Settings — Patch 3",
+      "title": "Panel Settings",
       "fieldOrder": [
         "refreshMinutes",
         "updateChannel",
