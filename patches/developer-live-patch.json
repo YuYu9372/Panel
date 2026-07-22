@@ -1,0 +1,183 @@
+{
+  "signed": {
+    "schemaVersion": 1,
+    "patchId": "developer-config-1-0-1-1",
+    "patchNumber": 1,
+    "channel": "developer",
+    "sequence": 3,
+    "issuedAt": "2026-07-22T02:35:06.492Z",
+    "expiresAt": "2026-07-29T02:35:06.492Z",
+    "appVersionRange": ">=1.0.1-alpha.1 <1.0.2",
+    "statusColors": {
+      "schemaVersion": 1,
+      "metrics": {
+        "cpu": {
+          "unit": "%",
+          "rules": [
+            {
+              "minInclusive": 0,
+              "maxExclusive": 80,
+              "color": "green"
+            },
+            {
+              "minInclusive": 80,
+              "maxExclusive": 90,
+              "color": "yellow"
+            },
+            {
+              "minInclusive": 90,
+              "maxExclusive": 94,
+              "color": "red"
+            },
+            {
+              "minInclusive": 94,
+              "maxExclusive": null,
+              "color": "purple"
+            }
+          ]
+        },
+        "gpu": {
+          "unit": "%",
+          "rules": [
+            {
+              "minInclusive": 0,
+              "maxExclusive": 80,
+              "color": "green"
+            },
+            {
+              "minInclusive": 80,
+              "maxExclusive": 90,
+              "color": "yellow"
+            },
+            {
+              "minInclusive": 90,
+              "maxExclusive": 96,
+              "color": "red"
+            },
+            {
+              "minInclusive": 96,
+              "maxExclusive": null,
+              "color": "purple"
+            }
+          ]
+        },
+        "ram": {
+          "unit": "%",
+          "rules": [
+            {
+              "minInclusive": 0,
+              "maxExclusive": 70,
+              "color": "green"
+            },
+            {
+              "minInclusive": 70,
+              "maxExclusive": 80,
+              "color": "yellow"
+            },
+            {
+              "minInclusive": 80,
+              "maxExclusive": 90,
+              "color": "red"
+            },
+            {
+              "minInclusive": 90,
+              "maxExclusive": null,
+              "color": "purple"
+            }
+          ]
+        },
+        "temp": {
+          "unit": "°C",
+          "rules": [
+            {
+              "minInclusive": 0,
+              "maxExclusive": 70,
+              "color": "green"
+            },
+            {
+              "minInclusive": 70,
+              "maxExclusive": 80,
+              "color": "yellow"
+            },
+            {
+              "minInclusive": 80,
+              "maxExclusive": 95,
+              "color": "red"
+            },
+            {
+              "minInclusive": 95,
+              "maxExclusive": null,
+              "color": "purple"
+            }
+          ]
+        },
+        "wifi": {
+          "unit": "ms",
+          "rules": [
+            {
+              "minInclusive": 0,
+              "maxExclusive": 25,
+              "color": "green"
+            },
+            {
+              "minInclusive": 25,
+              "maxExclusive": 35,
+              "color": "yellow"
+            },
+            {
+              "minInclusive": 35,
+              "maxExclusive": 45,
+              "color": "red"
+            },
+            {
+              "minInclusive": 45,
+              "maxExclusive": null,
+              "color": "purple"
+            }
+          ]
+        }
+      },
+      "offline": {
+        "color": "red",
+        "showSlash": true
+      },
+      "unavailable": {
+        "color": "gray"
+      }
+    },
+    "refreshPolicy": {
+      "schemaVersion": 1,
+      "timezone": "local",
+      "dayMinutesSource": "settings",
+      "night": {
+        "start": "00:00",
+        "end": "06:00",
+        "refreshMinutes": 30
+      },
+      "manualRefresh": true
+    },
+    "settingsLayout": {
+      "schemaVersion": 1,
+      "title": "Settings",
+      "fieldOrder": [
+        "anthropicApiKey",
+        "composioMcpToken",
+        "refreshMinutes",
+        "updateChannel"
+      ],
+      "labels": {
+        "anthropicApiKey": "Anthropic API Key",
+        "composioMcpToken": "Composio MCP Token",
+        "refreshMinutes": "Refresh time",
+        "updateChannel": "Update channel"
+      }
+    }
+  },
+  "signatures": [
+    {
+      "keyId": "panel-developer-2026-01",
+      "algorithm": "ed25519",
+      "signature": "8ZsQ3SLNudS2vm5BHlImwZChChYO6BnIf1b4vJtPOJk0hCjR8MRcyhrcSiQeffbMrWqec8fuSR1oKy1D2vrJDw=="
+    }
+  ]
+}
