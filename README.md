@@ -56,6 +56,9 @@ The [three-tier update architecture](docs/UPDATE_ARCHITECTURE.md) records the
 agreed Full Version Update, planned Runtime Update, and Standard Live Patch
 boundaries and the operator workflow for each tier.
 
+The shorter [technical manual](technical-manual/README.md) provides simple,
+step-by-step instructions for choosing and publishing each update type.
+
 The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the fixed Composio MCP service directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
 
 Calendar and Tasks refresh at the interval selected in Settings (15 minutes by
