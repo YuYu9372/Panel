@@ -1,5 +1,47 @@
 # Release Notes
 
+## Panel 1.0.1
+
+Panel 1.0.1 is a developer-test build that simplifies Settings and adds a safe
+RAW editing mode.
+
+**Public version:** `1.0.1`
+
+**Developer build:** `1.0.1+1.1D`
+
+**Electron update version:** `1.0.1-alpha.1`
+
+**Manual installer:** `panel.dmg`
+
+**DMG SHA-256:** `d61c2b5896871023b624095c72238aadbabad18337886e063fcd01f1599e216c`
+
+### Settings
+
+- Replaced decorative Settings surfaces with a flatter, quieter interface that
+  keeps the same dashboard colors and typography.
+- Added a **RAW** control that requires a double-click to enter or leave.
+- RAW mode edits only `PANEL_REFRESH_MINUTES`, `PANEL_UPDATE_CHANNEL`,
+  `ANTHROPIC_API_KEY`, `COMPOSIO_MCP_URL`, and `COMPOSIO_MCP_TOKEN` as
+  `.env`-style `KEY=value` text.
+- Saved API credentials remain encrypted and are never printed into RAW mode.
+  Leaving a secret blank preserves it; entering a value replaces it.
+- Unknown or duplicate fields, invalid refresh values, invalid update channels,
+  and changes to Panel's fixed Composio MCP URL are rejected.
+
+### Security and compatibility
+
+- RAW mode does not expose the Electron process environment, local `.env`
+  files, or unrelated system variables.
+- Existing mask/reveal controls, connection tests, secure storage, signed full
+  updates, and restricted Ed25519 Live Patches remain available.
+- Live Patch compatibility is restricted to `>=1.0.1 <1.0.2`.
+- 55 Node security and behavior tests and 9 Python tests pass.
+
+The DMG, ZIP, App signature structure, update metadata, packaged RAW resources,
+and version metadata were verified before release. This community build is
+Apple Development-signed but not notarized; Gatekeeper may require the manual
+first-launch override documented below.
+
 ## Panel 1.0.0
 
 Panel 1.0.0 is the first public baseline release. It contains the complete

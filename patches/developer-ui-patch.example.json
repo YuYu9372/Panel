@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "patchId": "developer-update-ui-1-0-0-1",
+  "patchId": "developer-update-ui-1-0-1-1",
   "patchNumber": 1,
   "channel": "developer",
   "sequence": 2,
-  "appVersionRange": ">=1.0.0 <1.0.1",
+  "appVersionRange": ">=1.0.1 <1.0.2",
   "lifetimeDays": 7,
   "ui": {
     "eyebrow": "DEVELOPER UPDATE",

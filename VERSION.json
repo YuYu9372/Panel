@@ -1,9 +1,9 @@
 {
-  "appVersion": "1.0.0",
-  "channel": "Release",
-  "build": "1.0.0+4.103R",
-  "gitTag": "1.0.0",
+  "appVersion": "1.0.1",
+  "channel": "devbeta",
+  "build": "1.0.1+1.1D",
+  "gitTag": "1.0.1",
   "artifact": "panel.dmg",
-  "public": true,
-  "livePatchCompatibility": ">=1.0.0 <1.0.1"
+  "public": false,
+  "livePatchCompatibility": ">=1.0.1 <1.0.2"
 }

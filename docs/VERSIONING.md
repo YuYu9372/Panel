@@ -49,19 +49,23 @@ Changing the bundled file after signing would invalidate the macOS signature.
 
 ## VERSION.json
 
-Release `1.0.0` uses:
+Developer test `1.0.1` uses:
 
 ```json
 {
-  "appVersion": "1.0.0",
-  "channel": "Release",
-  "build": "1.0.0+4.103R",
-  "gitTag": "1.0.0",
+  "appVersion": "1.0.1",
+  "channel": "devbeta",
+  "build": "1.0.1+1.1D",
+  "gitTag": "1.0.1",
   "artifact": "panel.dmg",
-  "public": true,
-  "livePatchCompatibility": ">=1.0.0 <1.0.1"
+  "public": false,
+  "livePatchCompatibility": ">=1.0.1 <1.0.2"
 }
 ```
+
+Its Electron package version is `1.0.1-alpha.1`. The prerelease suffix is not
+shown in Panel's public version label, but it lets Electron correctly upgrade
+the developer test to the later stable `1.0.1` release.
 
 Allowed channel names and codes are `Release`/`R`, `Beta`/`B`, and
 `devbeta`/`D`. Panel rejects mismatched names and Build suffixes.
@@ -75,8 +79,8 @@ version or opening the public App bundle.
 Use the public App version for the branch and tag:
 
 ```text
-branch: 1.0.0
-tag:    1.0.0
+branch: 1.0.1
+tag:    1.0.1
 ```
 
 Do not create a branch for every Build. Before each source commit, increase
