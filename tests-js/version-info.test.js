@@ -12,16 +12,16 @@ const versionInfo = JSON.parse(fs.readFileSync(
   'utf8',
 ));
 
-test('public 1.0.1 metadata follows the build naming scheme', () => {
+test('developer 1.0.1 metadata follows the build naming scheme', () => {
   assert.deepEqual(validateVersionInfo(versionInfo), versionInfo);
-  assert.equal(versionInfo.build, '1.0.1+1.104R');
+  assert.equal(versionInfo.build, '1.0.1+1.1D');
   assert.equal(versionInfo.artifact, 'panel.dmg');
 });
 
 test('runtime metadata adds only a validated positive patch number', () => {
-  assert.equal(runtimeVersionInfo(versionInfo, 2).build, '1.0.1+1.104Rp2');
-  assert.equal(runtimeVersionInfo(versionInfo, 0).build, '1.0.1+1.104R');
-  assert.equal(runtimeVersionInfo(versionInfo, '2').build, '1.0.1+1.104R');
+  assert.equal(runtimeVersionInfo(versionInfo, 2).build, '1.0.1+1.1Dp2');
+  assert.equal(runtimeVersionInfo(versionInfo, 0).build, '1.0.1+1.1D');
+  assert.equal(runtimeVersionInfo(versionInfo, '2').build, '1.0.1+1.1D');
 });
 
 test('metadata rejects mismatched channels, artifacts, and compatibility', () => {

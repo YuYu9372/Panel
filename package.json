@@ -1,6 +1,6 @@
 {
   "name": "panel",
-  "version": "1.0.1",
+  "version": "1.0.1-alpha.1",
   "description": "Panel — personal dashboard, packaged as a macOS app.",
   "author": "Sirius",
   "license": "UNLICENSED",
@@ -25,7 +25,7 @@
     "generateUpdatesFilesForAllChannels": true,
     "electronUpdaterCompatibility": ">=2.16",
     "directories": {
-      "output": "dist/1.0.1/1.0.1+1.104R"
+      "output": "dist/1.0.1/1.0.1+1.1D"
     },
     "files": [
       "electron/**/*",
@@ -107,7 +107,7 @@
         "owner": "YuYu9372",
         "repo": "Panel",
         "releaseType": "draft",
-        "channel": "latest"
+        "channel": "alpha"
       }
     ]
   },

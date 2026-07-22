@@ -49,19 +49,23 @@ Changing the bundled file after signing would invalidate the macOS signature.
 
 ## VERSION.json
 
-Release `1.0.1` uses:
+Developer test `1.0.1` uses:
 
 ```json
 {
   "appVersion": "1.0.1",
-  "channel": "Release",
-  "build": "1.0.1+1.104R",
+  "channel": "devbeta",
+  "build": "1.0.1+1.1D",
   "gitTag": "1.0.1",
   "artifact": "panel.dmg",
-  "public": true,
+  "public": false,
   "livePatchCompatibility": ">=1.0.1 <1.0.2"
 }
 ```
+
+Its Electron package version is `1.0.1-alpha.1`. The prerelease suffix is not
+shown in Panel's public version label, but it lets Electron correctly upgrade
+the developer test to the later stable `1.0.1` release.
 
 Allowed channel names and codes are `Release`/`R`, `Beta`/`B`, and
 `devbeta`/`D`. Panel rejects mismatched names and Build suffixes.

@@ -14,7 +14,7 @@ Package Panel into credential-free manual and automatic-update artifacts:
 
 ```bash
 npm install             # once, pulls Electron + electron-builder
-npm run dist            # dist/1.0.1/1.0.1+1.104R: DMG + update files
+npm run dist            # dist/1.0.1/1.0.1+1.1D: DMG + update files
 ```
 
 Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it is missing). During development, `npm start` runs the same window without packaging.
@@ -97,14 +97,16 @@ See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current public version: **1.0.1**
+Current developer-test version: **1.0.1**
 
-- Release build: `1.0.1+1.104R`.
-- Public DMG: `dist/1.0.1/1.0.1+1.104R/panel.dmg`.
+- Developer build: `1.0.1+1.1D`.
+- Electron update version: `1.0.1-alpha.1`, allowing the later stable `1.0.1`
+  to supersede this developer build.
+- Test DMG: `dist/1.0.1/1.0.1+1.1D/panel.dmg`.
 - The lower-left corner displays only `1.0.1`. Triple-click it to inspect the
   complete runtime `VERSION.json` metadata.
 - A signed Live Patch with `patchNumber: 2` changes the runtime build display
-  to `1.0.1+1.104Rp2` without modifying the signed App bundle.
+  to `1.0.1+1.1Dp2` without modifying the signed App bundle.
 - Simplified Settings into a flat form and added a double-click RAW/FORM switch
   for its five allowlisted `.env`-style fields.
 - Kept saved secret values out of RAW output; blank secrets preserve encrypted

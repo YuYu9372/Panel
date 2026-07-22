@@ -9,7 +9,7 @@ recovery.
 | Purpose | Location |
 | --- | --- |
 | Source repository | `/Users/yu/Dev_code/Panel` |
-| Current build output | `dist/1.0.1/1.0.1+1.104R` |
+| Current build output | `dist/1.0.1/1.0.1+1.1D` |
 | Editable status color JSON | `config/status-colors.json` |
 | Editable refresh policy | `config/refresh-policy.json` |
 | Editable Settings layout | `config/settings-layout.json` |
@@ -204,6 +204,10 @@ Release, Beta, and devbeta use `R`, `B`, and `D`. Increase `buildNum` once for
 every source commit. `patchNum` is absent in the signed base build and appears
 as `pN` only while a signed Patch is active. See `docs/VERSIONING.md`.
 
+For a Developer build, use a matching prerelease package version such as
+`1.0.1-alpha.1` while keeping the displayed App version `1.0.1`. This ensures
+Electron considers the later stable `1.0.1` newer than the developer test.
+
 Never reuse a version that has already been published. Recovery from a bad
 release requires a higher version.
 
@@ -235,11 +239,11 @@ metadata, and matching block maps belong to the same release.
 Replace the paths when the version changes:
 
 ```bash
-hdiutil verify 'dist/1.0.1/1.0.1+1.104R/panel.dmg'
-unzip -tq 'dist/1.0.1/1.0.1+1.104R/panel.zip'
-codesign --verify --deep --strict --verbose=2 'dist/1.0.1/1.0.1+1.104R/mac-arm64/Panel.app'
-shasum -a 256 'dist/1.0.1/1.0.1+1.104R/panel.dmg'
-shasum -a 256 'dist/1.0.1/1.0.1+1.104R/panel.zip'
+hdiutil verify 'dist/1.0.1/1.0.1+1.1D/panel.dmg'
+unzip -tq 'dist/1.0.1/1.0.1+1.1D/panel.zip'
+codesign --verify --deep --strict --verbose=2 'dist/1.0.1/1.0.1+1.1D/mac-arm64/Panel.app'
+shasum -a 256 'dist/1.0.1/1.0.1+1.1D/panel.dmg'
+shasum -a 256 'dist/1.0.1/1.0.1+1.1D/panel.zip'
 ```
 
 For a public release, the App must use a Developer ID Application certificate
@@ -252,7 +256,7 @@ Quit Panel first. Keep a recoverable backup of the installed App:
 
 ```bash
 mv /Applications/Panel.app /Users/yu/.Trash/Panel-before-new-build.app
-ditto 'dist/1.0.1/1.0.1+1.104R/mac-arm64/Panel.app' /Applications/Panel.app
+ditto 'dist/1.0.1/1.0.1+1.1D/mac-arm64/Panel.app' /Applications/Panel.app
 codesign --verify --deep --strict /Applications/Panel.app
 open /Applications/Panel.app
 ```

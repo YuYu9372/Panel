@@ -2,15 +2,18 @@
 
 ## Panel 1.0.1
 
-Panel 1.0.1 simplifies Settings and adds a safe RAW editing mode.
+Panel 1.0.1 is a developer-test build that simplifies Settings and adds a safe
+RAW editing mode.
 
 **Public version:** `1.0.1`
 
-**Release build:** `1.0.1+1.104R`
+**Developer build:** `1.0.1+1.1D`
+
+**Electron update version:** `1.0.1-alpha.1`
 
 **Manual installer:** `panel.dmg`
 
-**DMG SHA-256:** `cb6a9333cd0a59c7a0c295cb2ff0cbf2fee4c9df5a1af87ad494f7ee5bb8c974`
+**DMG SHA-256:** `d61c2b5896871023b624095c72238aadbabad18337886e063fcd01f1599e216c`
 
 ### Settings
 

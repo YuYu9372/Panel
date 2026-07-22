@@ -174,7 +174,7 @@ Panel/
 - [ ] Sign with Developer ID Application and notarize before public distribution.
 
 ### 1.0.1 <- Currently
-- [x] Use public App version `1.0.1` and release Build `1.0.1+1.104R`.
+- [x] Use App version `1.0.1` and developer-test Build `1.0.1+1.1D`.
 - [x] Simplify Settings into a flat, low-decoration interface.
 - [x] Add a double-click RAW/FORM switch for allowlisted Panel settings.
 - [x] Keep saved credentials encrypted and hidden from RAW output.
