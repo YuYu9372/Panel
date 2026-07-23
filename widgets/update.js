@@ -4,6 +4,7 @@ const updateWidget = {
   primary: null,
   state: null,
   currentPatchId: '',
+  mode: 'full',
   ui: {
     eyebrow: 'PANEL UPDATE',
     availableTitle: 'Update available',
@@ -133,27 +134,41 @@ const updateWidget = {
     const patch = state.uiPatch && state.uiPatch.patch;
     const patchId = patch ? patch.patchId : '';
     if (patchId !== this.currentPatchId) this.applyPatch(patch || null);
-    const visibleStatuses = new Set(['available', 'downloading', 'downloaded']);
-    const visible = visibleStatuses.has(state.status);
+    const fullStatuses = new Set(['available', 'downloading', 'downloaded']);
+    const runtimeStatuses = new Set(['available', 'downloading', 'verifying', 'staged']);
+    const runtime = state.runtimeUpdate || { status: 'unavailable' };
+    this.mode = fullStatuses.has(state.status) ? 'full' : 'runtime';
+    const presentation = this.mode === 'full' ? state : runtime;
+    const visible = this.mode === 'full'
+      ? fullStatuses.has(state.status)
+      : runtimeStatuses.has(runtime.status);
     this.el.hidden = !visible;
-    this.el.dataset.state = state.status;
+    this.el.dataset.state = presentation.status;
     if (!visible) this.close();
 
     document.getElementById('update-eyebrow').textContent = this.ui.eyebrow;
-    document.getElementById('update-current-version').textContent = state.currentDisplayVersion;
-    document.getElementById('update-available-version').textContent = state.availableDisplayVersion || '—';
-    document.getElementById('update-status').textContent = state.message || '';
+    document.getElementById('update-installed-label').textContent = this.mode === 'full' ? 'Installed' : 'Current Runtime';
+    document.getElementById('update-available-label').textContent = this.mode === 'full' ? 'Available' : 'New Runtime';
+    document.getElementById('update-current-version').textContent = this.mode === 'full'
+      ? state.currentDisplayVersion
+      : runtime.currentRevision ? `r${runtime.currentRevision}` : 'Bundled';
+    document.getElementById('update-available-version').textContent = this.mode === 'full'
+      ? state.availableDisplayVersion || '—'
+      : runtime.availableRevision ? `r${runtime.availableRevision}` : '—';
+    document.getElementById('update-status').textContent = presentation.message || '';
     document.getElementById('update-release-label').textContent = this.ui.releaseLabel;
 
     const title = document.getElementById('update-title');
-    if (state.status === 'downloaded') title.textContent = this.ui.downloadedTitle;
+    if (this.mode === 'runtime') {
+      title.textContent = runtime.status === 'staged' ? 'Runtime ready to apply' : 'Runtime update available';
+    } else if (state.status === 'downloaded') title.textContent = this.ui.downloadedTitle;
     else if (state.status === 'error') title.textContent = this.ui.errorTitle;
     else title.textContent = this.ui.availableTitle;
 
     const notes = document.getElementById('update-release-notes');
     notes.replaceChildren();
-    const entries = state.releaseNotes && state.releaseNotes.length
-      ? state.releaseNotes
+    const entries = presentation.releaseNotes && presentation.releaseNotes.length
+      ? presentation.releaseNotes
       : ['Security and reliability improvements.'];
     for (const entry of entries) {
       const item = document.createElement('li');
@@ -162,20 +177,29 @@ const updateWidget = {
     }
 
     const progress = document.getElementById('update-progress');
-    progress.hidden = state.status !== 'downloading';
-    progress.value = state.progress || 0;
+    progress.hidden = !['downloading', 'verifying'].includes(presentation.status);
+    progress.value = presentation.progress || 0;
 
-    this.primary.disabled = state.status === 'downloading';
-    if (state.status === 'downloaded') this.primary.textContent = this.ui.installLabel;
+    this.primary.disabled = ['downloading', 'verifying', 'staged'].includes(presentation.status);
+    if (this.mode === 'runtime' && runtime.status === 'staged') this.primary.textContent = 'Ready to apply';
+    else if (this.mode === 'runtime' && runtime.status === 'verifying') this.primary.textContent = 'Verifying Runtime…';
+    else if (this.mode === 'runtime' && runtime.status === 'downloading') this.primary.textContent = `Downloading ${runtime.progress || 0}%`;
+    else if (this.mode === 'runtime') this.primary.textContent = 'Download Runtime update';
+    else if (state.status === 'downloaded') this.primary.textContent = this.ui.installLabel;
     else if (state.status === 'downloading') this.primary.textContent = `Downloading ${state.progress || 0}%`;
     else this.primary.textContent = this.ui.downloadLabel;
+    document.getElementById('update-security').textContent = this.mode === 'runtime'
+      ? 'Ed25519 signed · A/B rollback protected'
+      : 'Signed update · Automatic rollback protection';
   },
 
   async performPrimaryAction() {
     if (!this.state) return;
     this.primary.disabled = true;
     try {
-      if (this.state.status === 'available') await window.panelApp.downloadUpdate();
+      if (this.mode === 'runtime' && this.state.runtimeUpdate.status === 'available') {
+        await window.panelApp.downloadRuntimeUpdate();
+      } else if (this.state.status === 'available') await window.panelApp.downloadUpdate();
       else if (this.state.status === 'downloaded') await window.panelApp.installUpdate();
     } catch {
       document.getElementById('update-status').textContent = 'The update action could not be completed.';

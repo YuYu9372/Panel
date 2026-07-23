@@ -18,6 +18,12 @@ yet a user-installable Runtime Update release.
   Bootstrap with a channel-specific Developer public key.
 - Added a signed Runtime feed contract that restricts downloads to Panel's GitHub
   Releases and binds every URL to its exact digest, size, identity, and compatibility.
+- Added a bounded streaming downloader with live progress, owner-only temporary
+  storage, digest verification, secure Rust staging, cleanup on failure, and staged
+  state recovery after relaunch or loss of network access.
+- Added Runtime availability, download, verification, and `Ready to apply` states
+  to the existing update card while keeping activation disabled until health-based
+  recovery is complete.
 - Added tests for successful A/B transitions, rollback, replay rejection,
   incompatible Runtime APIs, path traversal, undeclared archive files, package
   determinism, cross-language signatures, credential exclusion, and symlinks.

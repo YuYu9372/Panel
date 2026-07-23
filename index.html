@@ -35,7 +35,7 @@
           </div>
           <div class="update-version-route">
             <div>
-              <span>Installed</span>
+              <span id="update-installed-label">Installed</span>
               <strong id="update-current-version">1.0.1</strong>
             </div>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -43,7 +43,7 @@
               <path d="m14 7 5 5-5 5"></path>
             </svg>
             <div>
-              <span>Available</span>
+              <span id="update-available-label">Available</span>
               <strong id="update-available-version">—</strong>
             </div>
           </div>
@@ -54,7 +54,7 @@
             <ul id="update-release-notes"></ul>
           </div>
           <button id="update-primary" class="update-primary" type="button">Download update</button>
-          <div class="update-security">Signed update · Automatic rollback protection</div>
+          <div id="update-security" class="update-security">Signed update · Automatic rollback protection</div>
         </aside>
       </div>
       <div id="connectivity" class="connectivity net--unknown" aria-label="Network status"></div>
@@ -111,7 +111,7 @@
   <script src="widgets/refresh-policy.js?v=1"></script>
   <script src="widgets/status-grid.js?v=5"></script>
   <script src="widgets/connectivity.js?v=4"></script>
-  <script src="widgets/update.js?v=1"></script>
+  <script src="widgets/update.js?v=2"></script>
   <script src="widgets/settings.js?v=1"></script>
   <script src="widgets/version.js?v=1"></script>
   <script src="app.js?v=15"></script>

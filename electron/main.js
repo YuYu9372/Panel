@@ -17,6 +17,14 @@ const { SettingsStore } = require('./settings-store');
 const { testConnections } = require('./connections');
 const { PatchManager } = require('./patch-manager');
 const { UpdateManager } = require('./update-manager');
+const { RuntimeUpdateManager } = require('./runtime-update-manager');
+const {
+  BOOTSTRAP_API_VERSION,
+  RUNTIME_API_VERSION,
+  RUNTIME_FEED_URLS,
+  createRuntimeBootstrap,
+  runtimePaths,
+} = require('./runtime-trust');
 const { PATCH_MANIFEST_BASE_URL, PATCH_TRUST } = require('./update-trust');
 const {
   loadVersionInfo,
@@ -36,6 +44,7 @@ let win = null;
 let settingsStore = null;
 let updateManager = null;
 let patchManager = null;
+let runtimeUpdateManager = null;
 let versionInfo = null;
 const updateTimers = [];
 
@@ -236,6 +245,7 @@ function combinedUpdateState() {
     ...fullUpdate,
     version: runtimeVersionInfo(versionInfo, patchNumber),
     uiPatch,
+    runtimeUpdate: runtimeUpdateManager.snapshot(),
   };
 }
 
@@ -249,9 +259,43 @@ async function checkAllUpdates() {
   await Promise.allSettled([
     updateManager.check(),
     patchManager.check(channel),
+    runtimeUpdateManager.check(),
   ]);
   publishUpdateState();
   return combinedUpdateState();
+}
+
+function createRuntimeUpdateService(channel) {
+  const bootstrap = createRuntimeBootstrap({
+    app,
+    channel,
+    resourcesPath: process.resourcesPath,
+  });
+  const developmentFeedUrl = process.env.PANEL_RUNTIME_FEED_URL || '';
+  const enabled = Boolean(bootstrap) && (app.isPackaged || Boolean(developmentFeedUrl));
+  let publicKey = null;
+  if (enabled) {
+    const paths = runtimePaths({
+      app,
+      channel,
+      resourcesPath: process.resourcesPath,
+    });
+    publicKey = fs.readFileSync(paths.publicKey);
+  }
+  runtimeUpdateManager = new RuntimeUpdateManager({
+    enabled,
+    bootstrap,
+    fetcher: (url, options) => net.fetch(url, options),
+    feedUrl: app.isPackaged ? RUNTIME_FEED_URLS[channel] : developmentFeedUrl,
+    publicKey,
+    keyId: bootstrap ? bootstrap.keyId : '',
+    channel,
+    currentVersion: app.getVersion(),
+    bootstrapApiVersion: BOOTSTRAP_API_VERSION,
+    runtimeApiVersion: RUNTIME_API_VERSION,
+    downloadDirectory: path.join(app.getPath('userData'), 'runtime-downloads'),
+  });
+  runtimeUpdateManager.on('state', publishUpdateState);
 }
 
 function createUpdateServices() {
@@ -277,6 +321,7 @@ function createUpdateServices() {
     trust: PATCH_TRUST,
     allowHttp: !app.isPackaged,
   });
+  createRuntimeUpdateService(settingsStore.status().updateChannel);
   updateManager.on('state', publishUpdateState);
   patchManager.on('state', publishUpdateState);
   if (app.isPackaged) {
@@ -330,6 +375,12 @@ function registerIpc() {
     return combinedUpdateState();
   });
 
+  ipcMain.handle('panel:download-runtime-update', async (event) => {
+    requireSender(event, isDashboardSender);
+    await runtimeUpdateManager.downloadAndStage();
+    return combinedUpdateState();
+  });
+
   ipcMain.handle('panel:install-update', (event) => {
     requireSender(event, isDashboardSender);
     return updateManager.install();
@@ -337,8 +388,12 @@ function registerIpc() {
 
   ipcMain.handle('panel:set-update-channel', (event, channel) => {
     requireSender(event, isPanelSender);
+    if (runtimeUpdateManager.transitionActive()) {
+      throw new Error('Finish the active Runtime update before changing channels.');
+    }
     updateManager.setChannel(channel);
     patchManager.publish(channel);
+    createRuntimeUpdateService(channel);
     return combinedUpdateState();
   });
 

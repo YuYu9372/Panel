@@ -7,9 +7,11 @@ branch. It can prepare a file manifest, sign it with an offline Ed25519 key,
 create a deterministic ZIP, verify the package, stage it in an inactive A/B
 slot, activate it, confirm health, or roll it back.
 
-Panel does not download or launch this Runtime yet. The Updating screen, Electron
-launcher integration, process health supervisor, and automatic recovery still
-need to be connected. Use a Full Version Update for production program-code
+Panel can check the fixed signed feed, show a Runtime update in the existing update
+card, stream the ZIP into an owner-only temporary directory, verify its signed size
+and SHA-256 digest, and ask Rust to stage it. Activation, the full-screen Updating
+experience, Runtime process launching, health supervision, and automatic recovery
+still need to be connected. Use a Full Version Update for production program-code
 changes until that integration is complete.
 
 ## Purpose
@@ -102,11 +104,11 @@ Use a separate test root while developing:
 BOOTSTRAP='bootstrap-native/target/release/panel-bootstrap'
 ROOT='/tmp/panel-runtime-test'
 PACKAGE='runtime-output/r1/panel-runtime-r1.zip'
-PUBLIC_KEY="$HOME/Library/Application Support/Panel Developer/runtime-signing/developer-public.pem"
+PUBLIC_KEY='runtime-trust/developer-public.pem'
 
 "$BOOTSTRAP" --root "$ROOT" verify "$PACKAGE" \
   --public-key "$PUBLIC_KEY" \
-  --key-id panel-developer-2026-01 \
+  --key-id panel-runtime-developer-2026-01 \
   --app-version 1.1.0-alpha.1 \
   --channel developer \
   --bootstrap-api 1 \
@@ -114,7 +116,7 @@ PUBLIC_KEY="$HOME/Library/Application Support/Panel Developer/runtime-signing/de
 
 "$BOOTSTRAP" --root "$ROOT" stage "$PACKAGE" \
   --public-key "$PUBLIC_KEY" \
-  --key-id panel-developer-2026-01 \
+  --key-id panel-runtime-developer-2026-01 \
   --app-version 1.1.0-alpha.1 \
   --channel developer \
   --bootstrap-api 1 \
@@ -183,6 +185,11 @@ The Rust foundation already maintains the active, previous, and pending slots. I
 also remembers the highest accepted sequence and Runtime revision after rollback,
 so a published identity cannot be reused. The future supervisor will call
 `confirm` after a successful health check or `rollback` after failure.
+
+The current update card implements the safe first half of this flow. A user may
+download a Runtime, watch its progress, and reach `Ready to apply`. The Apply action
+remains deliberately disabled until the Updating screen and health supervisor are
+implemented.
 
 ## Important boundary
 

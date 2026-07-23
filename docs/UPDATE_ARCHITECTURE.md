@@ -8,14 +8,15 @@ model, and operator workflow for Panel.
 | Update tier | Status | Activation |
 | --- | --- | --- |
 | Full Version Update | Available | User approves, then Electron `quitAndInstall` |
-| Runtime Update | Package toolchain and Rust foundation implemented; Panel integration pending | User approves, Updating screen, A/B switch, micro-restart |
+| Runtime Update | Signed check, streaming download, and staging implemented; activation pending | User approves, Updating screen, A/B switch, micro-restart |
 | Standard Live Patch | Available | Automatic, immediate, health checked |
 
 The Runtime tools now prepare an explicit file manifest, sign it with an offline
 Ed25519 key, build a deterministic ZIP, verify it, and manage A/B stage, activate,
-confirm, and rollback state. A Full Version Update must still embed its trusted
-public keys and connect downloading, the Updating screen, process launching, health
-supervision, and automatic recovery before Runtime Update is available to users.
+confirm, and rollback state. Panel now checks the signed feed and streams verified
+packages into the inactive slot. A Full Version Update must still connect the
+Updating screen, process launching, health supervision, and automatic recovery
+before Runtime Update is available to users.
 
 ## Design principles
 
