@@ -173,13 +173,22 @@ Panel/
 - [x] Move the full-update and Live Patch feeds to `YuYu9372/Panel`.
 - [ ] Sign with Developer ID Application and notarize before public distribution.
 
-### 1.0.1 <- Currently
+### 1.0.1
 - [x] Use App version `1.0.1` and developer-test Build `1.0.1+1.1D`.
 - [x] Simplify Settings into a flat, low-decoration interface.
 - [x] Add a double-click RAW/FORM switch for allowlisted Panel settings.
 - [x] Keep saved credentials encrypted and hidden from RAW output.
 - [x] Validate RAW keys, values, update channel, and the fixed MCP URL.
 - [x] Add RAW security and behavior tests.
+- [ ] Sign with Developer ID Application and notarize before public distribution.
+
+### 1.1.0 <- Currently
+- [x] Use App version `1.1.0` and developer-test Build `1.1.0+1.7D`.
+- [x] Add the signed Runtime package, feed, download, and Rust A/B foundation.
+- [x] Add a full-screen Updating flow with Python and Renderer health checks.
+- [x] Add automatic rollback after failed or interrupted Runtime activation.
+- [x] Keep Stable and Developer Runtime state and trust separated.
+- [x] Verify the Developer DMG and automatic-update artifacts.
 - [ ] Sign with Developer ID Application and notarize before public distribution.
 
 ---

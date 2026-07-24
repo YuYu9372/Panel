@@ -197,8 +197,8 @@ layer:
 
 ```json
 {
-  "appVersion": "1.0.1",
-  "build": "1.0.1+1.1D",
+  "appVersion": "1.1.0",
+  "build": "1.1.0+1.7D",
   "runtimeRevision": 2,
   "livePatchNumber": 3,
   "bootstrapApiVersion": 1,
@@ -209,7 +209,7 @@ layer:
 A compact development display may use:
 
 ```text
-1.0.1+1.1D-r2-p3
+1.1.0+1.7D-r2-p3
 ```
 
 The public interface continues to show only the App version.

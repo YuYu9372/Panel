@@ -10,3 +10,4 @@ dist/
 *-private.pem
 patches/*.signed.json
 runtime-output/
+/.idea

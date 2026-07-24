@@ -3,7 +3,19 @@
 ## Panel 1.1.0 Development
 
 This development branch implements the trusted Developer Runtime Update flow.
-It is not yet a packaged `1.1.0` release.
+It is packaged as the first `1.1.0` Developer test baseline.
+
+**Public version:** `1.1.0`
+
+**Developer build:** `1.1.0+1.7D`
+
+**Electron update version:** `1.1.0-alpha.1`
+
+**Manual installer:** `panel.dmg`
+
+**DMG SHA-256:** `4b034d858820e3ba5fe262fd2049997682211dfa29b7e66bbf395d74eb35832a`
+
+**Automatic-update ZIP SHA-256:** `f7664e328aa621b6640cebffd707e95123e6f6df070df0e4d780d22e1b984dac`
 
 ### Runtime foundation
 
@@ -40,6 +52,12 @@ It is not yet a packaged `1.1.0` release.
 All 81 Node tests, 12 Python tests, 6 Rust tests, and strict Rust Clippy checks
 pass. Stable Runtime publishing remains disabled until a separate Stable public
 key is embedded in a Full Version Update.
+
+The DMG checksum, ZIP archive, block maps, `alpha-mac.yml`, packaged metadata,
+deep App signature, arm64 Rust Bootstrap, mounted DMG contents, credential scan,
+and bundled Runtime launch were verified. This Developer build uses an Apple
+Development signature and is not notarized, so Gatekeeper may require the manual
+first-launch override.
 
 ## Panel 1.0.1
 
