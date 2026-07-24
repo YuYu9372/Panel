@@ -8,15 +8,15 @@ model, and operator workflow for Panel.
 | Update tier | Status | Activation |
 | --- | --- | --- |
 | Full Version Update | Available | User approves, then Electron `quitAndInstall` |
-| Runtime Update | Signed check, streaming download, and staging implemented; activation pending | User approves, Updating screen, A/B switch, micro-restart |
+| Runtime Update | Developer flow implemented | User approves, Updating screen, A/B switch, service restart |
 | Standard Live Patch | Available | Automatic, immediate, health checked |
 
-The Runtime tools now prepare an explicit file manifest, sign it with an offline
+The Runtime tools prepare an explicit file manifest, sign it with an offline
 Ed25519 key, build a deterministic ZIP, verify it, and manage A/B stage, activate,
-confirm, and rollback state. Panel now checks the signed feed and streams verified
-packages into the inactive slot. A Full Version Update must still connect the
-Updating screen, process launching, health supervision, and automatic recovery
-before Runtime Update is available to users.
+confirm, and rollback state. Panel checks the signed feed, streams verified
+packages into the inactive slot, shows activation progress, restarts Runtime
+services, verifies the API and Renderer, and automatically restores a failed or
+interrupted activation.
 
 ## Design principles
 
@@ -27,9 +27,9 @@ before Runtime Update is available to users.
    rules, and preinstalled feature flags.
 4. Every downloaded payload is signed, version constrained, replay protected, and
    health checked before it becomes trusted state.
-5. The Bootstrap, signature verifier, embedded root public keys, rollback manager,
-   Updating screen, and process launcher cannot update themselves. They change only
-   through a Full Version Update.
+5. The Electron supervisor, Bootstrap, signature verifier, embedded root public
+   keys, rollback manager, and process launcher cannot update themselves. They
+   change only through a Full Version Update.
 6. Every accepted Runtime or Live Patch change is absorbed into the next Baseline.
 
 ## Tier 1: Full Version Update
@@ -91,10 +91,10 @@ A Runtime Update is intended to replace:
 - Python services
 - images, fonts, and feature assets
 - feature logic
-- main and preload code only when the Bootstrap API remains compatible
 
-Changing main or preload requires an automatic Electron micro-restart. It is not
-an in-memory code replacement.
+Electron main and preload are outside the current Runtime package. Changing them
+requires a Full Version Update because they enforce activation, IPC, health, and
+recovery boundaries.
 
 ### Package model
 
@@ -104,7 +104,6 @@ The build commands produce an immutable package such as:
 panel-runtime-r3.zip
 ├── manifest.json
 ├── renderer/
-├── electron/
 ├── python/
 └── assets/
 ```
@@ -127,12 +126,17 @@ SHA-256 digest and size of every file.
 8. Upload the package and signed manifest without modifying an existing revision.
 9. Commit and push the signed channel feed.
 10. Panel shows a Runtime Update card; it does not install automatically.
-11. After approval, the immutable Bootstrap displays the Updating screen with
-   download, verification, staging, switching, restart, and health-check progress.
-12. The Bootstrap activates the pending A/B slot only after health confirmation and
-    restores the previous slot after failure.
+11. After approval, Panel displays the Updating screen with switching, service
+    restart, and health-check progress.
+12. Rust marks the pending A/B slot active but unconfirmed.
+13. Electron launches the selected Python and Renderer roots, verifies their
+    Runtime identity and required dashboard elements, waits for the initialized
+    Renderer ready signal over restricted IPC, then asks Rust to confirm.
+14. Failure restores and relaunches the previous slot. An unconfirmed slot found
+    on the next App launch is rolled back before the dashboard starts.
 
-Package publishing and Panel integration remain design work.
+Developer and Stable channel slots are stored separately. The Stable flow remains
+disabled until its independent public key is embedded by a Full Version Update.
 
 ## Tier 3: Standard Live Patch
 

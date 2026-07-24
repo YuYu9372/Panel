@@ -5,6 +5,7 @@ const updateWidget = {
   state: null,
   currentPatchId: '',
   mode: 'full',
+  dismissedRuntimeResult: false,
   ui: {
     eyebrow: 'PANEL UPDATE',
     availableTitle: 'Update available',
@@ -25,6 +26,10 @@ const updateWidget = {
     this.el.addEventListener('click', () => this.toggle());
     document.getElementById('update-close').addEventListener('click', () => this.close());
     this.primary.addEventListener('click', () => this.performPrimaryAction());
+    document.getElementById('runtime-updating-close').addEventListener('click', () => {
+      this.dismissedRuntimeResult = true;
+      document.getElementById('runtime-updating-screen').hidden = true;
+    });
     document.addEventListener('click', (event) => {
       if (!this.popover.hidden && !event.target.closest('.update-anchor')) this.close();
     });
@@ -135,8 +140,9 @@ const updateWidget = {
     const patchId = patch ? patch.patchId : '';
     if (patchId !== this.currentPatchId) this.applyPatch(patch || null);
     const fullStatuses = new Set(['available', 'downloading', 'downloaded']);
-    const runtimeStatuses = new Set(['available', 'downloading', 'verifying', 'staged']);
+    const runtimeStatuses = new Set(['available', 'downloading', 'verifying', 'staged', 'rolledBack']);
     const runtime = state.runtimeUpdate || { status: 'unavailable' };
+    this.renderRuntimeScreen(runtime);
     this.mode = fullStatuses.has(state.status) ? 'full' : 'runtime';
     const presentation = this.mode === 'full' ? state : runtime;
     const visible = this.mode === 'full'
@@ -180,8 +186,12 @@ const updateWidget = {
     progress.hidden = !['downloading', 'verifying'].includes(presentation.status);
     progress.value = presentation.progress || 0;
 
-    this.primary.disabled = ['downloading', 'verifying', 'staged'].includes(presentation.status);
-    if (this.mode === 'runtime' && runtime.status === 'staged') this.primary.textContent = 'Ready to apply';
+    this.primary.disabled = ['downloading', 'verifying'].includes(presentation.status);
+    if (this.mode === 'runtime' && runtime.status === 'staged') this.primary.textContent = 'Apply Runtime update';
+    else if (this.mode === 'runtime' && runtime.status === 'rolledBack') {
+      this.primary.textContent = 'Previous Runtime restored';
+      this.primary.disabled = true;
+    }
     else if (this.mode === 'runtime' && runtime.status === 'verifying') this.primary.textContent = 'Verifying Runtime…';
     else if (this.mode === 'runtime' && runtime.status === 'downloading') this.primary.textContent = `Downloading ${runtime.progress || 0}%`;
     else if (this.mode === 'runtime') this.primary.textContent = 'Download Runtime update';
@@ -193,12 +203,36 @@ const updateWidget = {
       : 'Signed update · Automatic rollback protection';
   },
 
+  renderRuntimeScreen(runtime) {
+    const screen = document.getElementById('runtime-updating-screen');
+    const close = document.getElementById('runtime-updating-close');
+    const active = ['updating', 'rollingBack', 'recovery'].includes(runtime.status);
+    const result = runtime.status === 'rolledBack'
+      || (runtime.status === 'error' && Boolean(runtime.phase));
+    if (!active && !result) {
+      screen.hidden = true;
+      this.dismissedRuntimeResult = false;
+      return;
+    }
+    if (result && this.dismissedRuntimeResult) return;
+    screen.hidden = false;
+    screen.dataset.state = runtime.status;
+    document.getElementById('runtime-updating-phase').textContent = runtime.phase || 'Updating';
+    document.getElementById('runtime-updating-message').textContent = runtime.message
+      || 'Keep Panel open while the Runtime is updated.';
+    document.getElementById('runtime-updating-progress').value = runtime.progress || 0;
+    close.hidden = !result;
+  },
+
   async performPrimaryAction() {
     if (!this.state) return;
     this.primary.disabled = true;
     try {
       if (this.mode === 'runtime' && this.state.runtimeUpdate.status === 'available') {
         await window.panelApp.downloadRuntimeUpdate();
+      } else if (this.mode === 'runtime' && this.state.runtimeUpdate.status === 'staged') {
+        this.close();
+        await window.panelApp.applyRuntimeUpdate();
       } else if (this.state.status === 'available') await window.panelApp.downloadUpdate();
       else if (this.state.status === 'downloaded') await window.panelApp.installUpdate();
     } catch {

@@ -59,12 +59,14 @@ boundaries and the operator workflow for each tier.
 The shorter [technical manual](technical-manual/README.md) provides simple,
 step-by-step instructions for choosing and publishing each update type.
 
-The `1.1.0` development branch includes the standalone Runtime package toolchain:
-`npm run prepare:runtime`, `npm run sign:runtime`, and `npm run pack:runtime`.
-Panel integration is still in development, so Runtime ZIPs are not offered to
-installed users yet. The signed feed check, bounded streaming download, and secure
-staging path are implemented; activation and health-based rollback are the next
-milestone.
+The `1.1.0` development branch includes the Developer Runtime Update flow:
+`npm run prepare:runtime`, `npm run sign:runtime`, `npm run pack:runtime`, and
+`npm run sign:runtime-feed`. Panel securely downloads and stages a signed Runtime,
+then applies it from a full-screen Updating view. The selected Python and Renderer
+roots must pass API identity and dashboard health checks before Rust confirms the
+A/B slot; failures and interrupted activations automatically restore the previous
+slot. Stable Runtime publishing remains disabled until its separate trust key is
+shipped.
 
 The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the fixed Composio MCP service directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
 
@@ -104,6 +106,8 @@ to the complete public baseline; no earlier release is required.
 - Signed full-App update support and restricted Ed25519 Live Patches for
   validated UI text, design tokens, status colors, refresh policy, and Settings
   layout.
+- Signed Developer Runtime Updates for allowlisted HTML, CSS, Renderer JavaScript,
+  Widgets, and Python, with manual activation and automatic A/B rollback.
 - Public version `1.0.1` in the lower-left corner. Triple-clicking it reveals
   the detailed Build metadata and active Patch number.
 

@@ -868,7 +868,34 @@ LOCAL_HOSTS = {'localhost', '127.0.0.1', '::1'}
 LOOPBACK_CLIENTS = {'127.0.0.1', '::1', '::ffff:127.0.0.1'}
 
 
+def resolve_web_root(value=None):
+    candidate = Path(value or os.environ.get('PANEL_WEB_ROOT') or Path(__file__).resolve().parent)
+    if not candidate.is_absolute():
+        raise ValueError('PANEL_WEB_ROOT must be an absolute path')
+    resolved = candidate.resolve()
+    if not resolved.is_dir() or not (resolved / 'index.html').is_file():
+        raise ValueError('PANEL_WEB_ROOT does not contain Panel')
+    return resolved
+
+
+WEB_ROOT = resolve_web_root()
+
+
+def runtime_identity():
+    try:
+        revision = int(os.environ.get('PANEL_RUNTIME_REVISION', '0'))
+    except ValueError:
+        revision = -1
+    slot = os.environ.get('PANEL_RUNTIME_SLOT', 'bundled')
+    if revision < 0 or slot not in {'bundled', 'a', 'b'}:
+        raise ValueError('Runtime identity is not valid')
+    return {'ok': True, 'runtimeRevision': revision, 'runtimeSlot': slot}
+
+
 class PanelHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=str(WEB_ROOT), **kwargs)
+
     def end_headers(self):
         self.send_header('Cache-Control', 'no-store')
         super().end_headers()
@@ -907,6 +934,13 @@ class PanelHandler(http.server.SimpleHTTPRequestHandler):
 
         if path.startswith('/api/') and not self.is_local_request():
             self.send_error(403)
+            return
+
+        if path == '/api/runtime-health':
+            try:
+                self.send_json(runtime_identity())
+            except ValueError as error:
+                self.send_json({'ok': False, 'error': str(error)}, status=500)
             return
 
         if path == '/api/device':

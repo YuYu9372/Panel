@@ -42,8 +42,18 @@ test('Runtime paths stay inside fixed App and user-data locations', () => {
   );
   assert.equal(
     packaged.root,
-    '/Users/test/Library/Application Support/Panel/runtime-v1',
+    '/Users/test/Library/Application Support/Panel/runtime-v1/developer',
   );
+  const stable = runtimePaths({
+    app: app(true),
+    channel: 'stable',
+    resourcesPath: '/Applications/Panel.app/Contents/Resources',
+  });
+  assert.equal(
+    stable.root,
+    '/Users/test/Library/Application Support/Panel/runtime-v1/stable',
+  );
+  assert.notEqual(packaged.root, stable.root);
 });
 
 test('Runtime Bootstrap stays disabled until both immutable resources exist', () => {

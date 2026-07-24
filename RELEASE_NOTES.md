@@ -2,8 +2,8 @@
 
 ## Panel 1.1.0 Development
 
-This development branch begins the trusted Runtime Update foundation. It is not
-yet a user-installable Runtime Update release.
+This development branch implements the trusted Developer Runtime Update flow.
+It is not yet a packaged `1.1.0` release.
 
 ### Runtime foundation
 
@@ -21,18 +21,25 @@ yet a user-installable Runtime Update release.
 - Added a bounded streaming downloader with live progress, owner-only temporary
   storage, digest verification, secure Rust staging, cleanup on failure, and staged
   state recovery after relaunch or loss of network access.
-- Added Runtime availability, download, verification, and `Ready to apply` states
-  to the existing update card while keeping activation disabled until health-based
-  recovery is complete.
+- Added Runtime availability, download, verification, and **Apply Runtime update**
+  states to the existing update card.
+- Added a full-screen Updating experience for activation, service restart, API
+  checks, Renderer loading, confirmation, and rollback progress.
+- Added Runtime-aware Python and HTML roots, a local Runtime identity endpoint,
+  required dashboard element checks, and a restricted Renderer-ready handshake
+  before confirmation.
+- Added automatic A/B rollback when service or Renderer health fails and
+  next-launch recovery when Panel exits before confirmation.
+- Isolated Stable and Developer A/B state directories so a channel switch cannot
+  execute the other channel's Runtime.
 - Added tests for successful A/B transitions, rollback, replay rejection,
   incompatible Runtime APIs, path traversal, undeclared archive files, package
   determinism, cross-language signatures, credential exclusion, and symlinks.
 - Added an English Runtime operator guide and a short Rust basics guide.
 
-The Electron download flow, Updating screen, embedded production public keys,
-process supervisor, and automatic health recovery remain future work. Production
-code changes must continue to use a Full Version Update until those pieces are
-complete.
+All 81 Node tests, 12 Python tests, 6 Rust tests, and strict Rust Clippy checks
+pass. Stable Runtime publishing remains disabled until a separate Stable public
+key is embedded in a Full Version Update.
 
 ## Panel 1.0.1
 

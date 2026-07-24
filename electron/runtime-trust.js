@@ -29,7 +29,7 @@ function runtimePaths({ app, channel, resourcesPath, projectRoot = path.join(__d
       ? path.join(resources, 'bootstrap', 'panel-bootstrap')
       : path.join(projectRoot, 'bootstrap-native', 'target', 'release', 'panel-bootstrap'),
     publicKey: path.join(resources, 'runtime-trust', trust.publicKeyFile),
-    root: path.join(app.getPath('userData'), 'runtime-v1'),
+    root: path.join(app.getPath('userData'), 'runtime-v1', channel),
     trust,
   };
 }

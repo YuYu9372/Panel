@@ -68,7 +68,44 @@ class RuntimeUpdateManager extends EventEmitter {
 
   transitionActive() {
     return this.operationInFlight
-      || ['downloading', 'verifying', 'staged', 'recovery'].includes(this.state.status);
+      || [
+        'downloading',
+        'verifying',
+        'staged',
+        'updating',
+        'rollingBack',
+        'recovery',
+      ].includes(this.state.status);
+  }
+
+  async prepareForLaunch() {
+    if (!this.enabled) return null;
+    const runtimeState = await this.bootstrap.status();
+    this.updateState({ currentRevision: runtimeState.runtimeRevision || 0 });
+    if (!runtimeState.awaitingHealth) return runtimeState;
+    this.operationInFlight = true;
+    try {
+      this.updateState({
+        status: 'recovery',
+        progress: 15,
+        phase: 'Recovering',
+        message: 'An unconfirmed Runtime was found. Restoring the previous Runtime…',
+      });
+      await this.bootstrap.rollback();
+      const restored = await this.bootstrap.status();
+      this.updateState({
+        status: 'rolledBack',
+        currentRevision: restored.runtimeRevision || 0,
+        availableRevision: 0,
+        progress: 100,
+        phase: 'Recovered',
+        releaseNotes: [],
+        message: 'The previous Runtime was restored after an interrupted update.',
+      });
+      return restored;
+    } finally {
+      this.operationInFlight = false;
+    }
   }
 
   verificationOptions() {
@@ -116,7 +153,12 @@ class RuntimeUpdateManager extends EventEmitter {
   }
 
   async performCheck() {
-    this.updateState({ status: 'checking', message: 'Checking for Runtime updates…' });
+    this.updateState({
+      status: 'checking',
+      progress: 0,
+      phase: null,
+      message: 'Checking for Runtime updates…',
+    });
     try {
       const runtimeState = await this.bootstrap.status();
       this.updateState({ currentRevision: runtimeState.runtimeRevision || 0 });
@@ -128,10 +170,10 @@ class RuntimeUpdateManager extends EventEmitter {
           progress: 100,
           releaseNotes: [],
           message: `Runtime r${runtimeState.pendingRevision} is verified and ready.`,
+          phase: 'Ready',
         });
         return this.snapshot();
       }
-      const feed = await this.readFeed();
       if (runtimeState.awaitingHealth) {
         this.availableFeed = null;
         this.updateState({
@@ -140,9 +182,11 @@ class RuntimeUpdateManager extends EventEmitter {
           progress: 100,
           releaseNotes: [],
           message: 'Runtime health confirmation is pending.',
+          phase: 'Recovery required',
         });
         return this.snapshot();
       }
+      const feed = await this.readFeed();
       const usedRevision = feed.runtimeRevision <= (runtimeState.highestRuntimeRevision || 0);
       const usedSequence = feed.sequence <= (runtimeState.highestSequence || 0);
       if (usedRevision || usedSequence) {
@@ -153,6 +197,7 @@ class RuntimeUpdateManager extends EventEmitter {
           availableRevision: 0,
           progress: 0,
           releaseNotes: [],
+          phase: null,
           message: 'Runtime is up to date.',
         });
         return this.snapshot();
@@ -163,11 +208,16 @@ class RuntimeUpdateManager extends EventEmitter {
         availableRevision: feed.runtimeRevision,
         progress: 0,
         releaseNotes: feed.releaseNotes,
+        phase: null,
         message: `Runtime r${feed.runtimeRevision} is available.`,
       });
     } catch {
       this.availableFeed = null;
-      this.updateState({ status: 'error', message: 'The secure Runtime update check failed.' });
+      this.updateState({
+        status: 'error',
+        phase: null,
+        message: 'The secure Runtime update check failed.',
+      });
     }
     return this.snapshot();
   }
@@ -182,7 +232,12 @@ class RuntimeUpdateManager extends EventEmitter {
     let handle = null;
     let temporaryFile = '';
     try {
-      this.updateState({ status: 'downloading', progress: 0, message: 'Downloading Runtime…' });
+      this.updateState({
+        status: 'downloading',
+        progress: 0,
+        phase: null,
+        message: 'Downloading Runtime…',
+      });
       const response = await this.fetcher(feed.package.url, {
         cache: 'no-store',
         headers: { Accept: 'application/zip' },
@@ -237,13 +292,107 @@ class RuntimeUpdateManager extends EventEmitter {
         status: 'staged',
         progress: 100,
         availableRevision: staged.runtimeRevision,
+        phase: 'Ready',
         message: `Runtime r${staged.runtimeRevision} is verified and ready.`,
       });
       return this.snapshot();
     } catch (error) {
       if (handle) await handle.close().catch(() => {});
       if (temporaryFile) await this.fs.promises.unlink(temporaryFile).catch(() => {});
-      this.updateState({ status: 'error', progress: 0, message: 'Runtime download or verification failed.' });
+      this.updateState({
+        status: 'error',
+        progress: 0,
+        phase: null,
+        message: 'Runtime download or verification failed.',
+      });
+      throw error;
+    } finally {
+      this.operationInFlight = false;
+    }
+  }
+
+  async apply(restartRuntime) {
+    if (this.operationInFlight) throw new Error('Another Runtime operation is active.');
+    if (this.state.status !== 'staged') throw new Error('No staged Runtime is ready to apply.');
+    if (typeof restartRuntime !== 'function') throw new Error('Runtime restart handler is not valid.');
+    this.operationInFlight = true;
+    let activated = false;
+    try {
+      this.updateState({
+        status: 'updating',
+        progress: 10,
+        phase: 'Activating',
+        message: 'Activating the verified Runtime…',
+      });
+      await this.bootstrap.activate();
+      activated = true;
+      const activeState = await this.bootstrap.status();
+      await restartRuntime(activeState, (phase, progress, message) => {
+        this.updateState({ status: 'updating', phase, progress, message });
+      });
+      this.updateState({
+        status: 'updating',
+        progress: 92,
+        phase: 'Confirming',
+        message: 'Confirming Runtime health…',
+      });
+      await this.bootstrap.confirm();
+      const confirmed = await this.bootstrap.status();
+      this.availableFeed = null;
+      this.updateState({
+        status: 'idle',
+        currentRevision: confirmed.runtimeRevision || 0,
+        availableRevision: 0,
+        progress: 100,
+        phase: 'Complete',
+        releaseNotes: [],
+        message: 'Runtime update completed successfully.',
+      });
+      return this.snapshot();
+    } catch (error) {
+      if (!activated) {
+        this.updateState({
+          status: 'staged',
+          progress: 100,
+          phase: 'Ready',
+          message: 'Runtime activation did not start. The verified Runtime remains staged.',
+        });
+        throw error;
+      }
+      this.updateState({
+        status: 'rollingBack',
+        progress: 94,
+        phase: 'Rolling back',
+        message: 'Runtime health failed. Restoring the previous Runtime…',
+      });
+      try {
+        await this.bootstrap.rollback();
+        const restored = await this.bootstrap.status();
+        await restartRuntime(restored, (phase, progress, message) => {
+          this.updateState({
+            status: 'rollingBack',
+            phase,
+            progress: Math.max(94, progress),
+            message,
+          });
+        });
+        this.updateState({
+          status: 'rolledBack',
+          currentRevision: restored.runtimeRevision || 0,
+          availableRevision: 0,
+          progress: 100,
+          phase: 'Restored',
+          releaseNotes: [],
+          message: 'The Runtime update failed and the previous Runtime was restored.',
+        });
+      } catch {
+        this.updateState({
+          status: 'error',
+          progress: 100,
+          phase: 'Recovery failed',
+          message: 'Automatic Runtime recovery failed. Restart Panel to retry recovery.',
+        });
+      }
       throw error;
     } finally {
       this.operationInFlight = false;

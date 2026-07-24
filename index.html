@@ -88,6 +88,22 @@
     <div class="offline-tag">Offline</div>
   </div>
 
+  <section id="runtime-updating-screen" class="runtime-updating-screen" aria-live="polite" hidden>
+    <div class="runtime-updating-card">
+      <div class="runtime-updating-mark" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="runtime-updating-eyebrow">PANEL RUNTIME</div>
+      <h1>Updating Panel</h1>
+      <p id="runtime-updating-phase" class="runtime-updating-phase">Preparing update</p>
+      <progress id="runtime-updating-progress" class="runtime-updating-progress" max="100" value="0"></progress>
+      <p id="runtime-updating-message" class="runtime-updating-message">Keep Panel open while the Runtime is updated.</p>
+      <button id="runtime-updating-close" class="runtime-updating-close" type="button" hidden>Return to Panel</button>
+    </div>
+  </section>
+
   <button id="app-version" class="version-tag" type="button" aria-label="Panel version 1.0.1. Click three times for build details">1.0.1</button>
 
   <dialog id="version-dialog" class="version-dialog" aria-labelledby="version-dialog-title">
@@ -111,7 +127,7 @@
   <script src="widgets/refresh-policy.js?v=1"></script>
   <script src="widgets/status-grid.js?v=5"></script>
   <script src="widgets/connectivity.js?v=4"></script>
-  <script src="widgets/update.js?v=2"></script>
+  <script src="widgets/update.js?v=3"></script>
   <script src="widgets/settings.js?v=1"></script>
   <script src="widgets/version.js?v=1"></script>
   <script src="app.js?v=15"></script>

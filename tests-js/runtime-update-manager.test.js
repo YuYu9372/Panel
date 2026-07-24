@@ -193,3 +193,176 @@ test('Runtime manager restores a staged update without network access', async ()
   });
   assert.equal((await instance.check()).status, 'staged');
 });
+
+test('Runtime manager activates, health-checks, and confirms a staged Runtime', async () => {
+  let state = {
+    activeSlot: 'a',
+    previousSlot: null,
+    pendingSlot: 'b',
+    runtimeRevision: 1,
+    pendingRevision: 2,
+    highestRuntimeRevision: 2,
+    highestSequence: 2,
+    awaitingHealth: false,
+  };
+  const calls = [];
+  const instance = new RuntimeUpdateManager({
+    enabled: true,
+    bootstrap: {
+      status: async () => ({ ...state }),
+      activate: async () => {
+        calls.push('activate');
+        state = {
+          ...state,
+          activeSlot: 'b',
+          previousSlot: 'a',
+          pendingSlot: null,
+          runtimeRevision: 2,
+          pendingRevision: null,
+          awaitingHealth: true,
+        };
+      },
+      confirm: async () => {
+        calls.push('confirm');
+        state = { ...state, awaitingHealth: false };
+      },
+      rollback: async () => {
+        calls.push('rollback');
+      },
+    },
+    fetcher: async () => {
+      throw new Error('not used');
+    },
+    feedUrl,
+    publicKey,
+    keyId: 'panel-runtime-test',
+    channel: 'developer',
+    currentVersion: '1.1.0-alpha.1',
+    bootstrapApiVersion: 1,
+    runtimeApiVersion: 1,
+    downloadDirectory: fs.mkdtempSync(path.join(os.tmpdir(), 'panel-runtime-download-')),
+  });
+  instance.updateState({ status: 'staged', availableRevision: 2, progress: 100 });
+  const phases = [];
+  const result = await instance.apply(async (runtimeState, report) => {
+    calls.push(`restart:${runtimeState.activeSlot}`);
+    report('Checking services', 70, 'Checking');
+    phases.push(instance.snapshot().phase);
+  });
+  assert.equal(result.status, 'idle');
+  assert.equal(result.currentRevision, 2);
+  assert.deepEqual(calls, ['activate', 'restart:b', 'confirm']);
+  assert.deepEqual(phases, ['Checking services']);
+  assert.equal(instance.transitionActive(), false);
+});
+
+test('Runtime manager rolls back when the activated Runtime fails health checks', async () => {
+  let state = {
+    activeSlot: 'a',
+    previousSlot: null,
+    pendingSlot: 'b',
+    runtimeRevision: 1,
+    pendingRevision: 2,
+    highestRuntimeRevision: 2,
+    highestSequence: 2,
+    awaitingHealth: false,
+  };
+  const calls = [];
+  const instance = new RuntimeUpdateManager({
+    enabled: true,
+    bootstrap: {
+      status: async () => ({ ...state }),
+      activate: async () => {
+        calls.push('activate');
+        state = {
+          ...state,
+          activeSlot: 'b',
+          previousSlot: 'a',
+          pendingSlot: null,
+          runtimeRevision: 2,
+          pendingRevision: null,
+          awaitingHealth: true,
+        };
+      },
+      confirm: async () => {
+        calls.push('confirm');
+      },
+      rollback: async () => {
+        calls.push('rollback');
+        state = {
+          ...state,
+          activeSlot: 'a',
+          previousSlot: null,
+          runtimeRevision: 1,
+          awaitingHealth: false,
+        };
+      },
+    },
+    fetcher: async () => {
+      throw new Error('not used');
+    },
+    feedUrl,
+    publicKey,
+    keyId: 'panel-runtime-test',
+    channel: 'developer',
+    currentVersion: '1.1.0-alpha.1',
+    bootstrapApiVersion: 1,
+    runtimeApiVersion: 1,
+    downloadDirectory: fs.mkdtempSync(path.join(os.tmpdir(), 'panel-runtime-download-')),
+  });
+  instance.updateState({ status: 'staged', availableRevision: 2, progress: 100 });
+  let firstRestart = true;
+  await assert.rejects(
+    instance.apply(async (runtimeState) => {
+      calls.push(`restart:${runtimeState.activeSlot}`);
+      if (firstRestart) {
+        firstRestart = false;
+        throw new Error('health failed');
+      }
+    }),
+    /health failed/,
+  );
+  assert.deepEqual(calls, ['activate', 'restart:b', 'rollback', 'restart:a']);
+  assert.equal(instance.snapshot().status, 'rolledBack');
+  assert.equal(instance.snapshot().currentRevision, 1);
+});
+
+test('Runtime manager rolls back an unconfirmed Runtime before launch', async () => {
+  let state = {
+    activeSlot: 'b',
+    previousSlot: 'a',
+    runtimeRevision: 2,
+    pendingRevision: null,
+    awaitingHealth: true,
+  };
+  const instance = new RuntimeUpdateManager({
+    enabled: true,
+    bootstrap: {
+      status: async () => ({ ...state }),
+      rollback: async () => {
+        state = {
+          ...state,
+          activeSlot: 'a',
+          previousSlot: null,
+          runtimeRevision: 1,
+          awaitingHealth: false,
+        };
+      },
+    },
+    fetcher: async () => {
+      throw new Error('not used');
+    },
+    feedUrl,
+    publicKey,
+    keyId: 'panel-runtime-test',
+    channel: 'developer',
+    currentVersion: '1.1.0-alpha.1',
+    bootstrapApiVersion: 1,
+    runtimeApiVersion: 1,
+    downloadDirectory: fs.mkdtempSync(path.join(os.tmpdir(), 'panel-runtime-download-')),
+  });
+  const restored = await instance.prepareForLaunch();
+  assert.equal(restored.activeSlot, 'a');
+  assert.equal(instance.snapshot().status, 'rolledBack');
+  assert.equal(instance.snapshot().currentRevision, 1);
+});

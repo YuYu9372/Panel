@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('panelApp', {
   checkForUpdates: () => ipcRenderer.invoke('panel:check-for-updates'),
   downloadUpdate: () => ipcRenderer.invoke('panel:download-update'),
   downloadRuntimeUpdate: () => ipcRenderer.invoke('panel:download-runtime-update'),
+  applyRuntimeUpdate: () => ipcRenderer.invoke('panel:apply-runtime-update'),
+  reportRuntimeReady: () => ipcRenderer.invoke('panel:report-runtime-ready'),
   installUpdate: () => ipcRenderer.invoke('panel:install-update'),
   setUpdateChannel: (channel) => ipcRenderer.invoke('panel:set-update-channel', channel),
   confirmUiPatch: (patchId) => ipcRenderer.invoke('panel:confirm-ui-patch', patchId),

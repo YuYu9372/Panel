@@ -2,17 +2,15 @@
 
 ## Current status
 
-The standalone Runtime toolchain is implemented on the `1.1.0` development
-branch. It can prepare a file manifest, sign it with an offline Ed25519 key,
-create a deterministic ZIP, verify the package, stage it in an inactive A/B
-slot, activate it, confirm health, or roll it back.
+The complete Developer Runtime flow is implemented on the `1.1.0` development
+branch. It prepares and signs a deterministic ZIP, verifies it, stages it in an
+inactive A/B slot, shows an Updating screen, launches the selected Runtime, checks
+the local API and Renderer, confirms a healthy change, and rolls back a failed or
+interrupted activation.
 
-Panel can check the fixed signed feed, show a Runtime update in the existing update
-card, stream the ZIP into an owner-only temporary directory, verify its signed size
-and SHA-256 digest, and ask Rust to stage it. Activation, the full-screen Updating
-experience, Runtime process launching, health supervision, and automatic recovery
-still need to be connected. Use a Full Version Update for production program-code
-changes until that integration is complete.
+The Developer channel has its embedded public key. Stable Runtime publishing
+remains disabled until a separate Stable key is created and shipped in a Full
+Version Update.
 
 ## Purpose
 
@@ -22,7 +20,9 @@ Runtime Update will allow these files to update without a normal DMG installatio
 - Renderer JavaScript and Widgets
 - Python services
 - images, fonts, and feature assets
-- compatible Electron main and preload code
+
+Electron main, preload, the Rust Bootstrap, and trust keys remain part of the
+Full Version Update boundary.
 
 ## Create a Developer Runtime package
 
@@ -90,6 +90,22 @@ its revision and sequence.
 Each command refuses to overwrite an existing output. Use a new output directory
 for the next revision. `runtime-output` is ignored by Git.
 
+## What the user sees
+
+1. Panel finds the signed feed and displays the update icon.
+2. The user opens the update card and clicks **Download Runtime update**.
+3. Panel downloads, verifies, and stages the ZIP without changing the active code.
+4. The button changes to **Apply Runtime update**.
+5. Panel shows the full-screen Updating view and switches to the inactive A/B slot.
+6. Panel starts that slot's Python service, verifies `/api/runtime-health`, loads
+   its HTML, checks the required dashboard elements, and waits for the initialized
+   Renderer to report ready through restricted IPC.
+7. Rust confirms the new slot only after every health check passes.
+8. A failure restores and relaunches the previous slot automatically.
+
+If Panel exits after activation but before confirmation, the next launch detects
+the unconfirmed slot and rolls it back before starting the dashboard.
+
 ## Verify and exercise the Rust foundation
 
 Build it:
@@ -154,7 +170,7 @@ Update. It must never accept an arbitrary downloaded public key.
 - The separately signed feed restricts package URLs to this repository's GitHub
   Releases and binds the download to its exact size and SHA-256 digest.
 
-## Complete workflow target
+## Complete workflow
 
 ```text
 Edit code
@@ -162,13 +178,14 @@ Edit code
 → Increase Runtime revision
 → Build signed Runtime package
 → Upload package
-→ User clicks Update
+→ User downloads and clicks Apply
 → Panel shows Updating progress
 → Panel switches Runtime slot
-→ Health check or rollback
+→ API and Renderer health checks
+→ Confirm or automatic rollback
 ```
 
-## Planned user experience
+## Updating states
 
 The user will click a Runtime Update button. Panel will show:
 
@@ -176,23 +193,21 @@ The user will click a Runtime Update button. Panel will show:
 Downloading
 Verifying
 Preparing
-Restarting services
-Checking health
+Activating
+Stopping services
+Starting services
+Checking services
+Loading interface
+Confirming
 Complete
 ```
 
-The Rust foundation already maintains the active, previous, and pending slots. It
-also remembers the highest accepted sequence and Runtime revision after rollback,
-so a published identity cannot be reused. The future supervisor will call
-`confirm` after a successful health check or `rollback` after failure.
-
-The current update card implements the safe first half of this flow. A user may
-download a Runtime, watch its progress, and reach `Ready to apply`. The Apply action
-remains deliberately disabled until the Updating screen and health supervisor are
-implemented.
+Rust maintains the active, previous, and pending slots. It remembers the highest
+accepted sequence and Runtime revision after rollback, so a published identity
+cannot be reused. Stable and Developer channel state use separate directories.
 
 ## Important boundary
 
-Runtime Update will not replace the Bootstrap, root signature verifier, embedded
-public keys, recovery manager, or update process. Those components require a Full
-Version Update.
+Runtime Update does not replace Electron main or preload, the Rust Bootstrap, root
+signature verifier, embedded public keys, recovery manager, or update process.
+Those components require a Full Version Update.
