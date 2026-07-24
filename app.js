@@ -75,7 +75,9 @@ async function startWidgets() {
   scheduleConfiguredRefresh();
 }
 
-startWidgets();
+startWidgets().then(() => {
+  if (window.panelApp) window.panelApp.reportRuntimeReady();
+});
 
 setInterval(() => {
   widgets.forEach((widget) => widget.refreshUpdated && widget.refreshUpdated());

@@ -8,12 +8,15 @@ model, and operator workflow for Panel.
 | Update tier | Status | Activation |
 | --- | --- | --- |
 | Full Version Update | Available | User approves, then Electron `quitAndInstall` |
-| Runtime Update | Planned for a future Baseline | User approves, Updating screen, A/B switch, micro-restart |
+| Runtime Update | Developer flow implemented | User approves, Updating screen, A/B switch, service restart |
 | Standard Live Patch | Available | Automatic, immediate, health checked |
 
-Runtime Update commands do not exist yet. A Full Version Update must first add the
-immutable Bootstrap, signed runtime-package format, A/B slots, Updating screen,
-health protocol, and rollback supervisor.
+The Runtime tools prepare an explicit file manifest, sign it with an offline
+Ed25519 key, build a deterministic ZIP, verify it, and manage A/B stage, activate,
+confirm, and rollback state. Panel checks the signed feed, streams verified
+packages into the inactive slot, shows activation progress, restarts Runtime
+services, verifies the API and Renderer, and automatically restores a failed or
+interrupted activation.
 
 ## Design principles
 
@@ -24,9 +27,9 @@ health protocol, and rollback supervisor.
    rules, and preinstalled feature flags.
 4. Every downloaded payload is signed, version constrained, replay protected, and
    health checked before it becomes trusted state.
-5. The Bootstrap, signature verifier, embedded root public keys, rollback manager,
-   Updating screen, and process launcher cannot update themselves. They change only
-   through a Full Version Update.
+5. The Electron supervisor, Bootstrap, signature verifier, embedded root public
+   keys, rollback manager, and process launcher cannot update themselves. They
+   change only through a Full Version Update.
 6. Every accepted Runtime or Live Patch change is absorbed into the next Baseline.
 
 ## Tier 1: Full Version Update
@@ -88,20 +91,19 @@ A Runtime Update is intended to replace:
 - Python services
 - images, fonts, and feature assets
 - feature logic
-- main and preload code only when the Bootstrap API remains compatible
 
-Changing main or preload requires an automatic Electron micro-restart. It is not
-an in-memory code replacement.
+Electron main and preload are outside the current Runtime package. Changing them
+requires a Full Version Update because they enforce activation, IPC, health, and
+recovery boundaries.
 
 ### Package model
 
-The future build command will produce an immutable package such as:
+The build commands produce an immutable package such as:
 
 ```text
 panel-runtime-r3.zip
 ├── manifest.json
 ├── renderer/
-├── electron/
 ├── python/
 └── assets/
 ```
@@ -110,22 +112,31 @@ The signed manifest must contain the runtime revision, channel, Baseline range,
 Bootstrap and Runtime API versions, sequence, issue and expiry times, and the
 SHA-256 digest and size of every file.
 
-### Planned operator workflow
+### Operator workflow
 
 1. Modify HTML, CSS, JavaScript, Python, or other runtime source normally.
 2. Increase `runtimeRevision` and the anti-replay sequence.
 3. Run the complete test and dependency audit suite.
-4. Build a deterministic Runtime ZIP and manifest.
-5. Sign the manifest with the matching offline Ed25519 channel key.
-6. Upload the package and signed manifest without modifying an existing revision.
-7. Commit and push the public metadata.
-8. Panel shows a Runtime Update card; it does not install automatically.
-9. After approval, the immutable Bootstrap displays the Updating screen with
-   download, verification, staging, switching, restart, and health-check progress.
-10. The Bootstrap activates the pending A/B slot only after health confirmation and
-    restores the previous slot after failure.
+4. Run `npm run prepare:runtime` to hash the explicit source allowlist.
+5. Run `npm run sign:runtime` with the matching offline Ed25519 channel key.
+6. Run `npm run pack:runtime` to recheck the sources and create the deterministic
+   Runtime ZIP.
+7. Run `npm run sign:runtime-feed` to bind the GitHub Release URL to the exact ZIP
+   digest, size, revision, sequence, channel, Baseline, and API versions.
+8. Upload the package and signed manifest without modifying an existing revision.
+9. Commit and push the signed channel feed.
+10. Panel shows a Runtime Update card; it does not install automatically.
+11. After approval, Panel displays the Updating screen with switching, service
+    restart, and health-check progress.
+12. Rust marks the pending A/B slot active but unconfirmed.
+13. Electron launches the selected Python and Renderer roots, verifies their
+    Runtime identity and required dashboard elements, waits for the initialized
+    Renderer ready signal over restricted IPC, then asks Rust to confirm.
+14. Failure restores and relaunches the previous slot. An unconfirmed slot found
+    on the next App launch is rolled back before the dashboard starts.
 
-This workflow is a design contract, not a currently available command sequence.
+Developer and Stable channel slots are stored separately. The Stable flow remains
+disabled until its independent public key is embedded by a Full Version Update.
 
 ## Tier 3: Standard Live Patch
 
@@ -186,8 +197,8 @@ layer:
 
 ```json
 {
-  "appVersion": "1.0.1",
-  "build": "1.0.1+1.1D",
+  "appVersion": "1.1.0",
+  "build": "1.1.0+1.7D",
   "runtimeRevision": 2,
   "livePatchNumber": 3,
   "bootstrapApiVersion": 1,
@@ -198,7 +209,7 @@ layer:
 A compact development display may use:
 
 ```text
-1.0.1+1.1D-r2-p3
+1.1.0+1.7D-r2-p3
 ```
 
 The public interface continues to show only the App version.

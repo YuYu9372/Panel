@@ -1,5 +1,64 @@
 # Release Notes
 
+## Panel 1.1.0 Development
+
+This development branch implements the trusted Developer Runtime Update flow.
+It is packaged as the first `1.1.0` Developer test baseline.
+
+**Public version:** `1.1.0`
+
+**Developer build:** `1.1.0+1.7D`
+
+**Electron update version:** `1.1.0-alpha.1`
+
+**Manual installer:** `panel.dmg`
+
+**DMG SHA-256:** `4b034d858820e3ba5fe262fd2049997682211dfa29b7e66bbf395d74eb35832a`
+
+**Automatic-update ZIP SHA-256:** `f7664e328aa621b6640cebffd707e95123e6f6df070df0e4d780d22e1b984dac`
+
+### Runtime foundation
+
+- Added a standalone Rust CLI for verifying Ed25519-signed Runtime ZIP packages.
+- Added strict key ID, channel, Baseline range, Bootstrap API, Runtime API,
+  lifetime, path, size, SHA-256, and anti-replay checks.
+- Added local A/B slots with separate stage, activate, health-confirm, and
+  rollback operations.
+- Added a deterministic Runtime package builder and an offline Ed25519 manifest
+  signer with explicit source allowlisting and private-key permission checks.
+- Added a shell-free Electron-to-Rust command boundary and packaged the native
+  Bootstrap with a channel-specific Developer public key.
+- Added a signed Runtime feed contract that restricts downloads to Panel's GitHub
+  Releases and binds every URL to its exact digest, size, identity, and compatibility.
+- Added a bounded streaming downloader with live progress, owner-only temporary
+  storage, digest verification, secure Rust staging, cleanup on failure, and staged
+  state recovery after relaunch or loss of network access.
+- Added Runtime availability, download, verification, and **Apply Runtime update**
+  states to the existing update card.
+- Added a full-screen Updating experience for activation, service restart, API
+  checks, Renderer loading, confirmation, and rollback progress.
+- Added Runtime-aware Python and HTML roots, a local Runtime identity endpoint,
+  required dashboard element checks, and a restricted Renderer-ready handshake
+  before confirmation.
+- Added automatic A/B rollback when service or Renderer health fails and
+  next-launch recovery when Panel exits before confirmation.
+- Isolated Stable and Developer A/B state directories so a channel switch cannot
+  execute the other channel's Runtime.
+- Added tests for successful A/B transitions, rollback, replay rejection,
+  incompatible Runtime APIs, path traversal, undeclared archive files, package
+  determinism, cross-language signatures, credential exclusion, and symlinks.
+- Added an English Runtime operator guide and a short Rust basics guide.
+
+All 81 Node tests, 12 Python tests, 6 Rust tests, and strict Rust Clippy checks
+pass. Stable Runtime publishing remains disabled until a separate Stable public
+key is embedded in a Full Version Update.
+
+The DMG checksum, ZIP archive, block maps, `alpha-mac.yml`, packaged metadata,
+deep App signature, arm64 Rust Bootstrap, mounted DMG contents, credential scan,
+and bundled Runtime launch were verified. This Developer build uses an Apple
+Development signature and is not notarized, so Gatekeeper may require the manual
+first-launch override.
+
 ## Panel 1.0.1
 
 Panel 1.0.1 is a developer-test build that simplifies Settings and adds a safe

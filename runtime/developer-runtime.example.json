@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "runtimeRevision": 1,
+  "sequence": 1,
+  "channel": "developer",
+  "baselineRange": ">=1.1.0-alpha.1 <1.2.0",
+  "bootstrapApiVersion": 1,
+  "runtimeApiVersion": 1,
+  "lifetimeDays": 7,
+  "sourceRoot": "..",
+  "entries": [
+    {
+      "source": "index.html",
+      "target": "renderer/index.html"
+    },
+    {
+      "source": "style.css",
+      "target": "renderer/style.css"
+    },
+    {
+      "source": "app.js",
+      "target": "renderer/app.js"
+    },
+    {
+      "source": "widgets",
+      "target": "renderer/widgets"
+    },
+    {
+      "source": "config",
+      "target": "renderer/config"
+    },
+    {
+      "source": "serve.py",
+      "target": "python/serve.py"
+    },
+    {
+      "source": "macos_sensors.py",
+      "target": "python/macos_sensors.py"
+    }
+  ]
+}

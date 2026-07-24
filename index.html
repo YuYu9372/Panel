@@ -35,15 +35,15 @@
           </div>
           <div class="update-version-route">
             <div>
-              <span>Installed</span>
-              <strong id="update-current-version">1.0.1</strong>
+              <span id="update-installed-label">Installed</span>
+              <strong id="update-current-version">1.1.0</strong>
             </div>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14"></path>
               <path d="m14 7 5 5-5 5"></path>
             </svg>
             <div>
-              <span>Available</span>
+              <span id="update-available-label">Available</span>
               <strong id="update-available-version">—</strong>
             </div>
           </div>
@@ -54,7 +54,7 @@
             <ul id="update-release-notes"></ul>
           </div>
           <button id="update-primary" class="update-primary" type="button">Download update</button>
-          <div class="update-security">Signed update · Automatic rollback protection</div>
+          <div id="update-security" class="update-security">Signed update · Automatic rollback protection</div>
         </aside>
       </div>
       <div id="connectivity" class="connectivity net--unknown" aria-label="Network status"></div>
@@ -88,7 +88,23 @@
     <div class="offline-tag">Offline</div>
   </div>
 
-  <button id="app-version" class="version-tag" type="button" aria-label="Panel version 1.0.1. Click three times for build details">1.0.1</button>
+  <section id="runtime-updating-screen" class="runtime-updating-screen" aria-live="polite" hidden>
+    <div class="runtime-updating-card">
+      <div class="runtime-updating-mark" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="runtime-updating-eyebrow">PANEL RUNTIME</div>
+      <h1>Updating Panel</h1>
+      <p id="runtime-updating-phase" class="runtime-updating-phase">Preparing update</p>
+      <progress id="runtime-updating-progress" class="runtime-updating-progress" max="100" value="0"></progress>
+      <p id="runtime-updating-message" class="runtime-updating-message">Keep Panel open while the Runtime is updated.</p>
+      <button id="runtime-updating-close" class="runtime-updating-close" type="button" hidden>Return to Panel</button>
+    </div>
+  </section>
+
+  <button id="app-version" class="version-tag" type="button" aria-label="Panel version 1.1.0. Click three times for build details">1.1.0</button>
 
   <dialog id="version-dialog" class="version-dialog" aria-labelledby="version-dialog-title">
     <section class="version-dialog-card">
@@ -111,7 +127,7 @@
   <script src="widgets/refresh-policy.js?v=1"></script>
   <script src="widgets/status-grid.js?v=5"></script>
   <script src="widgets/connectivity.js?v=4"></script>
-  <script src="widgets/update.js?v=1"></script>
+  <script src="widgets/update.js?v=3"></script>
   <script src="widgets/settings.js?v=1"></script>
   <script src="widgets/version.js?v=1"></script>
   <script src="app.js?v=15"></script>

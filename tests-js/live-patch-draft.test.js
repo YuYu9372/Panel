@@ -38,21 +38,21 @@ test('Developer live-patch example contains validated 1.0.1 configuration', () =
   assert.equal(draft.channel, 'developer');
 });
 
-test('release metadata identifies the developer 1.0.1 build and artifact', () => {
+test('release metadata identifies the developer 1.1.0 build and artifact', () => {
   const version = readJson('VERSION.json');
   const packageJson = readJson('package.json');
   assert.deepEqual(version, {
-    appVersion: '1.0.1',
+    appVersion: '1.1.0',
     channel: 'devbeta',
-    build: '1.0.1+1.1D',
-    gitTag: '1.0.1',
+    build: '1.1.0+1.7D',
+    gitTag: '1.1.0',
     artifact: 'panel.dmg',
     public: false,
-    livePatchCompatibility: '>=1.0.1-alpha.1 <1.0.2',
+    livePatchCompatibility: '>=1.1.0-alpha.1 <1.1.1',
   });
-  assert.equal(packageJson.version, '1.0.1-alpha.1');
+  assert.equal(packageJson.version, '1.1.0-alpha.1');
   assert.equal(packageJson.build.artifactName, 'panel.${ext}');
-  assert.equal(packageJson.build.directories.output, 'dist/1.0.1/1.0.1+1.1D');
+  assert.equal(packageJson.build.directories.output, 'dist/1.1.0/1.1.0+1.7D');
   assert.equal(packageJson.build.publish[0].channel, 'alpha');
   assert.equal(packageJson.build.publish[0].repo, 'Panel');
 });

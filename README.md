@@ -14,7 +14,7 @@ Package Panel into credential-free manual and automatic-update artifacts:
 
 ```bash
 npm install             # once, pulls Electron + electron-builder
-npm run dist            # dist/1.0.1/1.0.1+1.1D: DMG + update files
+npm run dist            # dist/1.1.0/1.1.0+1.7D: DMG + update files
 ```
 
 Open the `.dmg`, drag **Panel** to Applications, and launch it — it opens full-screen (kiosk) and starts the Python server for you. Needs the system `python3` (the app tells you to install it if it is missing). During development, `npm start` runs the same window without packaging.
@@ -53,11 +53,20 @@ manual, all three JSON files, and a Developer patch example into `dist` and the
 current version's build folder.
 
 The [three-tier update architecture](docs/UPDATE_ARCHITECTURE.md) records the
-agreed Full Version Update, planned Runtime Update, and Standard Live Patch
+agreed Full Version Update, Runtime Update foundation, and Standard Live Patch
 boundaries and the operator workflow for each tier.
 
 The shorter [technical manual](technical-manual/README.md) provides simple,
 step-by-step instructions for choosing and publishing each update type.
+
+The `1.1.0` development branch includes the Developer Runtime Update flow:
+`npm run prepare:runtime`, `npm run sign:runtime`, `npm run pack:runtime`, and
+`npm run sign:runtime-feed`. Panel securely downloads and stages a signed Runtime,
+then applies it from a full-screen Updating view. The selected Python and Renderer
+roots must pass API identity and dashboard health checks before Rust confirms the
+A/B slot; failures and interrupted activations automatically restore the previous
+slot. Stable Runtime publishing remains disabled until its separate trust key is
+shipped.
 
 The Python server exposes local CPU, GPU, RAM, and temperature data to the system-status readout, calls the fixed Composio MCP service directly for Google Calendar and Google Tasks (no LLM), and proxies the Anthropic API only for the greeting line. On macOS, RAM comes from `vm_stat` and `sysctl`, while Apple Silicon temperature comes directly from the read-only SMC sensor interface. Neither reading needs `psutil`, sudo, or a separate monitoring app. Unsupported sensors are shown as unavailable.
 
@@ -70,9 +79,9 @@ credentials. Everything degrades gracefully when a key is missing.
 
 ## About
 
-Panel is a full-screen personal dashboard for Apple Silicon Macs. Version
-`1.0.1` adds a simpler Settings experience and a security-restricted RAW editor
-to the complete public baseline; no earlier release is required.
+Panel is a full-screen personal dashboard for Apple Silicon Macs. The `1.1.0`
+Developer build adds signed Runtime code updates with an Updating screen,
+health confirmation, and automatic A/B rollback.
 
 ## Features
 
@@ -97,23 +106,25 @@ to the complete public baseline; no earlier release is required.
 - Signed full-App update support and restricted Ed25519 Live Patches for
   validated UI text, design tokens, status colors, refresh policy, and Settings
   layout.
-- Public version `1.0.1` in the lower-left corner. Triple-clicking it reveals
+- Signed Developer Runtime Updates for allowlisted HTML, CSS, Renderer JavaScript,
+  Widgets, and Python, with manual activation and automatic A/B rollback.
+- Public version `1.1.0` in the lower-left corner. Triple-clicking it reveals
   the detailed Build metadata and active Patch number.
 
 See [plan.md](plan.md) for goals, stack, and roadmap.
 
 ## Version
 
-Current developer-test version: **1.0.1**
+Current developer-test version: **1.1.0**
 
-- Developer build: `1.0.1+1.1D`.
-- Electron update version: `1.0.1-alpha.1`, allowing the later stable `1.0.1`
+- Developer build: `1.1.0+1.7D`.
+- Electron update version: `1.1.0-alpha.1`, allowing the later stable `1.1.0`
   to supersede this developer build.
-- Test DMG: `dist/1.0.1/1.0.1+1.1D/panel.dmg`.
-- The lower-left corner displays only `1.0.1`. Triple-click it to inspect the
+- Test DMG: `dist/1.1.0/1.1.0+1.7D/panel.dmg`.
+- The lower-left corner displays only `1.1.0`. Triple-click it to inspect the
   complete runtime `VERSION.json` metadata.
 - A signed Live Patch with `patchNumber: 2` changes the runtime build display
-  to `1.0.1+1.1Dp2` without modifying the signed App bundle.
+  to `1.1.0+1.7Dp2` without modifying the signed App bundle.
 - Simplified Settings into a flat form and added a double-click RAW/FORM switch
   for its five allowlisted `.env`-style fields.
 - Kept saved secret values out of RAW output; blank secrets preserve encrypted

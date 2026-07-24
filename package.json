@@ -1,6 +1,6 @@
 {
   "name": "panel",
-  "version": "1.0.1-alpha.1",
+  "version": "1.1.0-alpha.1",
   "description": "Panel — personal dashboard, packaged as a macOS app.",
   "author": "Sirius",
   "license": "UNLICENSED",
@@ -8,11 +8,18 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac && node scripts/copy-operation-manual.js",
+    "build:bootstrap": "cargo build --release --manifest-path bootstrap-native/Cargo.toml",
+    "dist": "npm run build:bootstrap && electron-builder --mac && node scripts/copy-operation-manual.js",
     "sign:patch": "node scripts/sign-ui-patch.js",
+    "generate:runtime-key": "node scripts/generate-runtime-key.js",
+    "prepare:runtime": "python3 scripts/runtime-package.py prepare",
+    "sign:runtime": "node scripts/sign-runtime-manifest.js",
+    "sign:runtime-feed": "node scripts/sign-runtime-feed.js",
+    "pack:runtime": "python3 scripts/runtime-package.py pack",
     "test:node": "node --test tests-js/*.test.js",
     "test:python": "python3 -m unittest discover -s tests -v",
-    "test": "npm run test:node && npm run test:python"
+    "test:rust": "cargo test --manifest-path bootstrap-native/Cargo.toml && cargo clippy --manifest-path bootstrap-native/Cargo.toml --all-targets -- -D warnings",
+    "test": "npm run test:node && npm run test:python && npm run test:rust"
   },
   "devDependencies": {
     "electron": "^43.1.1",
@@ -25,7 +32,7 @@
     "generateUpdatesFilesForAllChannels": true,
     "electronUpdaterCompatibility": ">=2.16",
     "directories": {
-      "output": "dist/1.0.1/1.0.1+1.1D"
+      "output": "dist/1.1.0/1.1.0+1.7D"
     },
     "files": [
       "electron/**/*",
@@ -69,6 +76,14 @@
       {
         "from": "VERSION.json",
         "to": "VERSION.json"
+      },
+      {
+        "from": "bootstrap-native/target/release/panel-bootstrap",
+        "to": "bootstrap/panel-bootstrap"
+      },
+      {
+        "from": "runtime-trust",
+        "to": "runtime-trust"
       }
     ],
     "mac": {

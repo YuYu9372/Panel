@@ -9,3 +9,5 @@ dist/
 *.xml
 *-private.pem
 patches/*.signed.json
+runtime-output/
+/.idea
