@@ -3,7 +3,8 @@
   "lifetimeDays": 7,
   "packageUrl": "https://github.com/YuYu9372/Panel/releases/download/runtime-1.1.0-r1/panel-runtime-r1.zip",
   "releaseNotes": [
-    "First Developer Runtime package for the 1.1.0 Baseline.",
-    "Adds the signed Runtime package and A/B activation foundation."
+    "Adds a full-screen server-style system monitor.",
+    "Shows 24 half-hour windows for CPU, GPU, RAM, temperature, and Wi-Fi.",
+    "Adds 12-hour average, peak, coverage, host, uptime, and update metadata."
   ]
 }

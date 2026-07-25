@@ -7,7 +7,7 @@
   <title>Panel</title>
   <link rel="icon" href="data:," />
   <script src="widgets/boot-theme.js?v=1"></script>
-  <link rel="stylesheet" href="style.css?v=26" />
+  <link rel="stylesheet" href="style.css?v=27" />
 </head>
 <body>
   <header class="topbar" aria-label="Status bar">
@@ -82,6 +82,50 @@
     <div id="system-status" class="status-grid" aria-label="System status"></div>
   </footer>
 
+  <section id="monitoring-screen" class="monitoring-screen" aria-labelledby="monitoring-title" hidden>
+    <header class="monitoring-header">
+      <div>
+        <div class="monitoring-kicker">SYSTEM OBSERVABILITY</div>
+        <h1 id="monitoring-title">Panel Monitor</h1>
+        <p id="monitoring-subtitle">24 windows · 12 hours</p>
+      </div>
+      <button id="monitoring-back" class="monitoring-back" type="button" aria-label="Return to dashboard">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-6-6 6-6"></path>
+          <path d="M9 12h10"></path>
+        </svg>
+        <span>Dashboard</span>
+      </button>
+    </header>
+    <div class="monitoring-summary" aria-label="Monitor summary">
+      <div>
+        <span>HOST</span>
+        <strong id="monitoring-host">—</strong>
+      </div>
+      <div>
+        <span>UPTIME</span>
+        <strong id="monitoring-uptime">—</strong>
+      </div>
+      <div>
+        <span>WINDOW</span>
+        <strong id="monitoring-window">30 min</strong>
+      </div>
+      <div>
+        <span>UPDATED</span>
+        <strong id="monitoring-updated">—</strong>
+      </div>
+    </div>
+    <div id="monitoring-grid" class="monitoring-grid" aria-label="Detailed system history"></div>
+    <footer class="monitoring-legend" aria-label="Status color legend">
+      <span><i class="cell--green"></i>Normal</span>
+      <span><i class="cell--yellow"></i>Elevated</span>
+      <span><i class="cell--red"></i>High</span>
+      <span><i class="cell--purple"></i>Critical</span>
+      <span><i class="cell--gray"></i>Unavailable</span>
+      <strong>Completed windows use P95 · Current window uses live average</strong>
+    </footer>
+  </section>
+
   <div id="offline-screen" class="offline-screen" hidden>
     <div id="offline-status" class="system-status device-status--unknown"></div>
     <div class="offline-clock" id="offline-clock">--:--:--</div>
@@ -125,7 +169,7 @@
   <script src="widgets/tasks.js?v=4"></script>
   <script src="widgets/status-tiers.js?v=1"></script>
   <script src="widgets/refresh-policy.js?v=1"></script>
-  <script src="widgets/status-grid.js?v=5"></script>
+  <script src="widgets/status-grid.js?v=6"></script>
   <script src="widgets/connectivity.js?v=4"></script>
   <script src="widgets/update.js?v=3"></script>
   <script src="widgets/settings.js?v=1"></script>
