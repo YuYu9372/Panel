@@ -1031,7 +1031,7 @@ button.widget-updated:focus-visible {
 
 .monitoring-current strong {
   color: var(--monitor-accent);
-  font-size: clamp(1.15rem, 2.6vmin, 1.8rem);
+  font-size: clamp(1.75rem, 4vmin, 2.8rem);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -1056,6 +1056,12 @@ button.widget-updated:focus-visible {
   border-radius: 2px;
   background: rgba(60, 50, 40, 0.08);
 }
+
+.monitoring-cell.cell--green { background: #2f8b58; }
+.monitoring-cell.cell--yellow { background: #b47711; }
+.monitoring-cell.cell--red { background: #b93d35; }
+.monitoring-cell.cell--purple { background: #7839b6; }
+.monitoring-cell.cell--gray { background: #b3aea3; }
 
 .monitoring-axis {
   display: flex;
@@ -1897,6 +1903,12 @@ button.widget-updated:focus-visible {
   background: rgba(28, 35, 32, 0.84);
   box-shadow: 0 14px 32px -22px rgba(0, 0, 0, 0.84);
 }
+
+:root[data-theme='dark'] .monitoring-cell.cell--green { background: #3fa66c; }
+:root[data-theme='dark'] .monitoring-cell.cell--yellow { background: #d09227; }
+:root[data-theme='dark'] .monitoring-cell.cell--red { background: #d65043; }
+:root[data-theme='dark'] .monitoring-cell.cell--purple { background: #9a5cd0; }
+:root[data-theme='dark'] .monitoring-cell.cell--gray { background: #5a5750; }
 
 :root[data-theme='dark'] .offline-screen {
   background:

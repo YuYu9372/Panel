@@ -94,7 +94,8 @@ health confirmation, and automatic A/B rollback.
   through Panel's fixed Composio MCP service.
 - Live CPU, GPU, RAM, temperature, Wi-Fi latency, and device uptime in a compact
   twelve-window dock. Click any metric to open the server-style monitor with
-  twenty-four half-hour windows, twelve-hour average, peak, and coverage.
+  twenty-four color-tiered half-hour windows, large live readings, twelve-hour
+  average, peak, and coverage.
 - Network indicator and an offline clock screen that keeps local device status
   available when the internet connection fails.
 - Configurable Calendar and Tasks refresh time, a 30-minute night schedule from

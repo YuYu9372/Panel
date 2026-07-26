@@ -34,10 +34,17 @@ test('Monitoring uptime uses a compact server-style duration', () => {
 test('Dashboard includes the detailed Monitoring screen and 24-cell renderer', () => {
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const widget = fs.readFileSync(path.join(root, 'widgets', 'status-grid.js'), 'utf8');
+  const styles = fs.readFileSync(path.join(root, 'style.css'), 'utf8');
   assert.match(html, /id="monitoring-screen"/);
   assert.match(html, /id="monitoring-back"/);
   assert.match(html, /id="monitoring-grid"/);
   assert.match(widget, /detailBlocks: 24/);
   assert.match(widget, /repeat\(this\.detailBlocks\)/);
   assert.match(widget, /openMonitoring\(row\.dataset\.metric\)/);
+  assert.match(styles, /\.monitoring-cell\.cell--green\s*\{\s*background:/);
+  assert.match(styles, /\.monitoring-cell\.cell--purple\s*\{\s*background:/);
+  assert.match(
+    styles,
+    /\.monitoring-current strong\s*\{[^}]*font-size:\s*clamp\(1\.75rem,\s*4vmin,\s*2\.8rem\)/s,
+  );
 });

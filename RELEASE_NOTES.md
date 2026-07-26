@@ -25,6 +25,9 @@ It is packaged as the first `1.1.0` Developer test baseline.
   half-hour windows, covering the latest twelve hours.
 - Added current state, twelve-hour average, peak, coverage, host, uptime,
   window duration, and last-updated metadata.
+- Fixed the detailed history cells so each available window displays its
+  configured green, yellow, red, or purple tier instead of a gray placeholder.
+- Enlarged the live metric readings for faster at-a-glance monitoring.
 - Kept the dashboard dock at twelve windows for quick reading and added
   Dashboard and Escape navigation from the detailed view.
 - Expanded the local history API from twelve to twenty-four retained windows.
