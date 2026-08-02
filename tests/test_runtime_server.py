@@ -36,6 +36,15 @@ class RuntimeServerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 serve.runtime_identity()
 
+    def test_history_api_exposes_twenty_four_half_hour_windows(self):
+        payload = serve.get_history()
+        self.assertEqual(serve.HISTORY_BLOCKS, 24)
+        self.assertEqual(payload['history_blocks'], 24)
+        self.assertEqual(payload['window_minutes'], 30)
+        self.assertEqual(len(payload['blocks']), 24)
+        self.assertIn('hostname', payload)
+        self.assertIn('updated_at', payload)
+
 
 if __name__ == '__main__':
     unittest.main()

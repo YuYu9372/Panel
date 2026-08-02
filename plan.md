@@ -41,7 +41,7 @@ Panel/
     ├── weather.js
     ├── calendar.js
     ├── tasks.js
-    ├── status-grid.js     # 5×12 status history grid (CPU/GPU/RAM/TEMP/WIFI)
+    ├── status-grid.js     # Compact 5×12 dock + detailed 5×24 system monitor
     └── connectivity.js    # Wifi/latency indicator + offline screen
 ```
 
@@ -189,6 +189,8 @@ Panel/
 - [x] Add automatic rollback after failed or interrupted Runtime activation.
 - [x] Keep Stable and Developer Runtime state and trust separated.
 - [x] Verify the Developer DMG and automatic-update artifacts.
+- [x] Add Runtime r1 with a clickable server-style monitor and 24 half-hour
+  windows for CPU, GPU, RAM, Temperature, and Wi-Fi.
 - [ ] Sign with Developer ID Application and notarize before public distribution.
 
 ---
@@ -200,8 +202,10 @@ Panel/
 - Layout: top bar (greeting + wifi indicator), fixed 2 × 2 dashboard grid (clock, weather,
   calendar, tasks), and a full-width system history dock at the bottom.
 - Connectivity: `/api/net` measures internet reachability via a raw TCP connect (no DNS, no LLM). Widget polls every 5 s; latency ≈ ping. Offline overlay is debounced (2 fails) so brief blips don't flash it.
-- Status grid (`/api/history`): server samples device + net and aggregates clock-aligned
-  30-min windows. Completed blocks use p95; the current block uses its running average.
+- Status grid (`/api/history`): server samples device + net and aggregates 24
+  clock-aligned 30-min windows. The compact dock displays the latest 12, while
+  the detailed monitor displays all 24. Completed blocks use p95; the current
+  block uses its running average.
   History persists to `~/.panel/history.json` (home dir — the packaged bundle is read-only).
   Block tiers: CPU `<80 / 80-89 / 90-93 / >=94`; GPU `<80 / 80-89 / 90-95 / >=96`;
   RAM `<70 / 70-79 / 80-89 / >=90`; TEMP `<70 / 70-79 / 80-94 / >=95`°C;

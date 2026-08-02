@@ -728,7 +728,7 @@ def get_network():
 LIVE_SECONDS = 2
 WINDOW_SAMPLE_SECONDS = 30
 WINDOW_MINUTES = 30
-HISTORY_BLOCKS = 12
+HISTORY_BLOCKS = 24
 HISTORY_FILE = os.environ.get('PANEL_HISTORY_FILE') or str(Path.home() / '.panel' / 'history.json')
 
 history_lock = threading.Lock()
@@ -861,6 +861,10 @@ def get_history():
             'latest': history_state['latest'] or {},
             'blocks': blocks,
             'uptime_seconds': get_system_uptime(),
+            'hostname': socket.gethostname().split('.')[0],
+            'updated_at': datetime.now(timezone.utc).isoformat(),
+            'window_minutes': WINDOW_MINUTES,
+            'history_blocks': HISTORY_BLOCKS,
         }
 
 

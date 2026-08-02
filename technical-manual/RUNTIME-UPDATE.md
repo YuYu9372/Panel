@@ -24,6 +24,14 @@ Runtime Update will allow these files to update without a normal DMG installatio
 Electron main, preload, the Rust Bootstrap, and trust keys remain part of the
 Full Version Update boundary.
 
+## First Runtime package
+
+Developer Runtime r1 is the first feature package for the `1.1.0` Baseline. It
+adds a full-screen server-style monitor that opens when a user clicks CPU, GPU,
+RAM, Temperature, or Wi-Fi in the bottom dock. The detailed view retains
+twenty-four half-hour windows, covering twelve hours, while the compact dock
+continues to show twelve windows.
+
 ## Create a Developer Runtime package
 
 Start with `runtime/developer-runtime.example.json`. Increase both

@@ -17,6 +17,23 @@ It is packaged as the first `1.1.0` Developer test baseline.
 
 **Automatic-update ZIP SHA-256:** `f7664e328aa621b6640cebffd707e95123e6f6df070df0e4d780d22e1b984dac`
 
+### Developer Runtime r1
+
+- Made each CPU, GPU, RAM, Temperature, and Wi-Fi row in the compact system dock
+  open a dedicated full-screen monitoring view.
+- Added a server-style five-card layout with twenty-four clock-aligned
+  half-hour windows, covering the latest twelve hours.
+- Added current state, twelve-hour average, peak, coverage, host, uptime,
+  window duration, and last-updated metadata.
+- Fixed the detailed history cells so each available window displays its
+  configured green, yellow, red, or purple tier instead of a gray placeholder.
+- Enlarged the live metric readings for faster at-a-glance monitoring.
+- Kept the dashboard dock at twelve windows for quick reading and added
+  Dashboard and Escape navigation from the detailed view.
+- Expanded the local history API from twelve to twenty-four retained windows.
+- Added Renderer and Python tests for the statistics helpers, monitoring
+  structure, metadata, and twenty-four-window contract.
+
 ### Runtime foundation
 
 - Added a standalone Rust CLI for verifying Ed25519-signed Runtime ZIP packages.
@@ -49,7 +66,7 @@ It is packaged as the first `1.1.0` Developer test baseline.
   determinism, cross-language signatures, credential exclusion, and symlinks.
 - Added an English Runtime operator guide and a short Rust basics guide.
 
-All 81 Node tests, 12 Python tests, 6 Rust tests, and strict Rust Clippy checks
+All 84 Node tests, 13 Python tests, 6 Rust tests, and strict Rust Clippy checks
 pass. Stable Runtime publishing remains disabled until a separate Stable public
 key is embedded in a Full Version Update.
 
