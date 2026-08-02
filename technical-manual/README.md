@@ -31,6 +31,7 @@ Panel's update card.
 - [Runtime Update](RUNTIME-UPDATE.md)
 - [Rust Bootstrap Basics](RUST-BOOTSTRAP-BASICS.md)
 - [Standard Live Patch](STANDARD-LIVE-PATCH.md)
+- [Supervisor and Gateway Plan](SUPERVISOR-GATEWAY/README.md)
 
 The detailed security and architecture design remains available in
 [`docs/UPDATE_ARCHITECTURE.md`](../docs/UPDATE_ARCHITECTURE.md).
