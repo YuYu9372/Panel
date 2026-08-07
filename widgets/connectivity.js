@@ -1,7 +1,21 @@
+function formatOfflineDuration(elapsedMilliseconds) {
+  const totalSeconds = Number.isFinite(elapsedMilliseconds)
+    ? Math.max(0, Math.floor(elapsedMilliseconds / 1000))
+    : 0;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return [hours, minutes, seconds]
+    .map((value) => String(value).padStart(2, '0'))
+    .join(':');
+}
+
 const connectivityWidget = {
   el: null,
   overlay: null,
   clockEl: null,
+  offlineStopwatchEl: null,
+  offlineStartedAt: null,
   interval: 5000,
   failStreak: 0,
   offlineAfter: 2,
@@ -10,6 +24,7 @@ const connectivityWidget = {
     this.el = document.getElementById('connectivity');
     this.overlay = document.getElementById('offline-screen');
     this.clockEl = document.getElementById('offline-clock');
+    this.offlineStopwatchEl = document.getElementById('offline-stopwatch');
     this.tickClock();
     this.el.innerHTML = `
       <svg class="net-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"
@@ -45,7 +60,23 @@ const connectivityWidget = {
   },
 
   showOffline(show) {
-    if (this.overlay) this.overlay.hidden = !show;
+    if (!this.overlay) return;
+    if (show) {
+      if (this.overlay.hidden || this.offlineStartedAt == null) {
+        this.offlineStartedAt = Date.now();
+      }
+      this.overlay.hidden = false;
+    } else {
+      this.overlay.hidden = true;
+      this.offlineStartedAt = null;
+    }
+    this.updateOfflineStopwatch();
+  },
+
+  updateOfflineStopwatch(now = Date.now()) {
+    if (!this.offlineStopwatchEl) return;
+    const elapsed = this.offlineStartedAt == null ? 0 : now - this.offlineStartedAt;
+    this.offlineStopwatchEl.textContent = formatOfflineDuration(elapsed);
   },
 
   tickClock() {
@@ -55,6 +86,7 @@ const connectivityWidget = {
       this.clockEl.textContent =
         `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     }
+    this.updateOfflineStopwatch(now.getTime());
     setTimeout(() => this.tickClock(), 1000 - (Date.now() % 1000));
   },
 
@@ -75,3 +107,7 @@ const connectivityWidget = {
     }
   },
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { formatOfflineDuration };
+}

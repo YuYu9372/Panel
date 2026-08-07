@@ -97,7 +97,7 @@ health confirmation, and automatic A/B rollback.
   twenty-four color-tiered half-hour windows, large live readings, twelve-hour
   average, peak, and coverage.
 - Network indicator and an offline clock screen that keeps local device status
-  available when the internet connection fails.
+  available while an outage stopwatch records the confirmed offline duration.
 - Configurable Calendar and Tasks refresh time, a 30-minute night schedule from
   00:00 through 05:59, and click-to-refresh controls.
 - Flat, minimal Settings screen with masked Anthropic and Composio credentials,

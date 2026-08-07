@@ -28,6 +28,8 @@ It is packaged as the first `1.1.0` Developer test baseline.
 - Fixed the detailed history cells so each available window displays its
   configured green, yellow, red, or purple tier instead of a gray placeholder.
 - Enlarged the live metric readings for faster at-a-glance monitoring.
+- Added an `Offline HH:MM:SS` stopwatch to the bottom of the offline screen. It
+  starts when Panel confirms the outage and resets after connectivity returns.
 - Kept the dashboard dock at twelve windows for quick reading and added
   Dashboard and Escape navigation from the detailed view.
 - Expanded the local history API from twelve to twenty-four retained windows.

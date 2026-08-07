@@ -7,7 +7,7 @@
   <title>Panel</title>
   <link rel="icon" href="data:," />
   <script src="widgets/boot-theme.js?v=1"></script>
-  <link rel="stylesheet" href="style.css?v=28" />
+  <link rel="stylesheet" href="style.css?v=29" />
 </head>
 <body>
   <header class="topbar" aria-label="Status bar">
@@ -129,7 +129,10 @@
   <div id="offline-screen" class="offline-screen" hidden>
     <div id="offline-status" class="system-status device-status--unknown"></div>
     <div class="offline-clock" id="offline-clock">--:--:--</div>
-    <div class="offline-tag">Offline</div>
+    <div class="offline-tag">
+      <span>Offline</span>
+      <time id="offline-stopwatch">00:00:00</time>
+    </div>
   </div>
 
   <section id="runtime-updating-screen" class="runtime-updating-screen" aria-live="polite" hidden>
@@ -170,7 +173,7 @@
   <script src="widgets/status-tiers.js?v=1"></script>
   <script src="widgets/refresh-policy.js?v=1"></script>
   <script src="widgets/status-grid.js?v=6"></script>
-  <script src="widgets/connectivity.js?v=4"></script>
+  <script src="widgets/connectivity.js?v=5"></script>
   <script src="widgets/update.js?v=3"></script>
   <script src="widgets/settings.js?v=1"></script>
   <script src="widgets/version.js?v=1"></script>
